@@ -1,0 +1,202 @@
+/* =========================
+   GLOBAL RESET & VARIABLES
+   ========================= */
+:root {
+    --bg-black: #000000;
+    --primary: #cfffdc; /* Mint Green */
+    --primary-glow: #cfffdc;
+    --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --shadow: white;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    min-height: 100vh;
+    background-color: #142c1e;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow-x: hidden;
+}
+
+.main-wrapper {
+    display: flex;
+    width: 100%;
+    height: 100vh;
+    align-items: center;
+    justify-content: space-between; 
+    padding: 0 5px; 
+    position: relative;
+}
+
+.main-wrapper::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 8px; 
+    height: 80vh; 
+    background: var(--bg-black); 
+    border-radius: 10px;
+    box-shadow: 0 0 20px var(--primary);
+}
+
+/* =========================
+   LEFT SIDE: LOGO & TWO-LINE TYPING
+   ========================= */
+.logo-side {
+    flex: 1;
+    margin-left: -130px; 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    align-self: flex-start; 
+    margin-top: 10vh; 
+}
+
+.brand-img-logo {
+    width: 100%;
+    max-width: 280px; 
+    border: solid 10px var(--bg-black);
+    border-radius: 20px;
+    box-shadow: 0 0 1cm var(--primary-glow);
+    margin-bottom: 40px;
+}
+
+.welcome-text {
+    font-size: 52px;
+    color: var(--primary);
+    text-transform: uppercase;
+    letter-spacing: 6px;
+    text-align: center;
+}
+
+.welcome-text span {
+    display: block;
+    overflow: hidden;
+    white-space: nowrap;
+    width: 0;
+    margin: 0 auto;
+    /* REMOVED ALL CURSORS */
+    border-right: none; 
+}
+
+.welcome-text .line1 {
+    font-weight: 800; /* WELCOME TO BOLD */
+    animation: typeLine1 2s steps(10, end) forwards;
+}
+
+.welcome-text .line2 {
+    font-family: 'Cinzel', serif; 
+    font-weight: 900;
+    font-size: 64px;
+    margin-top: 10px;
+    animation: typeLine2 0.1s steps(2, end) 2s forwards;
+}
+
+@keyframes typeLine1 { from { width: 0; } to { width: 550px; } }
+@keyframes typeLine2 { from { width: 0; } to { width: 450px; } }
+
+/* =========================
+   RIGHT SIDE: FORM CONTAINER
+   ========================= */
+.form-container {
+    background: var(--bg-black); 
+    margin-right: 80px; 
+    width: 100%;
+    max-width: 480px;
+    padding: 40px; 
+    border-radius: 24px;
+    border: 1px solid rgba(207, 255, 220, 0.15);
+    box-shadow: 0 0 1cm var(--primary-glow);
+}
+
+.form-container h2 {
+    text-align: center; 
+    color: var(--primary); 
+    font-weight: 800;
+    letter-spacing: 2px;
+    margin-bottom: 30px;
+    font-size: 28px;
+    text-transform: uppercase;
+}
+
+.form-footer {
+    text-align: center;
+    margin-top: 20px;
+    color: var(--primary);
+    font-size: 15px;
+}
+/* LABELS AND SPACING */
+form p {
+    margin-bottom: 12px; /* 5PX SPACE BETWEEN FIELDS */
+}
+
+form p label, 
+form label {
+    color: var(--primary);
+    font-weight: 600;
+    font-size: 15px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-left: 5px;
+}
+
+form select {
+    width: 100%;
+    padding: 16px;
+    border-radius: 12px;
+    background: #0d0d0d; 
+    color: #fff;
+    border: 1px solid transparent;
+    margin-top: 8px;
+    appearance: none; 
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23cfffdc' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    background-size: 18px;
+    cursor: pointer;
+}
+
+form input {
+    width: 100%;
+    padding: 16px;
+    border-radius: 12px;
+    background: #0d0d0d;
+    color: #fff;
+    border: 1px solid transparent;
+    margin-top: 8px;
+}
+
+button {
+    width: 100%;
+    padding: 16px;
+    background: var(--primary);
+    color: #000;
+    font-weight: 800;
+    border-radius: 12px;
+    border: none;
+    margin-top: 15px;
+    cursor: pointer;
+    font-size: 20px;
+}
+
+.errorlist {
+    color: tomato;
+    list-style: none;
+    font-size: 14px;
+    font-weight: 600;
+    margin-top: 5px;
+    padding: 0;
+}
+
+.errorlist li {
+    color: tomato;
+}

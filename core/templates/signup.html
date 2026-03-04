@@ -1,0 +1,40 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signup</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div class="main-wrapper">
+       <div class="logo-side">
+            <img src="{% static 'images/RAMYA5.jpeg' %}" alt="RAMYA Logo" class="brand-img-logo">
+           <h1 class="welcome-text">
+            <span class="line1">Welcome to</span>
+            <span class="line2">Ramya</span>
+             </h1>
+        </div>
+
+        <div class="form-container">
+            <h2>Create Account</h2>
+
+            <form method="POST">
+                {% csrf_token %}
+                
+                {{ form.as_p }}
+                
+                <button type="submit">SIGN UP</button>
+            </form>
+
+            <div class="form-footer">
+                Already have an account? <a href="{% url 'login' %}">Login</a>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
