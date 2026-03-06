@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>RAMYA - {% block title %}{% endblock %}</title>
+    <style>
+        body { font-family: Arial; margin: 0; padding: 0; }
+        nav { background: #000000; color: white; padding: 15px; display: flex; justify-content: space-between; }
+        nav a { color: white; margin-right: 15px; text-decoration: none; }
+        footer { background: #000000; padding: 20px; text-align: center; margin-top: 50px; border-top: 1px solid #ddd; color: white; }
+        .content { min-height: 80vh; padding: 20px; }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div><strong>RAMYA</strong></div>
+        <div>
+            <a href="#">Home</a>
+            {% if user.is_authenticated %}
+                {% if user.role == 'vendor' %}
+                    <a href="{% url 'vendor_dashboard' %}">Vendor Panel</a>
+                {% elif user.role == 'customer' %}
+                    <a href="{% url 'customer_dashboard' %}">My Account</a>
+                {% endif %}
+                <a href="#">Profile</a> <form action="{% url 'logout' %}" method="post" style="display:inline;">
+                    {% csrf_token %}<button type="submit">Logout</button>
+                </form>
+            {% else %}
+                <a href="{% url 'login' %}">Login</a>
+                <a href="{% url 'signup' %}">Signup</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <div class="content">
+        {% block content %}
+        {% endblock %}
+    </div>
+
+    <footer>
+        <p>&copy; 2026 RAMYA Collective. All Rights Reserved.</p>
+        <a href="#">About Us</a> | <a href="#">Contact</a> | <a href="#">Privacy Policy</a>
+    </footer>
+
+</body>
+</html>
