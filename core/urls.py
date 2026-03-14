@@ -1,11 +1,18 @@
 from django.urls import path
-from .views import signup_view,login_view
-from core import views
+from .views import *
 
-urlpatterns=[
-    path('signup/',signup_view,name='signup'),
-    path('login/',login_view,name='login'),
-    path('logout/', views.logout_view, name='logout'),
-    path('vendor/dashboard/', views.vendor_dashboard, name='vendor_dashboard'),
-    path('customer/dashboard/', views.customer_dashboard, name='customer_dashboard'),
+urlpatterns = [
+
+    path("", signup_view, name="signup"),
+
+    path("login/", login_view, name="login"),
+
+    path("logout/", logout_view, name="logout"),
+
+    path("complete-profile/", complete_profile, name="complete_profile"),
+
+    path("vendor-dashboard/", vendor_dashboard, name="vendor_dashboard"),
+
+    path("customer-dashboard/", customer_dashboard, name="customer_dashboard"),
+
 ]

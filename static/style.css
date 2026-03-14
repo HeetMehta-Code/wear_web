@@ -200,3 +200,31 @@ button {
 .errorlist li {
     color: tomato;
 }
+
+/* Target the file input specifically */
+input[type="file"] {
+    padding: 12px;
+    background: #0d0d0d;
+    color: var(--primary);
+    border: 1px dashed var(--primary); /* Dashed border for a "drop zone" look */
+    cursor: pointer;
+}
+
+/* Style the actual button inside the file input */
+input[type="file"]::-webkit-file-upload-button {
+    background: var(--primary);
+    color: #000;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 8px;
+    font-weight: 800;
+    text-transform: uppercase;
+    cursor: pointer;
+    margin-right: 15px;
+    transition: var(--transition);
+}
+
+input[type="file"]::-webkit-file-upload-button:hover {
+    box-shadow: 0 0 10px var(--primary-glow);
+    transform: scale(1.05);
+}
