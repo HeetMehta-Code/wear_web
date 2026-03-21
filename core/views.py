@@ -1,8 +1,12 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
+from django.http import JsonResponse
+from django.contrib import messages
 from .forms import SignupForm, LoginForm
 
-from efashion.models import Vendor, Customer
+from efashion.models import Vendor, Customer, Product
 from efashion.forms import VendorProfileForm, CustomerProfileForm
 
 
@@ -106,7 +110,6 @@ def complete_profile(request):
 
         return render(request, "Vendors/cvp.html", {"form": form})
 
-
     elif user.role == "customer":
 
         customer = Customer.objects.get(user=user)
@@ -139,7 +142,17 @@ def customer_dashboard(request):
 
     customer = Customer.objects.get(user=request.user)
 
-    return render(request, "Customers/customers.html", {"customer": customer})
+    new_arrivals = (
+        Product.objects
+        .filter(is_active=True, is_new_arrival=True)
+        .select_related('vendor')
+        .order_by('-created_at')[:12]
+    )
+
+    return render(request, "Customers/customers.html", {
+        "customer": customer,
+        "new_arrivals": new_arrivals,
+    })
 
 
 # -----------------------------
@@ -150,3 +163,90 @@ def logout_view(request):
     logout(request)
 
     return redirect("login")
+
+
+# -----------------------------
+# NEW ARRIVALS API
+# -----------------------------
+def all_new_arrivals(request):
+
+    products = (
+        Product.objects
+        .filter(is_active=True, is_new_arrival=True)
+        .select_related('vendor')
+        .order_by('-created_at')
+    )
+
+    data = []
+    for p in products:
+        data.append({
+            'id':             p.id,
+            'name':           p.name,
+            'brand':          p.vendor.shopname or '',
+            'category':       p.get_category_display(),
+            'price':          p.price,
+            'original_price': p.original_price,
+            'discount':       p.discount_percent,
+            'image':          p.product_image.url if p.product_image else '',
+        })
+
+    return JsonResponse({'products': data})
+
+
+# -----------------------------
+# VENDOR UPLOAD PRODUCT
+# -----------------------------
+@login_required
+def vendor_upload_product(request):
+
+    try:
+        vendor = Vendor.objects.get(user=request.user)
+    except Vendor.DoesNotExist:
+        return redirect('complete_profile')
+
+    if request.method == 'POST':
+
+        name           = request.POST.get('name', '').strip()
+        category       = request.POST.get('category', 'other')
+        price          = request.POST.get('price')
+        original_price = request.POST.get('original_price') or None
+        stock          = request.POST.get('stock', 0)
+        image          = request.FILES.get('product_image')
+
+        if not all([name, price, stock, image]):
+            messages.error(request, "Name, price, stock and image are required.")
+        else:
+            Product.objects.create(
+                vendor=vendor,
+                name=name,
+                category=category,
+                price=price,
+                original_price=original_price,
+                stock=stock,
+                product_image=image,
+                is_active=True,
+                is_new_arrival=True,
+            )
+            messages.success(request, f'"{name}" is now live on the homepage!')
+            return redirect('vendor_dashboard')
+
+    return render(request, 'Vendors/vendor_upload.html', {
+        'category_choices': Product.CATEGORY_CHOICES,
+    })
+
+
+# -----------------------------
+# VENDOR TOGGLE PRODUCT
+# -----------------------------
+@login_required
+@require_POST
+def vendor_toggle_product(request, product_id):
+
+    try:
+        vendor  = Vendor.objects.get(user=request.user)
+        product = Product.objects.get(id=product_id, vendor=vendor)
+        product.is_active = not product.is_active
+        product.save()
+        return JsonResponse({'status': 'ok', 'is_active': product.is_active})
+    except (Vendor.DoesNotExist, Product.DoesNotExist):
+        return JsonResponse({'status': 'error'}, status=403)

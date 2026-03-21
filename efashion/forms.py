@@ -7,7 +7,7 @@ class VendorProfileForm(forms.ModelForm):
         fields = ['shopname', 'vendor_logo']
         widgets = {
             'shopname': forms.TextInput(attrs={
-                'placeholder': 'ENTER YOUR SHOP NAME',
+                'class': 'form-control',
             }),
             # FileInput removes the "Currently: URL" and the checkbox
             'vendor_logo': forms.FileInput(attrs={
@@ -21,7 +21,7 @@ class CustomerProfileForm(forms.ModelForm):
         fields = ['address', 'profile_photo']
         widgets = {
             'address': forms.TextInput(attrs={
-                'placeholder': 'ENTER YOUR DELIVERY ADDRESS',
+                'class': 'form-control',
             }),
             # FileInput removes the "Currently: URL" and the checkbox
             'profile_photo': forms.FileInput(attrs={

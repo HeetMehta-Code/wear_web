@@ -1,8 +1,806 @@
-{% extends 'base.html' %}
-
-{% block title %}Customer Dashboard{% endblock %}
+{% extends "base.html" %}
+{% load static %}
 
 {% block content %}
-    <h1>Customer Dashboard</h1>
-    <p>Welcome back! Browse your fashion collective below.</p>
+<div class="customer-home">
+
+    <!-- ══════════════ OFFER SLIDER ══════════════ -->
+    <div class="offer-slider">
+        <div class="slider-wrapper">
+            <img src="{% static 'images/slide1.png' %}" class="slide-img" alt="Offer 1">
+            <img src="{% static 'images/slide2.png' %}" class="slide-img" alt="Offer 2">
+            <img src="{% static 'images/slide3.png' %}" class="slide-img" alt="Offer 3">
+            <img src="{% static 'images/slide4.png' %}" class="slide-img" alt="Offer 4">
+            <img src="{% static 'images/slide5.png' %}" class="slide-img" alt="Offer 5">
+        </div>
+    </div>
+
+    <!-- ══════════════ CATEGORY SECTION ══════════════ -->
+    <div class="section-container">
+        <h2 class="section-title">Choose Category</h2>
+        <div class="universal-grid-9">
+            <div class="item-wrapper">
+                <button type="button" class="circle-btn-shape" onclick="location.href='#'"><img class="circle-img" src="{% static 'images/person1.png' %}"></button>
+                <p class="circle-label">Men's Wear</p>
+            </div>
+            <div class="item-wrapper">
+                <button type="button" class="circle-btn-shape" onclick="location.href='#'"><img class="circle-img" src="{% static 'images/person3.png' %}"></button>
+                <p class="circle-label">Women's Wear</p>
+            </div>
+            <div class="item-wrapper">
+                <button type="button" class="circle-btn-shape" onclick="location.href='#'"><img class="circle-img" src="{% static 'images/kids.png' %}"></button>
+                <p class="circle-label">Kid's Wear</p>
+            </div>
+            <div class="item-wrapper">
+                <button type="button" class="circle-btn-shape" onclick="location.href='#'"><img class="circle-img" src="{% static 'images/bags.png' %}"></button>
+                <p class="circle-label">Bags</p>
+            </div>
+            <div class="item-wrapper">
+                <button type="button" class="circle-btn-shape" onclick="location.href='#'"><img class="circle-img" src="{% static 'images/purse.png' %}"></button>
+                <p class="circle-label">Purses</p>
+            </div>
+            <div class="item-wrapper">
+                <button type="button" class="circle-btn-shape" onclick="location.href='#'"><img class="circle-img" src="{% static 'images/belts.png' %}"></button>
+                <p class="circle-label">Belts</p>
+            </div>
+            <div class="item-wrapper">
+                <button type="button" class="circle-btn-shape" onclick="location.href='#'"><img class="circle-img" src="{% static 'images/gls.png' %}"></button>
+                <p class="circle-label">Sun Glasses</p>
+            </div>
+            <div class="item-wrapper">
+                <button type="button" class="circle-btn-shape" onclick="location.href='#'"><img class="circle-img" src="{% static 'images/makeup.png' %}"></button>
+                <p class="circle-label">Makeup</p>
+            </div>
+            <div class="item-wrapper">
+                <button type="button" class="circle-btn-shape footwear-circle" onclick="location.href='#'"><img class="circle-img" src="{% static 'images/shu.png' %}"></button>
+                <p class="circle-label">Footwear</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════════ FEATURED SECTION ══════════════ -->
+    <div class="featured-section">
+        <div class="accessories-col">
+            <a href="#" class="accessory-banner acc-sunglass">
+                <div class="accessory-banner-text">
+                    <span class="accessory-banner-label">New Drop</span>
+                    <span class="accessory-banner-title">Sun<br>Glasses</span>
+                    <span class="accessory-banner-sub">Premium UV Protection</span>
+                </div>
+                <img class="accessory-banner-img" src="{% static 'images/gls.png' %}" alt="Sun Glasses">
+            </a>
+            <a href="#" class="accessory-banner acc-makeup">
+                <div class="accessory-banner-text">
+                    <span class="accessory-banner-label">Trending</span>
+                    <span class="accessory-banner-title">Makeup<br>Collection</span>
+                    <span class="accessory-banner-sub">Glow Up This Season</span>
+                </div>
+                <img class="accessory-banner-img" src="{% static 'images/makeup.png' %}" alt="Makeup">
+            </a>
+            <a href="#" class="accessory-banner acc-bag">
+                <div class="accessory-banner-text">
+                    <span class="accessory-banner-label">Bestseller</span>
+                    <span class="accessory-banner-title">Bags &<br>Totes</span>
+                    <span class="accessory-banner-sub">Style Meets Function</span>
+                </div>
+                <img class="accessory-banner-img" src="{% static 'images/bags.png' %}" alt="Bags">
+            </a>
+            <a href="#" class="accessory-banner acc-purse">
+                <div class="accessory-banner-text">
+                    <span class="accessory-banner-label">Limited</span>
+                    <span class="accessory-banner-title">Purses &<br>Clutches</span>
+                    <span class="accessory-banner-sub">Carry It in Style</span>
+                </div>
+                <img class="accessory-banner-img" src="{% static 'images/purse.png' %}" alt="Purses">
+            </a>
+            <a href="#" class="accessory-banner acc-belt">
+                <div class="accessory-banner-text">
+                    <span class="accessory-banner-label">Classic</span>
+                    <span class="accessory-banner-title">Belts &<br>Straps</span>
+                    <span class="accessory-banner-sub">The Perfect Finish</span>
+                </div>
+                <img class="accessory-banner-img" src="{% static 'images/belts.png' %}" alt="Belts">
+            </a>
+        </div>
+
+        <!-- RIGHT: New Arrivals -->
+        <div class="new-arrivals-col">
+            <div class="new-arrivals-header">
+                <span class="new-arrivals-title">New Arrivals</span>
+                <button class="new-arrivals-badge" onclick="openNewArrivalsPopup()">View All →</button>
+            </div>
+            <div class="new-arrivals-grid">
+                {% if new_arrivals %}
+                    {% for product in new_arrivals %}
+                    <div class="product-card">
+                        <div class="product-card-img-wrap">
+                            <img class="product-card-img" src="{{ product.product_image.url }}" alt="{{ product.name }}">
+                            <span class="product-card-new-tag">New</span>
+                        </div>
+                        <div class="product-card-info">
+                            <div class="product-card-brand">{{ product.vendor.shopname }}</div>
+                            <div class="product-card-name">{{ product.name }}</div>
+                            <div class="product-card-price">
+                                ₹{{ product.price }}
+                                {% if product.original_price %}<span>₹{{ product.original_price }}</span>{% endif %}
+                            </div>
+                        </div>
+                        <button class="product-card-btn">Add to Cart</button>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="product-card"><div class="product-card-img-wrap"><img class="product-card-img" src="{% static 'images/person1.png' %}" alt="Product"><span class="product-card-new-tag">New</span></div><div class="product-card-info"><div class="product-card-brand">Allen Solly</div><div class="product-card-name">Slim Fit Shirt</div><div class="product-card-price">₹1,299 <span>₹1,999</span></div></div><button class="product-card-btn">Add to Cart</button></div>
+                    <div class="product-card"><div class="product-card-img-wrap"><img class="product-card-img" src="{% static 'images/person3.png' %}" alt="Product"><span class="product-card-new-tag">New</span></div><div class="product-card-info"><div class="product-card-brand">H&amp;M</div><div class="product-card-name">Floral Dress</div><div class="product-card-price">₹2,499 <span>₹3,499</span></div></div><button class="product-card-btn">Add to Cart</button></div>
+                    <div class="product-card"><div class="product-card-img-wrap"><img class="product-card-img" src="{% static 'images/bags.png' %}" alt="Product"><span class="product-card-new-tag">New</span></div><div class="product-card-info"><div class="product-card-brand">Rare Rabbit</div><div class="product-card-name">Tote Bag</div><div class="product-card-price">₹3,999 <span>₹5,499</span></div></div><button class="product-card-btn">Add to Cart</button></div>
+                    <div class="product-card"><div class="product-card-img-wrap"><img class="product-card-img" src="{% static 'images/kids.png' %}" alt="Product"><span class="product-card-new-tag">New</span></div><div class="product-card-info"><div class="product-card-brand">Puma</div><div class="product-card-name">Kids Jogger</div><div class="product-card-price">₹1,799 <span>₹2,299</span></div></div><button class="product-card-btn">Add to Cart</button></div>
+                    <div class="product-card"><div class="product-card-img-wrap"><img class="product-card-img" src="{% static 'images/gls.png' %}" alt="Product"><span class="product-card-new-tag">New</span></div><div class="product-card-info"><div class="product-card-brand">Ray-Ban</div><div class="product-card-name">UV Sunglasses</div><div class="product-card-price">₹4,500 <span>₹6,000</span></div></div><button class="product-card-btn">Add to Cart</button></div>
+                    <div class="product-card"><div class="product-card-img-wrap"><img class="product-card-img" src="{% static 'images/makeup.png' %}" alt="Product"><span class="product-card-new-tag">New</span></div><div class="product-card-info"><div class="product-card-brand">Chanel</div><div class="product-card-name">Lip Collection</div><div class="product-card-price">₹2,200 <span>₹2,800</span></div></div><button class="product-card-btn">Add to Cart</button></div>
+                    <div class="product-card"><div class="product-card-img-wrap"><img class="product-card-img" src="{% static 'images/purse.png' %}" alt="Product"><span class="product-card-new-tag">New</span></div><div class="product-card-info"><div class="product-card-brand">Louis Philippe</div><div class="product-card-name">Evening Clutch</div><div class="product-card-price">₹2,999 <span>₹4,200</span></div></div><button class="product-card-btn">Add to Cart</button></div>
+                    <div class="product-card"><div class="product-card-img-wrap"><img class="product-card-img" src="{% static 'images/belts.png' %}" alt="Product"><span class="product-card-new-tag">New</span></div><div class="product-card-info"><div class="product-card-brand">Arrow</div><div class="product-card-name">Leather Belt</div><div class="product-card-price">₹899 <span>₹1,299</span></div></div><button class="product-card-btn">Add to Cart</button></div>
+                    <div class="product-card"><div class="product-card-img-wrap"><img class="product-card-img" src="{% static 'images/person1.png' %}" alt="Product"><span class="product-card-new-tag">New</span></div><div class="product-card-info"><div class="product-card-brand">Levi's</div><div class="product-card-name">Slim Denim</div><div class="product-card-price">₹3,299 <span>₹4,500</span></div></div><button class="product-card-btn">Add to Cart</button></div>
+                    <div class="product-card"><div class="product-card-img-wrap"><img class="product-card-img" src="{% static 'images/person3.png' %}" alt="Product"><span class="product-card-new-tag">New</span></div><div class="product-card-info"><div class="product-card-brand">Spykar</div><div class="product-card-name">Casual Kurta</div><div class="product-card-price">₹1,499 <span>₹2,000</span></div></div><button class="product-card-btn">Add to Cart</button></div>
+                    <div class="product-card"><div class="product-card-img-wrap"><img class="product-card-img" src="{% static 'images/kids.png' %}" alt="Product"><span class="product-card-new-tag">New</span></div><div class="product-card-info"><div class="product-card-brand">Adidas</div><div class="product-card-name">Sports T-Shirt</div><div class="product-card-price">₹999 <span>₹1,499</span></div></div><button class="product-card-btn">Add to Cart</button></div>
+                    <div class="product-card"><div class="product-card-img-wrap"><img class="product-card-img" src="{% static 'images/bags.png' %}" alt="Product"><span class="product-card-new-tag">New</span></div><div class="product-card-info"><div class="product-card-brand">GAP</div><div class="product-card-name">Canvas Backpack</div><div class="product-card-price">₹2,799 <span>₹3,800</span></div></div><button class="product-card-btn">Add to Cart</button></div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════════ CLOTHING BRANDS ══════════════ -->
+    <div class="section-container">
+        <h2 class="section-title">Clothing Brands</h2>
+        <div class="universal-grid-9">
+            <div class="item-wrapper"><button type="button" class="brand-pillar-shape brand-bg-as" onclick="location.href='#'"><img class="brand-img brand-img-square" src="{% static 'images/as.jpg' %}"></button><p class="label-text">Allen Solly</p></div>
+            <div class="item-wrapper"><button type="button" class="brand-pillar-shape brand-bg-pe" onclick="location.href='#'"><img class="brand-img brand-img-square" src="{% static 'images/pe.png' %}"></button><p class="label-text">Peter England</p></div>
+            <div class="item-wrapper"><button type="button" class="brand-pillar-shape brand-bg-up" onclick="location.href='#'"><img class="brand-img brand-img-tall" src="{% static 'images/up.jpg' %}"></button><p class="label-text">US Polo</p></div>
+            <div class="item-wrapper"><button type="button" class="brand-pillar-shape brand-bg-hm" onclick="location.href='#'"><img class="brand-img brand-img-tall" src="{% static 'images/hm.jpg' %}"></button><p class="label-text">H&amp;M</p></div>
+            <div class="item-wrapper"><button type="button" class="brand-pillar-shape brand-bg-vh" onclick="location.href='#'"><img class="brand-img brand-img-square" src="{% static 'images/vh.jpeg' %}"></button><p class="label-text">Venhusen</p></div>
+            <div class="item-wrapper"><button type="button" class="brand-pillar-shape brand-bg-jk" onclick="location.href='#'"><img class="brand-img brand-img-square" src="{% static 'images/jk.png' %}"></button><p class="label-text">Jockey</p></div>
+            <div class="item-wrapper"><button type="button" class="brand-pillar-shape brand-bg-rm" onclick="location.href='#'"><img class="brand-img brand-img-square" src="{% static 'images/rm.png' %}"></button><p class="label-text">Raymond</p></div>
+            <div class="item-wrapper"><button type="button" class="brand-pillar-shape brand-bg-ar" onclick="location.href='#'"><img class="brand-img brand-img-square" src="{% static 'images/ar.png' %}"></button><p class="label-text">Arrow</p></div>
+            <div class="item-wrapper"><button type="button" class="brand-pillar-shape brand-bg-ls" onclick="location.href='#'"><img class="brand-img brand-img-levis" src="{% static 'images/ls.jpg' %}"></button><p class="label-text">Levi's</p></div>
+            <div class="item-wrapper"><button type="button" class="brand-pillar-shape brand-bg-lp" onclick="location.href='#'"><img class="brand-img brand-img-square" src="{% static 'images/lp.png' %}"></button><p class="label-text">Louis Philippe</p></div>
+            <div class="item-wrapper"><button type="button" class="brand-pillar-shape brand-bg-gap" onclick="location.href='#'"><img class="brand-img brand-img-square" src="{% static 'images/Gap.png' %}"></button><p class="label-text">GAP</p></div>
+            <div class="item-wrapper"><button type="button" class="brand-pillar-shape brand-bg-sp" onclick="location.href='#'"><img class="brand-img brand-img-square" src="{% static 'images/sp.png' %}"></button><p class="label-text">Spykar</p></div>
+            <div class="item-wrapper"><button type="button" class="brand-pillar-shape brand-bg-ad" onclick="location.href='#'"><img class="brand-img brand-img-tall" src="{% static 'images/ad.jpg' %}"></button><p class="label-text">Adidas</p></div>
+            <div class="item-wrapper"><button type="button" class="brand-pillar-shape brand-bg-rr" onclick="location.href='#'"><img class="brand-img brand-img-square" src="{% static 'images/rr.jpeg' %}"></button><p class="label-text">Rare Rabbit</p></div>
+            <div class="item-wrapper"><button type="button" class="brand-pillar-shape brand-bg-ch" onclick="location.href='#'"><img class="brand-img brand-img-tall" src="{% static 'images/ch.jpg' %}"></button><p class="label-text">Chanel</p></div>
+            <div class="item-wrapper"><button type="button" class="brand-pillar-shape brand-bg-la" onclick="location.href='#'"><img class="brand-img brand-img-square" src="{% static 'images/la.jpg' %}"></button><p class="label-text">Lacoste</p></div>
+            <div class="item-wrapper"><button type="button" class="brand-pillar-shape brand-bg-puma" onclick="location.href='#'"><img class="brand-img brand-img-tall" src="{% static 'images/puma.jpg' %}"></button><p class="label-text">Puma</p></div>
+            <div class="item-wrapper"><button type="button" class="brand-pillar-shape brand-bg-ua" onclick="location.href='#'"><img class="brand-img brand-img-ua" src="{% static 'images/ua.jpg' %}"></button><p class="label-text">Under Armour</p></div>
+        </div>
+    </div>
+
+    <!-- ══════════════ SUNGLASSES BRANDS ══════════════ -->
+    <div class="section-container">
+        <h2 class="section-title">Sunglasses Brands</h2>
+        <div class="universal-grid-9">
+            <!-- s.png Ray-Ban bg:#f3383d wide -->
+            <div class="item-wrapper">
+                <button type="button" class="brand-pillar-shape" style="background:#f3383d;overflow:hidden;" onclick="location.href='#'">
+                    <div class="brand-img-wrap"><img class="brand-img brand-img-wide" src="{% static 'images/s.png' %}"></div>
+                </button>
+                <p class="label-text">Ray-Ban</p>
+            </div>
+            <!-- s1.png Police bg:#ffffff square -->
+            <div class="item-wrapper">
+                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='#'">
+                    <div class="brand-img-wrap"><img class="brand-img brand-img-square" src="{% static 'images/s1.png' %}"></div>
+                </button>
+                <p class="label-text">Police</p>
+            </div>
+            <!-- s2.jpg Oakley bg:#000000 tall -->
+            <div class="item-wrapper">
+                <button type="button" class="brand-pillar-shape" style="background:#000000;overflow:hidden;" onclick="location.href='#'">
+                    <div class="brand-img-wrap" style="background:#000000;"><img class="brand-img brand-img-tall" src="{% static 'images/s2.jpg' %}"></div>
+                </button>
+                <p class="label-text">Oakley</p>
+            </div>
+            <!-- s3.png Fastrack bg:#ffffff square -->
+            <div class="item-wrapper">
+                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='#'">
+                    <div class="brand-img-wrap"><img class="brand-img brand-img-square" src="{% static 'images/s3.png' %}"></div>
+                </button>
+                <p class="label-text">Fastrack</p>
+            </div>
+            <!-- s4.png Titan bg:#ffffff square -->
+            <div class="item-wrapper">
+                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='#'">
+                    <div class="brand-img-wrap"><img class="brand-img brand-img-square" src="{% static 'images/s4.png' %}"></div>
+                </button>
+                <p class="label-text">Titan</p>
+            </div>
+            <!-- s5.png Vincent Chase bg:#ffffff square -->
+            <div class="item-wrapper">
+                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='#'">
+                    <div class="brand-img-wrap"><img class="brand-img brand-img-square" src="{% static 'images/s5.png' %}"></div>
+                </button>
+                <p class="label-text">Vincent Chase</p>
+            </div>
+            <!-- s6.png Carrera bg:#ffffff square -->
+            <div class="item-wrapper">
+                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='#'">
+                    <div class="brand-img-wrap"><img class="brand-img brand-img-square" src="{% static 'images/s6.png' %}"></div>
+                </button>
+                <p class="label-text">Carrera</p>
+            </div>
+            <!-- s7.png Maui Jim bg:#ffffff square -->
+            <div class="item-wrapper">
+                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='#'">
+                    <div class="brand-img-wrap"><img class="brand-img brand-img-square" src="{% static 'images/s7.png' %}"></div>
+                </button>
+                <p class="label-text">Maui Jim</p>
+            </div>
+            <!-- s8.png Scott bg:#ffffff square -->
+            <div class="item-wrapper">
+                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='#'">
+                    <div class="brand-img-wrap"><img class="brand-img brand-img-square" src="{% static 'images/s8.png' %}"></div>
+                </button>
+                <p class="label-text">Scott</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════════ MAKEUP BRANDS ══════════════ -->
+    <div class="section-container">
+        <h2 class="section-title">Makeup Brands</h2>
+        <div class="universal-grid-9">
+            <!-- m1.png Lakme bg:#ffffff square -->
+            <div class="item-wrapper">
+                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='#'">
+                    <div class="brand-img-wrap"><img class="brand-img brand-img-square" src="{% static 'images/m1.png' %}"></div>
+                </button>
+                <p class="label-text">Lakme</p>
+            </div>
+            <!-- m2.png Maybelline bg:#000000 square -->
+            <div class="item-wrapper">
+                <button type="button" class="brand-pillar-shape" style="background:#000000;overflow:hidden;" onclick="location.href='#'">
+                    <div class="brand-img-wrap" style="background:#000000;"><img class="brand-img brand-img-square" src="{% static 'images/m2.png' %}"></div>
+                </button>
+                <p class="label-text">Maybelline</p>
+            </div>
+            <!-- m3.png MAC bg:#000000 square -->
+            <div class="item-wrapper">
+                <button type="button" class="brand-pillar-shape" style="background:#000000;overflow:hidden;" onclick="location.href='#'">
+                    <div class="brand-img-wrap" style="background:#000000;"><img class="brand-img brand-img-square" src="{% static 'images/m3.png' %}"></div>
+                </button>
+                <p class="label-text">MAC</p>
+            </div>
+            <!-- m4.png L'Oreal bg:#ffffff square -->
+            <div class="item-wrapper">
+                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='#'">
+                    <div class="brand-img-wrap"><img class="brand-img brand-img-square" src="{% static 'images/m4.png' %}"></div>
+                </button>
+                <p class="label-text">L'Oréal</p>
+            </div>
+            <!-- m5.png Nykaa bg:#fb2778 pink square -->
+            <div class="item-wrapper">
+                <button type="button" class="brand-pillar-shape" style="background:#fb2778;overflow:hidden;" onclick="location.href='#'">
+                    <div class="brand-img-wrap" style="background:#fb2778;"><img class="brand-img brand-img-square" src="{% static 'images/m5.png' %}"></div>
+                </button>
+                <p class="label-text">Nykaa</p>
+            </div>
+            <!-- m6.png Colorbar bg:#000000 square -->
+            <div class="item-wrapper">
+                <button type="button" class="brand-pillar-shape" style="background:#000000;overflow:hidden;" onclick="location.href='#'">
+                    <div class="brand-img-wrap" style="background:#000000;"><img class="brand-img brand-img-square" src="{% static 'images/m6.png' %}"></div>
+                </button>
+                <p class="label-text">Colorbar</p>
+            </div>
+            <!-- m7.png Faces Canada bg:#000000 square -->
+            <div class="item-wrapper">
+                <button type="button" class="brand-pillar-shape" style="background:#000000;overflow:hidden;" onclick="location.href='#'">
+                    <div class="brand-img-wrap" style="background:#000000;"><img class="brand-img brand-img-square" src="{% static 'images/m7.png' %}"></div>
+                </button>
+                <p class="label-text">Faces Canada</p>
+            </div>
+            <!-- m8.png Sugar bg:#000000 square -->
+            <div class="item-wrapper">
+                <button type="button" class="brand-pillar-shape" style="background:#000000;overflow:hidden;" onclick="location.href='#'">
+                    <div class="brand-img-wrap" style="background:#000000;"><img class="brand-img brand-img-square" src="{% static 'images/m8.png' %}"></div>
+                </button>
+                <p class="label-text">Sugar</p>
+            </div>
+            <!-- m9.png Biotique bg:#000000 wide -->
+            <div class="item-wrapper">
+                <button type="button" class="brand-pillar-shape" style="background:#000000;overflow:hidden;" onclick="location.href='#'">
+                    <div class="brand-img-wrap" style="background:#000000;"><img class="brand-img brand-img-wide" src="{% static 'images/m9.png' %}"></div>
+                </button>
+                <p class="label-text">Biotique</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════════ BAGS BRANDS ══════════════ -->
+    <div class="section-container">
+        <h2 class="section-title">Bags Brands</h2>
+        <div class="universal-grid-9">
+            <!-- b1.png Hidesign bg:#fefefe square -->
+            <div class="item-wrapper">
+                <button type="button" class="brand-pillar-shape" style="background:#fefefe;overflow:hidden;" onclick="location.href='#'">
+                    <div class="brand-img-wrap"><img class="brand-img brand-img-square" src="{% static 'images/b1.png' %}"></div>
+                </button>
+                <p class="label-text">Hidesign</p>
+            </div>
+            <!-- b2.png Wildcraft bg:#4c4f54 dark grey -->
+            <div class="item-wrapper">
+                <button type="button" class="brand-pillar-shape" style="background:#4c4f54;overflow:hidden;" onclick="location.href='#'">
+                    <div class="brand-img-wrap" style="background:#4c4f54;"><img class="brand-img brand-img-square" src="{% static 'images/b2.png' %}"></div>
+                </button>
+                <p class="label-text">Wildcraft</p>
+            </div>
+            <!-- b3.png Samsonite bg:#ffffff square -->
+            <div class="item-wrapper">
+                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='#'">
+                    <div class="brand-img-wrap"><img class="brand-img brand-img-square" src="{% static 'images/b3.png' %}"></div>
+                </button>
+                <p class="label-text">Samsonite</p>
+            </div>
+            <!-- b4.png Baggit bg:#ffffff square -->
+            <div class="item-wrapper">
+                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='#'">
+                    <div class="brand-img-wrap"><img class="brand-img brand-img-square" src="{% static 'images/b4.png' %}"></div>
+                </button>
+                <p class="label-text">Baggit</p>
+            </div>
+            <!-- b5.png Caprese bg:#fefefe square -->
+            <div class="item-wrapper">
+                <button type="button" class="brand-pillar-shape" style="background:#fefefe;overflow:hidden;" onclick="location.href='#'">
+                    <div class="brand-img-wrap"><img class="brand-img brand-img-square" src="{% static 'images/b5.png' %}"></div>
+                </button>
+                <p class="label-text">Caprese</p>
+            </div>
+            <!-- b6.png American Tourister bg:#000000 square -->
+            <div class="item-wrapper">
+                <button type="button" class="brand-pillar-shape" style="background:#000000;overflow:hidden;" onclick="location.href='#'">
+                    <div class="brand-img-wrap" style="background:#000000;"><img class="brand-img brand-img-square" src="{% static 'images/b6.png' %}"></div>
+                </button>
+                <p class="label-text">American Tourister</p>
+            </div>
+            <!-- b7.png VIP bg:#ffffff square -->
+            <div class="item-wrapper">
+                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='#'">
+                    <div class="brand-img-wrap"><img class="brand-img brand-img-square" src="{% static 'images/b7.png' %}"></div>
+                </button>
+                <p class="label-text">VIP</p>
+            </div>
+            <!-- b8.png Skybags bg:#0177bf blue wide -->
+            <div class="item-wrapper">
+                <button type="button" class="brand-pillar-shape" style="background:#0177bf;overflow:hidden;" onclick="location.href='#'">
+                    <div class="brand-img-wrap" style="background:#0177bf;"><img class="brand-img brand-img-wide" src="{% static 'images/b8.png' %}"></div>
+                </button>
+                <p class="label-text">Skybags</p>
+            </div>
+            <!-- b9.png Da Milano bg:#ffffff square -->
+            <div class="item-wrapper">
+                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='#'">
+                    <div class="brand-img-wrap"><img class="brand-img brand-img-square" src="{% static 'images/b9.png' %}"></div>
+                </button>
+                <p class="label-text">Da Milano</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════════ PURSE BRANDS ══════════════ -->
+    <div class="section-container">
+        <h2 class="section-title">Purse Brands</h2>
+        <div class="universal-grid-9">
+            <!-- Caprese — reuse b5.png -->
+            <div class="item-wrapper">
+                <button type="button" class="brand-pillar-shape" style="background:#fefefe;overflow:hidden;" onclick="location.href='#'">
+                    <div class="brand-img-wrap"><img class="brand-img brand-img-square" src="{% static 'images/b5.png' %}"></div>
+                </button>
+                <p class="label-text">Caprese</p>
+            </div>
+            <!-- Baggit — reuse b4.png -->
+            <div class="item-wrapper">
+                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='#'">
+                    <div class="brand-img-wrap"><img class="brand-img brand-img-square" src="{% static 'images/b4.png' %}"></div>
+                </button>
+                <p class="label-text">Baggit</p>
+            </div>
+            <!-- Hidesign — reuse b1.png -->
+            <div class="item-wrapper">
+                <button type="button" class="brand-pillar-shape" style="background:#fefefe;overflow:hidden;" onclick="location.href='#'">
+                    <div class="brand-img-wrap"><img class="brand-img brand-img-square" src="{% static 'images/b1.png' %}"></div>
+                </button>
+                <p class="label-text">Hidesign</p>
+            </div>
+            <!-- Da Milano — reuse b9.png -->
+            <div class="item-wrapper">
+                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='#'">
+                    <div class="brand-img-wrap"><img class="brand-img brand-img-square" src="{% static 'images/b9.png' %}"></div>
+                </button>
+                <p class="label-text">Da Milano</p>
+            </div>
+            <!-- Lavie — p6.png bg:#ffffff square -->
+            <div class="item-wrapper">
+                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='#'">
+                    <div class="brand-img-wrap"><img class="brand-img brand-img-square" src="{% static 'images/p6.png' %}"></div>
+                </button>
+                <p class="label-text">Lavie</p>
+            </div>
+            <!-- Aldo — new p4.png bg:#ffffff wide -->
+            <div class="item-wrapper">
+                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='#'">
+                    <div class="brand-img-wrap"><img class="brand-img brand-img-wide" src="{% static 'images/p4.png' %}"></div>
+                </button>
+                <p class="label-text">Aldo</p>
+            </div>
+            <!-- Lino Perros — new p7.png bg:#fdfeff square -->
+            <div class="item-wrapper">
+                <button type="button" class="brand-pillar-shape" style="background:#fdfeff;overflow:hidden;" onclick="location.href='#'">
+                    <div class="brand-img-wrap"><img class="brand-img brand-img-square" src="{% static 'images/p7.png' %}"></div>
+                </button>
+                <p class="label-text">Lino Perros</p>
+            </div>
+            <!-- Fastrack — reuse s3.png -->
+            <div class="item-wrapper">
+                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='#'">
+                    <div class="brand-img-wrap"><img class="brand-img brand-img-square" src="{% static 'images/s3.png' %}"></div>
+                </button>
+                <p class="label-text">Fastrack</p>
+            </div>
+            <!-- Dior — new p9.png bg:#ffffff square (replaces Eske) -->
+            <div class="item-wrapper">
+                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='#'">
+                    <div class="brand-img-wrap"><img class="brand-img brand-img-square" src="{% static 'images/p9.png' %}"></div>
+                </button>
+                <p class="label-text">Dior</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════════ BELTS BRANDS ══════════════ -->
+    <div class="section-container">
+        <h2 class="section-title">Belts Brands</h2>
+        <div class="universal-grid-9">
+            <!-- Peter England — reuse pe.png bg:#0a233e -->
+            <div class="item-wrapper">
+                <button type="button" class="brand-pillar-shape" style="background:#0a233e;overflow:hidden;" onclick="location.href='#'">
+                    <div class="brand-img-wrap" style="background:#0a233e;"><img class="brand-img brand-img-square" src="{% static 'images/pe.png' %}"></div>
+                </button>
+                <p class="label-text">Peter England</p>
+            </div>
+            <!-- Allen Solly — reuse as.jpg bg:#ffffff -->
+            <div class="item-wrapper">
+                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='#'">
+                    <div class="brand-img-wrap"><img class="brand-img brand-img-square" src="{% static 'images/as.jpg' %}"></div>
+                </button>
+                <p class="label-text">Allen Solly</p>
+            </div>
+            <!-- Arrow — reuse ar.png bg:#ffffff -->
+            <div class="item-wrapper">
+                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='#'">
+                    <div class="brand-img-wrap"><img class="brand-img brand-img-square" src="{% static 'images/ar.png' %}"></div>
+                </button>
+                <p class="label-text">Arrow</p>
+            </div>
+            <!-- Hidesign — reuse b1.png bg:#fefefe -->
+            <div class="item-wrapper">
+                <button type="button" class="brand-pillar-shape" style="background:#fefefe;overflow:hidden;" onclick="location.href='#'">
+                    <div class="brand-img-wrap"><img class="brand-img brand-img-square" src="{% static 'images/b1.png' %}"></div>
+                </button>
+                <p class="label-text">Hidesign</p>
+            </div>
+            <!-- Levi's — reuse ls.jpg bg:#d94a5d -->
+            <div class="item-wrapper">
+                <button type="button" class="brand-pillar-shape" style="background:#d94a5d;overflow:hidden;" onclick="location.href='#'">
+                    <div class="brand-img-wrap" style="background:#d94a5d;"><img class="brand-img brand-img-levis" src="{% static 'images/ls.jpg' %}"></div>
+                </button>
+                <p class="label-text">Levi's</p>
+            </div>
+            <!-- Louis Philippe — reuse lp.png bg:#ffffff -->
+            <div class="item-wrapper">
+                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='#'">
+                    <div class="brand-img-wrap"><img class="brand-img brand-img-square" src="{% static 'images/lp.png' %}"></div>
+                </button>
+                <p class="label-text">Louis Philippe</p>
+            </div>
+            <!-- Woodland — bl.png bg:#00652d -->
+            <div class="item-wrapper">
+                <button type="button" class="brand-pillar-shape" style="background:#00652d;overflow:hidden;" onclick="location.href='#'">
+                    <div class="brand-img-wrap" style="background:#00652d;"><img class="brand-img brand-img-square" src="{% static 'images/bl.png' %}"></div>
+                </button>
+                <p class="label-text">Woodland</p>
+            </div>
+            <!-- Fastrack — reuse s3.png bg:#ffffff -->
+            <div class="item-wrapper">
+                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='#'">
+                    <div class="brand-img-wrap"><img class="brand-img brand-img-square" src="{% static 'images/s3.png' %}"></div>
+                </button>
+                <p class="label-text">Fastrack</p>
+            </div>
+            <!-- Raymond — reuse rm.png bg:#ca142b -->
+            <div class="item-wrapper">
+                <button type="button" class="brand-pillar-shape" style="background:#ca142b;overflow:hidden;" onclick="location.href='#'">
+                    <div class="brand-img-wrap" style="background:#ca142b;"><img class="brand-img brand-img-square" src="{% static 'images/rm.png' %}"></div>
+                </button>
+                <p class="label-text">Raymond</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════════ FOOTWEAR BRANDS ══════════════ -->
+    <div class="section-container">
+        <h2 class="section-title">Footwear Brands</h2>
+        <div class="universal-grid-9">
+            <!-- f1.png Bata bg:#ffffff -->
+            <div class="item-wrapper">
+                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='#'">
+                    <div class="brand-img-wrap"><img class="brand-img brand-img-square" src="{% static 'images/f1.png' %}"></div>
+                </button>
+                <p class="label-text">Bata</p>
+            </div>
+            <!-- f2.png Paragon bg:#000000 -->
+            <div class="item-wrapper">
+                <button type="button" class="brand-pillar-shape" style="background:#000000;overflow:hidden;" onclick="location.href='#'">
+                    <div class="brand-img-wrap" style="background:#000000;"><img class="brand-img brand-img-square" src="{% static 'images/f2.png' %}"></div>
+                </button>
+                <p class="label-text">Paragon</p>
+            </div>
+            <!-- f3.png Campus bg:#000000 -->
+            <div class="item-wrapper">
+                <button type="button" class="brand-pillar-shape" style="background:#000000;overflow:hidden;" onclick="location.href='#'">
+                    <div class="brand-img-wrap" style="background:#000000;"><img class="brand-img brand-img-square" src="{% static 'images/f3.png' %}"></div>
+                </button>
+                <p class="label-text">Campus</p>
+            </div>
+            <!-- f4.png Metro bg:#000000 -->
+            <div class="item-wrapper">
+                <button type="button" class="brand-pillar-shape" style="background:#000000;overflow:hidden;" onclick="location.href='#'">
+                    <div class="brand-img-wrap" style="background:#000000;"><img class="brand-img brand-img-square" src="{% static 'images/f4.png' %}"></div>
+                </button>
+                <p class="label-text">Metro</p>
+            </div>
+            <!-- f5.png Flite bg:#ffffff -->
+            <div class="item-wrapper">
+                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='#'">
+                    <div class="brand-img-wrap"><img class="brand-img brand-img-square" src="{% static 'images/f5.png' %}"></div>
+                </button>
+                <p class="label-text">Flite</p>
+            </div>
+            <!-- f6.png Nike bg:#ffffff -->
+            <div class="item-wrapper">
+                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='#'">
+                    <div class="brand-img-wrap"><img class="brand-img brand-img-square" src="{% static 'images/f6.png' %}"></div>
+                </button>
+                <p class="label-text">Nike</p>
+            </div>
+            <!-- Woodland — reuse bl.png bg:#00652d -->
+            <div class="item-wrapper">
+                <button type="button" class="brand-pillar-shape" style="background:#00652d;overflow:hidden;" onclick="location.href='#'">
+                    <div class="brand-img-wrap" style="background:#00652d;"><img class="brand-img brand-img-square" src="{% static 'images/bl.png' %}"></div>
+                </button>
+                <p class="label-text">Woodland</p>
+            </div>
+            <!-- Puma — reuse puma.jpg bg:#000000 -->
+            <div class="item-wrapper">
+                <button type="button" class="brand-pillar-shape brand-bg-puma" onclick="location.href='#'">
+                    <img class="brand-img brand-img-tall" src="{% static 'images/puma.jpg' %}">
+                </button>
+                <p class="label-text">Puma</p>
+            </div>
+            <!-- Adidas — reuse ad.jpg bg:#000000 -->
+            <div class="item-wrapper">
+                <button type="button" class="brand-pillar-shape brand-bg-ad" onclick="location.href='#'">
+                    <img class="brand-img brand-img-tall" src="{% static 'images/ad.jpg' %}">
+                </button>
+                <p class="label-text">Adidas</p>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- ══════════════ NEW ARRIVALS POPUP ══════════════ -->
+<div id="naPopupOverlay" class="na-popup-overlay" onclick="closePopupOnOverlay(event)">
+    <div class="na-popup">
+        <div class="na-popup-header">
+            <span class="na-popup-title">New Arrivals</span>
+            <div class="na-popup-controls">
+                <select id="popupCategoryFilter" class="na-popup-filter" onchange="filterPopupProducts()">
+                    <option value="">All Categories</option>
+                    <option value="Men's Wear">Men's Wear</option>
+                    <option value="Women's Wear">Women's Wear</option>
+                    <option value="Kid's Wear">Kid's Wear</option>
+                    <option value="Bags">Bags</option>
+                    <option value="Purses">Purses</option>
+                    <option value="Belts">Belts</option>
+                    <option value="Sun Glasses">Sun Glasses</option>
+                    <option value="Makeup">Makeup</option>
+                    <option value="Other">Other</option>
+                </select>
+                <button class="na-popup-close" onclick="closeNewArrivalsPopup()">✕</button>
+            </div>
+        </div>
+        <div id="popupLoader" class="na-popup-loader">
+            <div class="na-spinner"></div>
+            <p>Loading new arrivals...</p>
+        </div>
+        <div id="popupGrid" class="na-popup-grid" style="display:none;"></div>
+        <div id="popupEmpty" class="na-popup-empty" style="display:none;"><p>No products found.</p></div>
+    </div>
+</div>
+
+<style>
+/* ── ACCESSORY BRAND BUTTONS ── */
+.acc-brand-btn {
+    background: transparent !important;
+    padding: 0 !important;
+    overflow: hidden;
+}
+.acc-brand-inner {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 12px 8px;
+    border-radius: 20px;
+    transition: filter 0.3s;
+}
+.acc-brand-btn:hover .acc-brand-inner {
+    filter: brightness(1.2);
+}
+.acc-brand-name {
+    font-size: 13px;
+    font-weight: 900;
+    color: #fff;
+    text-align: center;
+    line-height: 1.2;
+    letter-spacing: 0.5px;
+}
+.acc-brand-since {
+    font-size: 9px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.65);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+/* ── POPUP STYLES ── */
+.na-popup-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.72); z-index: 9999;
+    justify-content: center; align-items: flex-start;
+    padding: 40px 20px; overflow-y: auto;
+}
+.na-popup-overlay.open { display: flex; }
+.na-popup {
+    background: #cfffdc; border: 5px solid #000;
+    border-radius: 24px; width: 100%; max-width: 1100px;
+    overflow: hidden; box-shadow: 0 0 40px rgba(0,0,0,0.5);
+    animation: popupIn 0.3s ease; margin: auto;
+}
+@keyframes popupIn {
+    from { opacity: 0; transform: translateY(-30px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.na-popup-header {
+    background: #000; padding: 16px 24px;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 3px solid #cfffdc;
+}
+.na-popup-title { font-size: 1.2rem; font-weight: 900; color: #cfffdc; letter-spacing: 3px; text-transform: uppercase; }
+.na-popup-controls { display: flex; align-items: center; gap: 12px; }
+.na-popup-filter { background: #1a1a1a; color: #cfffdc; border: 2px solid #cfffdc; border-radius: 10px; padding: 7px 12px; font-size: 12px; font-weight: 700; cursor: pointer; outline: none; }
+.na-popup-close { background: transparent; border: 2px solid #cfffdc; color: #cfffdc; width: 36px; height: 36px; border-radius: 50%; font-size: 1rem; font-weight: 900; cursor: pointer; transition: background 0.2s, color 0.2s; display: flex; align-items: center; justify-content: center; }
+.na-popup-close:hover { background: #cfffdc; color: #000; }
+.na-popup-loader { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 20px; gap: 16px; color: #000; font-weight: 700; }
+.na-spinner { width: 44px; height: 44px; border: 4px solid rgba(0,0,0,0.15); border-top-color: #000; border-radius: 50%; animation: spin 0.7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.na-popup-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 14px; padding: 20px 22px 24px; }
+@media (max-width: 900px) { .na-popup-grid { grid-template-columns: repeat(3,1fr); } }
+@media (max-width: 580px) { .na-popup-grid { grid-template-columns: repeat(2,1fr); } }
+.na-popup-card { background: #fff; border: 3px solid #000; border-radius: 14px; overflow: hidden; cursor: pointer; transition: transform 0.3s, box-shadow 0.3s; display: flex; flex-direction: column; }
+.na-popup-card:hover { transform: translateY(-5px); box-shadow: 0 0 12px 4px #cfffdc, 0 8px 20px rgba(0,0,0,0.2); }
+.na-popup-card-img-wrap { width: 100%; aspect-ratio: 3/4; overflow: hidden; background: #f0f0f0; position: relative; }
+.na-popup-card-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s; }
+.na-popup-card:hover .na-popup-card-img { transform: scale(1.06); }
+.na-popup-tag { position: absolute; top: 8px; left: 8px; background: #000; color: #cfffdc; font-size: 8px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; padding: 3px 8px; border-radius: 6px; }
+.na-popup-discount { position: absolute; top: 8px; right: 8px; background: #ff3b3b; color: #fff; font-size: 8px; font-weight: 800; padding: 3px 7px; border-radius: 6px; }
+.na-popup-card-info { padding: 8px 10px 4px; display: flex; flex-direction: column; gap: 2px; }
+.na-popup-card-brand { font-size: 9px; font-weight: 700; color: #555; text-transform: uppercase; letter-spacing: 1px; }
+.na-popup-card-name { font-size: 12px; font-weight: 800; color: #000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.na-popup-card-cat { font-size: 9px; color: #888; font-weight: 600; }
+.na-popup-card-price { font-size: 13px; font-weight: 900; color: #000; margin-top: 4px; }
+.na-popup-card-price s { font-size: 10px; color: #999; margin-left: 5px; }
+.na-popup-card-btn { margin: 5px 10px 10px; background: #000; color: #cfffdc; border: none; border-radius: 9px; padding: 8px 0; font-size: 10px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; cursor: pointer; width: calc(100% - 20px); transition: background 0.2s, box-shadow 0.2s; }
+.na-popup-card-btn:hover { background: #1a1a1a; box-shadow: 0 0 10px 3px #cfffdc; }
+.na-popup-empty { text-align: center; padding: 60px 20px; font-size: 1rem; font-weight: 700; color: #555; }
+.new-arrivals-badge { background: transparent; color: #cfffdc; font-size: 10px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; padding: 5px 12px; border-radius: 16px; border: 2px solid #cfffdc; cursor: pointer; transition: background 0.2s; font-family: Arial, sans-serif; }
+.new-arrivals-badge:hover { background: rgba(207,255,220,0.15); }
+</style>
+
+<script>
+let slideIndex = 0;
+showSlides();
+function showSlides() {
+    let slides = document.getElementsByClassName("slide-img");
+    for (let i = 0; i < slides.length; i++) { slides[i].style.display = "none"; }
+    slideIndex++;
+    if (slideIndex > slides.length) { slideIndex = 1; }
+    slides[slideIndex - 1].style.display = "block";
+    setTimeout(showSlides, 8000);
+}
+
+let allPopupProducts = [];
+
+function openNewArrivalsPopup() {
+    document.getElementById('naPopupOverlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+    loadAllNewArrivals();
+}
+function closeNewArrivalsPopup() {
+    document.getElementById('naPopupOverlay').classList.remove('open');
+    document.body.style.overflow = '';
+}
+function closePopupOnOverlay(e) {
+    if (e.target === document.getElementById('naPopupOverlay')) closeNewArrivalsPopup();
+}
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeNewArrivalsPopup();
+});
+function loadAllNewArrivals() {
+    const loader = document.getElementById('popupLoader');
+    const grid   = document.getElementById('popupGrid');
+    const empty  = document.getElementById('popupEmpty');
+    loader.style.display = 'flex';
+    grid.style.display   = 'none';
+    empty.style.display  = 'none';
+    document.getElementById('popupCategoryFilter').value = '';
+    fetch("{% url 'all_new_arrivals' %}")
+        .then(res => res.json())
+        .then(data => {
+            allPopupProducts = data.products;
+            loader.style.display = 'none';
+            renderPopupGrid(allPopupProducts);
+        })
+        .catch(err => {
+            loader.style.display = 'none';
+            empty.style.display  = 'block';
+            empty.querySelector('p').textContent = 'Failed to load. Please try again.';
+            console.error(err);
+        });
+}
+function filterPopupProducts() {
+    const selected = document.getElementById('popupCategoryFilter').value;
+    const filtered = selected ? allPopupProducts.filter(p => p.category === selected) : allPopupProducts;
+    renderPopupGrid(filtered);
+}
+function renderPopupGrid(products) {
+    const grid  = document.getElementById('popupGrid');
+    const empty = document.getElementById('popupEmpty');
+    if (!products.length) {
+        grid.style.display  = 'none';
+        empty.style.display = 'block';
+        empty.querySelector('p').textContent = 'No products found in this category.';
+        return;
+    }
+    empty.style.display = 'none';
+    grid.style.display  = 'grid';
+    grid.innerHTML = products.map(p => {
+        const oldPrice = p.original_price ? `<s>₹${parseFloat(p.original_price).toLocaleString('en-IN')}</s>` : '';
+        const discTag  = p.discount > 0 ? `<span class="na-popup-discount">−${p.discount}%</span>` : '';
+        return `
+        <div class="na-popup-card">
+            <div class="na-popup-card-img-wrap">
+                <img class="na-popup-card-img" src="${p.image}" alt="${p.name}" loading="lazy">
+                <span class="na-popup-tag">New</span>${discTag}
+            </div>
+            <div class="na-popup-card-info">
+                <div class="na-popup-card-brand">${p.brand}</div>
+                <div class="na-popup-card-name">${p.name}</div>
+                <div class="na-popup-card-cat">${p.category}</div>
+                <div class="na-popup-card-price">₹${parseFloat(p.price).toLocaleString('en-IN')} ${oldPrice}</div>
+            </div>
+            <button class="na-popup-card-btn">Add to Cart</button>
+        </div>`;
+    }).join('');
+}
+</script>
+
 {% endblock %}

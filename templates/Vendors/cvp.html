@@ -1,11 +1,43 @@
-<h2>Complete Vendor Profile</h2>
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vendor Profile | Chizi Fashion</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
 
-<form method="POST" enctype="multipart/form-data">
+    <div class="main-wrapper">
+        <div class="logo-side">
+            <img src="{% static 'images/RAMYA5.jpeg' %}" alt="Chizi Fashion" class="brand-img-logo">
+            
+            <div class="welcome-text">
+                <span class="line1">Set Up Your</span>
+                <span class="line2">Store</span>
+            </div>
+        </div>
 
-    {% csrf_token %}
+        <div class="form-container">
+            <h2>Brand Details</h2>
+            
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <div class="form-body">
+                    {{ form.as_p }}
+                </div>
 
-    {{ form.as_p }}
+                <button type="submit">SAVE PROFILE</button>
+            </form>
 
-    <button type="submit">Save Profile</button>
+            <div class="form-footer">
+                <p>Ready to launch your fashion vibe?</p>
+            </div>
+        </div>
+    </div>
 
-</form>
+</body>
+</html>
