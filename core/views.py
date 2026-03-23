@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
@@ -6,7 +7,7 @@ from django.http import JsonResponse
 from django.contrib import messages
 from .forms import SignupForm, LoginForm
 
-from efashion.models import Vendor, Customer, Product
+from efashion.models import Vendor, Customer, Product, Order
 from efashion.forms import VendorProfileForm, CustomerProfileForm
 
 
@@ -158,6 +159,13 @@ def customer_dashboard(request):
 # -----------------------------
 # LOGOUT
 # -----------------------------
+# CUSTOMER PROFILE
+@login_required
+def customer_profile(request):
+    customer = Customer.objects.get(user=request.user)
+    orders = Order.objects.filter(customer=customer).order_by("-orderDate")
+    return render(request, "Customers/customer_profile.html", {"customer": customer, "orders": orders, "order_count": orders.count()})
+
 def logout_view(request):
 
     logout(request)

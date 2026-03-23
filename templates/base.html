@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RAMYA FASHION</title>
+    <title>RAMYA</title>
     <link rel="stylesheet" href="{% static 'c_style.css' %}">
 </head>
 <body class="dashboard-body">
@@ -40,7 +40,7 @@
 
                 <!-- Profile: photo if uploaded, else first letter of email -->
                 {% if user.is_authenticated %}
-                    <a href="{% url 'complete_profile' %}" class="header-profile" title="My Profile">
+                    <a href="{% url 'customer_profile' %}" class="header-profile" title="My Profile">
                         {% if user.customer_profile.profile_photo %}
                             <img src="{{ user.customer_profile.profile_photo.url }}" alt="Profile" class="profile-img">
                         {% else %}
@@ -63,7 +63,7 @@
                 <input type="text" placeholder="Search...">
             </div>
             {% if user.is_authenticated %}
-                <a href="{% url 'complete_profile' %}">My Profile</a>
+                <a href="{% url 'customer_profile' %}">My Profile</a>
                 <a href="#">My Orders</a>
                 <a href="{% url 'logout' %}">Logout</a>
             {% else %}
@@ -114,7 +114,7 @@
             <div class="footer-col">
                 <h4 class="footer-col-title">Feedback</h4>
                 <p class="footer-col-text">Have a suggestion, complaint or idea? We love hearing from our customers.</p>
-                <a href="mailto:feedback@ramyafashion.com" class="footer-mail-btn">
+                <a href="mailto:ramya.wearweb@gmail.com" class="footer-mail-btn">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
                     Send Feedback
                 </a>

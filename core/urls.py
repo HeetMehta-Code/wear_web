@@ -5,6 +5,7 @@ from .views import (
     logout_view,
     complete_profile,
     customer_dashboard,
+    customer_profile,
     vendor_dashboard,
     all_new_arrivals,
     vendor_upload_product,
@@ -21,4 +22,5 @@ urlpatterns = [
     path("api/new-arrivals/", all_new_arrivals, name="all_new_arrivals"),
     path("vendor/upload/", vendor_upload_product, name="vendor_upload"),
     path("vendor/toggle/<int:product_id>/", vendor_toggle_product, name="vendor_toggle"),
+    path("customer-profile/", customer_profile, name="customer_profile"),
 ]
