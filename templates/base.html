@@ -9,26 +9,20 @@
 </head>
 <body class="dashboard-body">
 
-    <!-- ══════════════ HEADER ══════════════ -->
     <header class="main-header">
         <div class="header-inner">
 
-            <!-- LEFT: Brand Name -->
             <a href="{% url 'customer_dashboard' %}" class="header-logo">RAMYA</a>
 
-            <!-- CENTER: Oval Search Bar -->
-            <div class="header-search">
+            <form action="{% url 'search_products' %}" method="GET" class="header-search">
                 <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <circle cx="11" cy="11" r="8"/>
                     <path d="m21 21-4.35-4.35"/>
                 </svg>
-                <input type="text" class="search-input" placeholder="Search clothes, brands, accessories...">
-            </div>
+                <input type="text" name="q" class="search-input" placeholder="Search clothes, brands, accessories..." required>
+            </form>
 
-            <!-- RIGHT: Cart + Profile -->
             <div class="header-right">
-
-                <!-- Bold Cart Icon -->
                 <a href="#" class="header-cart" title="Cart">
                     <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8">
                         <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
@@ -38,7 +32,6 @@
                     <span class="cart-count">0</span>
                 </a>
 
-                <!-- Profile: photo if uploaded, else first letter of email -->
                 {% if user.is_authenticated %}
                     <a href="{% url 'customer_profile' %}" class="header-profile" title="My Profile">
                         {% if user.customer_profile.profile_photo %}
@@ -51,17 +44,15 @@
                 {% else %}
                     <a href="{% url 'login' %}" class="header-login">Login</a>
                 {% endif %}
-
             </div>
         </div>
 
-        <!-- Mobile Toggle -->
         <button class="mobile-toggle" id="mobileToggle">&#9776;</button>
         <nav class="mobile-nav" id="mobileNav">
-            <div class="mobile-search-wrap">
+            <form action="{% url 'search_products' %}" method="GET" class="mobile-search-wrap">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-                <input type="text" placeholder="Search...">
-            </div>
+                <input type="text" name="q" placeholder="Search..." required>
+            </form>
             {% if user.is_authenticated %}
                 <a href="{% url 'customer_profile' %}">My Profile</a>
                 <a href="#">My Orders</a>
@@ -76,73 +67,57 @@
         {% block content %}{% endblock content %}
     </main>
 
-    <!-- ══════════════ FOOTER ══════════════ -->
     <footer class="main-footer">
         <div class="footer-inner">
-
-            <!-- Brand -->
             <div class="footer-brand-col">
                 <span class="footer-logo">RAMYA</span>
                 <p class="footer-tagline">Premium fashion for every style.<br>Delivered with love across India.</p>
             </div>
 
-            <!-- About Us -->
             <div class="footer-col">
                 <h4 class="footer-col-title">About Us</h4>
                 <p class="footer-col-text">RAMYA Fashion is India's curated multi-brand fashion platform connecting customers with the best clothing, accessories, makeup and more from top brands and local vendors.</p>
-                <a href="#" class="footer-text-link">Read More →</a>
+                <a href="{% url 'about_us' %}" class="footer-text-link">Read More →</a>
             </div>
 
-            <!-- Contact Us -->
             <div class="footer-col">
                 <h4 class="footer-col-title">Contact Us</h4>
                 <div class="footer-contact-item">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.1 6.1l.98-.98a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
                     <span>+91 98765 43210</span>
                 </div>
                 <div class="footer-contact-item">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
                     <span>ramya.wearweb@gmail.com</span>
                 </div>
-                <div class="footer-contact-item">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                    <span>Gandhinagar, Gujarat, India</span>
-                </div>
+                <a href="{% url 'contact_us' %}" class="footer-text-link" style="margin-top:10px; display:block;">Write to us →</a>
             </div>
 
-            <!-- Feedback -->
             <div class="footer-col">
                 <h4 class="footer-col-title">Feedback</h4>
                 <p class="footer-col-text">Have a suggestion, complaint or idea? We love hearing from our customers.</p>
-                <a href="mailto:ramya.wearweb@gmail.com" class="footer-mail-btn">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-                    Send Feedback
-                </a>
-                <div class="footer-links-row">
-                    <a href="#" class="footer-text-link">Privacy Policy</a>
-                    <a href="#" class="footer-text-link">Terms</a>
-                    <a href="#" class="footer-text-link">FAQ</a>
-                </div>
+                <a href="mailto:ramya.wearweb@gmail.com" class="footer-mail-btn">Send Feedback</a>
             </div>
-
         </div>
         <div class="footer-bottom">
-            <span>© 2025 RAMYA Fashion. All rights reserved.</span>
-            <span>Made with ♥ in India</span>
+            <span>© 2026 RAMYA Fashion. All rights reserved.</span>
         </div>
     </footer>
 
     <script>
-        // Mobile toggle
         document.getElementById('mobileToggle').addEventListener('click', function () {
             document.getElementById('mobileNav').classList.toggle('open');
         });
 
-        // Dynamic header — shrinks & shadows on scroll
         window.addEventListener('scroll', function () {
             document.querySelector('.main-header').classList.toggle('header-scrolled', window.scrollY > 50);
         });
-    </script>
 
+        // Optional: Allow pressing "Enter" on the search bar to submit
+        const searchInput = document.querySelector('.search-input');
+        searchInput.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                this.parentElement.submit();
+            }
+        });
+    </script>
 </body>
 </html>

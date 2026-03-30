@@ -1,0 +1,248 @@
+{% extends "Vendors/base.html" %}
+
+{% block content %}
+<style>
+    /* 1. Wrapper and Card */
+    .upload-box { 
+        display: flex; 
+        justify-content: center; 
+        padding: 40px 20px; 
+        background: #142c1e; 
+        min-height: 80vh; 
+    }
+    .card { 
+        background: #000; 
+        border: 3px solid #78b388; 
+        border-radius: 24px; 
+        width: 100%; 
+        max-width: 950px; 
+        padding: 40px; 
+        box-shadow: 0 0px 50px #cfffdc; 
+    }
+    
+    /* 2. Scoped Typography */
+    .card h2 { color: #cfffdc; margin-top: 0; font-size: 24px; letter-spacing: 1px; }
+    .card h3 { color: #78b388; font-size: 16px; margin-bottom: 15px; }
+    .card label { 
+        display: block; 
+        color: #cfffdc; 
+        font-size: 15px; 
+        font-weight: 800; 
+        text-transform: uppercase; 
+        margin-bottom: 8px; 
+        margin-top: 15px; 
+    }
+    
+    /* 3. SCOPED INPUTS - Uniform Sizing */
+    .card input[type="text"], 
+    .card input[type="number"], 
+    .card input[type="file"],
+    .card select, 
+    .card textarea { 
+        width: 100%; 
+        background: #111; 
+        border: 1px solid #222; 
+        padding: 12px; 
+        color: #fff; 
+        border-radius: 12px; 
+        transition: 0.3s; 
+        box-sizing: border-box; 
+        outline: none;
+        font-family: inherit;
+        font-size: 13px;
+        height: 45px; 
+    }
+
+    .card input[type="file"] {
+        padding: 8px 12px;
+        cursor: pointer;
+    }
+
+    .card textarea { height: auto; }
+
+    .card input:focus, 
+    .card select:focus, 
+    .card textarea:focus { 
+        border-color: #78b388; 
+        background: #161616; 
+        box-shadow: 0 0 10px rgba(120, 179, 136, 0.1);
+    }
+
+    /* 4. Variant Section - 4 Equal Columns */
+    .variant-row { 
+        display: grid; 
+        grid-template-columns: 1fr 1fr 1fr 1fr 45px; 
+        gap: 12px; 
+        background: #0a0a0a; 
+        padding: 15px; 
+        border-radius: 15px; 
+        margin-bottom: 10px; 
+        border: 1px solid #1a1a1a;
+        align-items: center;
+    }
+    
+    .add-variant-btn { 
+        background: transparent; 
+        color: #78b388; 
+        border: 2px dashed #333; 
+        padding: 12px; 
+        width: 100%; 
+        border-radius: 12px; 
+        cursor: pointer; 
+        font-weight: 700; 
+        transition: 0.3s; 
+        margin-bottom: 25px;
+    }
+    .add-variant-btn:hover { border-color: #78b388; background: #0a110c; color: #cfffdc; }
+    
+    .remove-btn { 
+        background: #221111; 
+        color: #ff5555; 
+        border: 1px solid #442222; 
+        border-radius: 10px; 
+        cursor: pointer; 
+        font-weight: 900;
+        transition: 0.2s;
+        height: 45px;
+        width: 100%;
+    }
+    .remove-btn:hover { background: #441111; }
+
+    /* 6. Submit Button */
+    .btn-publish { 
+        width: 100%; 
+        background: #cfffdc; 
+        color: #000; 
+        padding: 18px; 
+        border: none; 
+        border-radius: 15px; 
+        font-weight: 900; 
+        cursor: pointer; 
+        font-size: 16px; 
+        text-transform: uppercase; 
+        letter-spacing: 1px; 
+        margin-top: 20px;
+        transition: 0.3s;
+    }
+    .btn-publish:hover { 
+        background: #cfffdc; 
+        transform: translateY(-2px); 
+        box-shadow: 0 5px 20px rgba(207, 255, 220, 0.4); 
+    }
+</style>
+
+<div class="upload-box">
+    <div class="card">
+        <h2>Upload New Product</h2>
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div>
+                    <label>Product Name</label>
+                    <input type="text" name="name" required placeholder="e.g. Premium Cotton T-Shirt">
+                </div>
+                <div>
+                    <label>Brand Name</label>
+                    <input type="text" name="brand" placeholder="e.g. Ramya Originals">
+                </div>
+            </div>
+
+            <label>Description</label>
+            <textarea name="description" rows="3" placeholder="Describe your product..."></textarea>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div>
+                    <label>Category</label>
+                    <select name="category" id="id_category" required onchange="updateSubCategories()">
+                        <option value="mens">Men's Wear</option>
+                        <option value="womens">Women's Wear</option>
+                        <option value="kids">Kid's Wear</option>
+                        <option value="bags">Bags</option>
+                        <option value="footwear">Footwear</option>
+                        <option value="makeup">Makeup</option>
+                        <option value="sunglasses">Sunglasses</option>
+                        <option value="belts">Belts</option>
+                        <option value="purses">Purses</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Sub-Category</label>
+                    <select name="sub_category" id="id_sub_category">
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div>
+                    <label>Selling Price (₹)</label>
+                    <input type="number" step="0.01" name="price" required placeholder="0.00">
+                </div>
+                <div>
+                    <label>Original Price (₹)</label>
+                    <input type="number" step="0.01" name="original_price" placeholder="For discount display">
+                </div>
+            </div>
+
+            <hr style="border: 0; border-top: 1px solid #222; margin: 30px 0;">
+
+            <h3 style="color: #78b388;">Product Variants (Size & Color)</h3>
+            <p style="color: #666; font-size: 12px; margin-bottom: 15px;">The photo of the first variant will be used as the main product image.</p>
+            
+            <div id="variant-container">
+                <div class="variant-row">
+                    <input type="text" name="variant_color[]" placeholder="Color" required>
+                    <input type="text" name="variant_size[]" placeholder="Size">
+                    <input type="number" name="variant_qty[]" placeholder="Stock" required>
+                    <input type="file" name="variant_image[]" accept="image/*" required>
+                    <button type="button" class="remove-btn" onclick="this.parentElement.remove()">×</button>
+                </div>
+            </div>
+
+            <button type="button" class="add-variant-btn" onclick="addVariantRow()">+ Add Another Variation</button>
+
+            <button type="submit" class="btn-publish">Publish Product</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    const subData = {
+        'mens': ['Jacket', 'T-Shirt', 'Shirt', 'Hoodie', 'Pants', 'Traditional'],
+        'womens': ['Saree', 'Kurti', 'Pant', 'T-Shirt', 'Western', 'Sweateshirt'],
+        'kids': ['Boys', 'Girls']
+    };
+
+    function updateSubCategories() {
+        const cat = document.getElementById('id_category').value;
+        const subSelect = document.getElementById('id_sub_category');
+        subSelect.innerHTML = '';
+        
+        const options = subData[cat] || ['Other'];
+        options.forEach(opt => {
+            const el = document.createElement('option');
+            el.value = opt.toLowerCase();
+            el.textContent = opt;
+            subSelect.appendChild(el);
+        });
+    }
+
+    function addVariantRow() {
+        const container = document.getElementById('variant-container');
+        const div = document.createElement('div');
+        div.className = 'variant-row';
+        div.innerHTML = `
+            <input type="text" name="variant_color[]" placeholder="Color">
+            <input type="text" name="variant_size[]" placeholder="Size">
+            <input type="number" name="variant_qty[]" placeholder="Stock" required>
+            <input type="file" name="variant_image[]" accept="image/*">
+            <button type="button" class="remove-btn" onclick="this.parentElement.remove()">×</button>
+        `;
+        container.appendChild(div);
+    }
+
+    updateSubCategories();
+</script>
+{% endblock %}

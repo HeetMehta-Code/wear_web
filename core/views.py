@@ -1,7 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from django.contrib import messages
@@ -15,28 +14,21 @@ from efashion.forms import VendorProfileForm, CustomerProfileForm
 # SIGNUP
 # -----------------------------
 def signup_view(request):
-
     if request.method == "POST":
-
         form = SignupForm(request.POST)
-
         if form.is_valid():
-
             user = form.save(commit=False)
             user.set_password(form.cleaned_data['password'])
             user.save()
 
             if user.role == "vendor":
                 Vendor.objects.create(user=user)
-
             elif user.role == "customer":
                 Customer.objects.create(user=user)
 
             return redirect("login")
-
     else:
         form = SignupForm()
-
     return render(request, "signup.html", {"form": form})
 
 
@@ -44,112 +36,78 @@ def signup_view(request):
 # LOGIN
 # -----------------------------
 def login_view(request):
-
     if request.method == "POST":
-
         form = LoginForm(request.POST)
-
         if form.is_valid():
-
             email = form.cleaned_data["email"]
             password = form.cleaned_data["password"]
-
             user = authenticate(request, email=email, password=password)
 
             if user is not None:
-
                 login(request, user)
-
                 if user.role == "vendor":
-
                     vendor = Vendor.objects.get(user=user)
-
                     if not vendor.shopname or not vendor.vendor_logo:
                         return redirect("complete_profile")
-
                     return redirect("vendor_dashboard")
-
                 elif user.role == "customer":
-
                     customer = Customer.objects.get(user=user)
-
                     if not customer.address or not customer.profile_photo:
                         return redirect("complete_profile")
-
                     return redirect("customer_dashboard")
-
             else:
                 form.add_error(None, "Invalid email or password")
-
     else:
         form = LoginForm()
-
     return render(request, "login.html", {"form": form})
 
 
 # -----------------------------
 # COMPLETE PROFILE
 # -----------------------------
+@login_required
 def complete_profile(request):
-
     user = request.user
-
     if user.role == "vendor":
-
         vendor = Vendor.objects.get(user=user)
-
         if request.method == "POST":
-
             form = VendorProfileForm(request.POST, request.FILES, instance=vendor)
-
             if form.is_valid():
                 form.save()
                 return redirect("vendor_dashboard")
-
         else:
             form = VendorProfileForm(instance=vendor)
-
         return render(request, "Vendors/cvp.html", {"form": form})
 
     elif user.role == "customer":
-
         customer = Customer.objects.get(user=user)
-
         if request.method == "POST":
-
             form = CustomerProfileForm(request.POST, request.FILES, instance=customer)
-
             if form.is_valid():
                 form.save()
                 return redirect("customer_dashboard")
-
         else:
             form = CustomerProfileForm(instance=customer)
-
         return render(request, "Customers/ccp.html", {"form": form})
 
 
 # -----------------------------
 # DASHBOARDS
 # -----------------------------
+@login_required
 def vendor_dashboard(request):
-
     vendor = Vendor.objects.get(user=request.user)
-
     return render(request, "Vendors/vendors.html", {"vendor": vendor})
 
-
+@login_required
 def customer_dashboard(request):
-
     customer = Customer.objects.get(user=request.user)
-
     new_arrivals = (
         Product.objects
         .filter(is_active=True, is_new_arrival=True)
         .select_related('vendor')
         .order_by('-created_at')[:12]
     )
-
     return render(request, "Customers/customers.html", {
         "customer": customer,
         "new_arrivals": new_arrivals,
@@ -157,19 +115,58 @@ def customer_dashboard(request):
 
 
 # -----------------------------
-# LOGOUT
-# -----------------------------
 # CUSTOMER PROFILE
+# -----------------------------
 @login_required
 def customer_profile(request):
     customer = Customer.objects.get(user=request.user)
     orders = Order.objects.filter(customer=customer).order_by("-orderDate")
-    return render(request, "Customers/customer_profile.html", {"customer": customer, "orders": orders, "order_count": orders.count()})
+    return render(request, "Customers/customer_profile.html", {
+        "customer": customer, 
+        "orders": orders, 
+        "order_count": orders.count()
+    })
 
+
+# -----------------------------
+# CATEGORY VIEWS (MEN, WOMEN, KIDS)
+# -----------------------------
+@login_required
+def mens_wear(request):
+    products = (
+        Product.objects
+        .filter(is_active=True, category="mens")
+        .select_related("vendor")
+        .order_by("-created_at")
+    )
+    return render(request, "Customers/mens_wear.html", {"products": products})
+
+@login_required
+def womens_wear(request):
+    products = (
+        Product.objects
+        .filter(is_active=True, category="womens") # Ensure "womens" matches your Model choices
+        .select_related("vendor")
+        .order_by("-created_at")
+    )
+    return render(request, "Customers/womens_wear.html", {"products": products})
+
+@login_required
+def kids_wear(request):
+    products = (
+        Product.objects
+        .filter(is_active=True, category="kids") # Ensure "kids" matches your Model choices
+        .select_related("vendor")
+        .order_by("-created_at")
+    )
+    return render(request, "Customers/kids_wear.html", {"products": products})
+
+
+# -----------------------------
+# LOGOUT
+# -----------------------------
 def logout_view(request):
-
     logout(request)
-
     return redirect("login")
 
 
@@ -177,14 +174,12 @@ def logout_view(request):
 # NEW ARRIVALS API
 # -----------------------------
 def all_new_arrivals(request):
-
     products = (
         Product.objects
         .filter(is_active=True, is_new_arrival=True)
         .select_related('vendor')
         .order_by('-created_at')
     )
-
     data = []
     for p in products:
         data.append({
@@ -197,7 +192,6 @@ def all_new_arrivals(request):
             'discount':       p.discount_percent,
             'image':          p.product_image.url if p.product_image else '',
         })
-
     return JsonResponse({'products': data})
 
 
@@ -206,14 +200,12 @@ def all_new_arrivals(request):
 # -----------------------------
 @login_required
 def vendor_upload_product(request):
-
     try:
         vendor = Vendor.objects.get(user=request.user)
     except Vendor.DoesNotExist:
         return redirect('complete_profile')
 
     if request.method == 'POST':
-
         name           = request.POST.get('name', '').strip()
         category       = request.POST.get('category', 'other')
         price          = request.POST.get('price')
@@ -249,7 +241,6 @@ def vendor_upload_product(request):
 @login_required
 @require_POST
 def vendor_toggle_product(request, product_id):
-
     try:
         vendor  = Vendor.objects.get(user=request.user)
         product = Product.objects.get(id=product_id, vendor=vendor)

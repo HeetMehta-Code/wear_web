@@ -20,39 +20,39 @@
         <h2 class="section-title">Choose Category</h2>
         <div class="universal-grid-9">
             <div class="item-wrapper">
-                <button type="button" class="circle-btn-shape" onclick="location.href='#'"><img class="circle-img" src="{% static 'images/person1.png' %}"></button>
+                <button type="button" class="circle-btn-shape" onclick="location.href='{% url 'mens_wear' %}'"><img class="circle-img" src="{% static 'images/person1.png' %}"></button>
                 <p class="circle-label">Men's Wear</p>
             </div>
             <div class="item-wrapper">
-                <button type="button" class="circle-btn-shape" onclick="location.href='#'"><img class="circle-img" src="{% static 'images/person3.png' %}"></button>
+                <button type="button" class="circle-btn-shape" onclick="location.href='{% url 'womens_wear' %}'"><img class="circle-img" src="{% static 'images/person3.png' %}"></button>
                 <p class="circle-label">Women's Wear</p>
             </div>
             <div class="item-wrapper">
-                <button type="button" class="circle-btn-shape" onclick="location.href='#'"><img class="circle-img" src="{% static 'images/kids.png' %}"></button>
+                <button type="button" class="circle-btn-shape" onclick="location.href='{% url 'kids_wear' %}'"><img class="circle-img" src="{% static 'images/kids.png' %}"></button>
                 <p class="circle-label">Kid's Wear</p>
             </div>
             <div class="item-wrapper">
-                <button type="button" class="circle-btn-shape" onclick="location.href='#'"><img class="circle-img" src="{% static 'images/bags.png' %}"></button>
+                <button type="button" class="circle-btn-shape" onclick="location.href='{% url 'category_view' 'bags' %}'"><img class="circle-img" src="{% static 'images/bags.png' %}"></button>
                 <p class="circle-label">Bags</p>
             </div>
             <div class="item-wrapper">
-                <button type="button" class="circle-btn-shape" onclick="location.href='#'"><img class="circle-img" src="{% static 'images/purse.png' %}"></button>
+                <button type="button" class="circle-btn-shape" onclick="location.href='{% url 'category_view' 'purses' %}'"><img class="circle-img" src="{% static 'images/purse.png' %}"></button>
                 <p class="circle-label">Purses</p>
             </div>
             <div class="item-wrapper">
-                <button type="button" class="circle-btn-shape" onclick="location.href='#'"><img class="circle-img" src="{% static 'images/belts.png' %}"></button>
+                <button type="button" class="circle-btn-shape" onclick="location.href='{% url 'category_view' 'belts' %}'"><img class="circle-img" src="{% static 'images/belts.png' %}"></button>
                 <p class="circle-label">Belts</p>
             </div>
             <div class="item-wrapper">
-                <button type="button" class="circle-btn-shape" onclick="location.href='#'"><img class="circle-img" src="{% static 'images/gls.png' %}"></button>
+                <button type="button" class="circle-btn-shape" onclick="location.href='{% url 'category_view' 'sunglasses' %}'"><img class="circle-img" src="{% static 'images/gls.png' %}"></button>
                 <p class="circle-label">Sun Glasses</p>
             </div>
             <div class="item-wrapper">
-                <button type="button" class="circle-btn-shape" onclick="location.href='#'"><img class="circle-img" src="{% static 'images/makeup.png' %}"></button>
+                <button type="button" class="circle-btn-shape" onclick="location.href='{% url 'category_view' 'makeup' %}'"><img class="circle-img" src="{% static 'images/makeup.png' %}"></button>
                 <p class="circle-label">Makeup</p>
             </div>
             <div class="item-wrapper">
-                <button type="button" class="circle-btn-shape footwear-circle" onclick="location.href='#'"><img class="circle-img" src="{% static 'images/shu.png' %}"></button>
+                <button type="button" class="circle-btn-shape footwear-circle" onclick="location.href='{% url 'category_view' 'footwear' %}'"><img class="circle-img" src="{% static 'images/shu.png' %}"></button>
                 <p class="circle-label">Footwear</p>
             </div>
         </div>
@@ -60,48 +60,6 @@
 
     <!-- ══════════════ FEATURED SECTION ══════════════ -->
     <div class="featured-section">
-        <div class="accessories-col">
-            <a href="#" class="accessory-banner acc-sunglass">
-                <div class="accessory-banner-text">
-                    <span class="accessory-banner-label">New Drop</span>
-                    <span class="accessory-banner-title">Sun<br>Glasses</span>
-                    <span class="accessory-banner-sub">Premium UV Protection</span>
-                </div>
-                <img class="accessory-banner-img" src="{% static 'images/gls.png' %}" alt="Sun Glasses">
-            </a>
-            <a href="#" class="accessory-banner acc-makeup">
-                <div class="accessory-banner-text">
-                    <span class="accessory-banner-label">Trending</span>
-                    <span class="accessory-banner-title">Makeup<br>Collection</span>
-                    <span class="accessory-banner-sub">Glow Up This Season</span>
-                </div>
-                <img class="accessory-banner-img" src="{% static 'images/makeup.png' %}" alt="Makeup">
-            </a>
-            <a href="#" class="accessory-banner acc-bag">
-                <div class="accessory-banner-text">
-                    <span class="accessory-banner-label">Bestseller</span>
-                    <span class="accessory-banner-title">Bags &<br>Totes</span>
-                    <span class="accessory-banner-sub">Style Meets Function</span>
-                </div>
-                <img class="accessory-banner-img" src="{% static 'images/bags.png' %}" alt="Bags">
-            </a>
-            <a href="#" class="accessory-banner acc-purse">
-                <div class="accessory-banner-text">
-                    <span class="accessory-banner-label">Limited</span>
-                    <span class="accessory-banner-title">Purses &<br>Clutches</span>
-                    <span class="accessory-banner-sub">Carry It in Style</span>
-                </div>
-                <img class="accessory-banner-img" src="{% static 'images/purse.png' %}" alt="Purses">
-            </a>
-            <a href="#" class="accessory-banner acc-belt">
-                <div class="accessory-banner-text">
-                    <span class="accessory-banner-label">Classic</span>
-                    <span class="accessory-banner-title">Belts &<br>Straps</span>
-                    <span class="accessory-banner-sub">The Perfect Finish</span>
-                </div>
-                <img class="accessory-banner-img" src="{% static 'images/belts.png' %}" alt="Belts">
-            </a>
-        </div>
 
         <!-- RIGHT: New Arrivals -->
         <div class="new-arrivals-col">
@@ -150,24 +108,131 @@
     <div class="section-container">
         <h2 class="section-title">Clothing Brands</h2>
         <div class="universal-grid-9">
-            <div class="item-wrapper"><button type="button" class="brand-pillar-shape brand-bg-as" onclick="location.href='#'"><img class="brand-img brand-img-square" src="{% static 'images/as.jpg' %}"></button><p class="label-text">Allen Solly</p></div>
-            <div class="item-wrapper"><button type="button" class="brand-pillar-shape brand-bg-pe" onclick="location.href='#'"><img class="brand-img brand-img-square" src="{% static 'images/pe.png' %}"></button><p class="label-text">Peter England</p></div>
-            <div class="item-wrapper"><button type="button" class="brand-pillar-shape brand-bg-up" onclick="location.href='#'"><img class="brand-img brand-img-tall" src="{% static 'images/up.jpg' %}"></button><p class="label-text">US Polo</p></div>
-            <div class="item-wrapper"><button type="button" class="brand-pillar-shape brand-bg-hm" onclick="location.href='#'"><img class="brand-img brand-img-tall" src="{% static 'images/hm.jpg' %}"></button><p class="label-text">H&amp;M</p></div>
-            <div class="item-wrapper"><button type="button" class="brand-pillar-shape brand-bg-vh" onclick="location.href='#'"><img class="brand-img brand-img-square" src="{% static 'images/vh.jpeg' %}"></button><p class="label-text">Venhusen</p></div>
-            <div class="item-wrapper"><button type="button" class="brand-pillar-shape brand-bg-jk" onclick="location.href='#'"><img class="brand-img brand-img-square" src="{% static 'images/jk.png' %}"></button><p class="label-text">Jockey</p></div>
-            <div class="item-wrapper"><button type="button" class="brand-pillar-shape brand-bg-rm" onclick="location.href='#'"><img class="brand-img brand-img-square" src="{% static 'images/rm.png' %}"></button><p class="label-text">Raymond</p></div>
-            <div class="item-wrapper"><button type="button" class="brand-pillar-shape brand-bg-ar" onclick="location.href='#'"><img class="brand-img brand-img-square" src="{% static 'images/ar.png' %}"></button><p class="label-text">Arrow</p></div>
-            <div class="item-wrapper"><button type="button" class="brand-pillar-shape brand-bg-ls" onclick="location.href='#'"><img class="brand-img brand-img-levis" src="{% static 'images/ls.jpg' %}"></button><p class="label-text">Levi's</p></div>
-            <div class="item-wrapper"><button type="button" class="brand-pillar-shape brand-bg-lp" onclick="location.href='#'"><img class="brand-img brand-img-square" src="{% static 'images/lp.png' %}"></button><p class="label-text">Louis Philippe</p></div>
-            <div class="item-wrapper"><button type="button" class="brand-pillar-shape brand-bg-gap" onclick="location.href='#'"><img class="brand-img brand-img-square" src="{% static 'images/Gap.png' %}"></button><p class="label-text">GAP</p></div>
-            <div class="item-wrapper"><button type="button" class="brand-pillar-shape brand-bg-sp" onclick="location.href='#'"><img class="brand-img brand-img-square" src="{% static 'images/sp.png' %}"></button><p class="label-text">Spykar</p></div>
-            <div class="item-wrapper"><button type="button" class="brand-pillar-shape brand-bg-ad" onclick="location.href='#'"><img class="brand-img brand-img-tall" src="{% static 'images/ad.jpg' %}"></button><p class="label-text">Adidas</p></div>
-            <div class="item-wrapper"><button type="button" class="brand-pillar-shape brand-bg-rr" onclick="location.href='#'"><img class="brand-img brand-img-square" src="{% static 'images/rr.jpeg' %}"></button><p class="label-text">Rare Rabbit</p></div>
-            <div class="item-wrapper"><button type="button" class="brand-pillar-shape brand-bg-ch" onclick="location.href='#'"><img class="brand-img brand-img-tall" src="{% static 'images/ch.jpg' %}"></button><p class="label-text">Chanel</p></div>
-            <div class="item-wrapper"><button type="button" class="brand-pillar-shape brand-bg-la" onclick="location.href='#'"><img class="brand-img brand-img-square" src="{% static 'images/la.jpg' %}"></button><p class="label-text">Lacoste</p></div>
-            <div class="item-wrapper"><button type="button" class="brand-pillar-shape brand-bg-puma" onclick="location.href='#'"><img class="brand-img brand-img-tall" src="{% static 'images/puma.jpg' %}"></button><p class="label-text">Puma</p></div>
-            <div class="item-wrapper"><button type="button" class="brand-pillar-shape brand-bg-ua" onclick="location.href='#'"><img class="brand-img brand-img-ua" src="{% static 'images/ua.jpg' %}"></button><p class="label-text">Under Armour</p></div>
+            <div class="item-wrapper">
+            <button type="button" class="brand-pillar-shape brand-bg-as" onclick="location.href='{% url 'brand_products' 'Allen Solly' %}'">
+                <img class="brand-img brand-img-square" src="{% static 'images/as.jpg' %}">
+            </button>
+            <p class="label-text">Allen Solly</p>
+        </div>
+
+        <div class="item-wrapper">
+            <button type="button" class="brand-pillar-shape brand-bg-pe" onclick="location.href='{% url 'brand_products' 'Peter England' %}'">
+                <img class="brand-img brand-img-square" src="{% static 'images/pe.png' %}">
+            </button>
+            <p class="label-text">Peter England</p>
+        </div>
+
+        <div class="item-wrapper">
+            <button type="button" class="brand-pillar-shape brand-bg-up" onclick="location.href='{% url 'brand_products' 'US Polo' %}'">
+                <img class="brand-img brand-img-tall" src="{% static 'images/up.jpg' %}">
+            </button>
+            <p class="label-text">US Polo</p>
+        </div>
+
+        <div class="item-wrapper">
+            <button type="button" class="brand-pillar-shape brand-bg-hm" onclick="location.href='{% url 'brand_products' 'H&M' %}'">
+                <img class="brand-img brand-img-tall" src="{% static 'images/hm.jpg' %}">
+            </button>
+            <p class="label-text">H&M</p>
+        </div>
+
+        <div class="item-wrapper">
+            <button type="button" class="brand-pillar-shape brand-bg-vh" onclick="location.href='{% url 'brand_products' 'Van Heusen' %}'">
+                <img class="brand-img brand-img-square" src="{% static 'images/vh.jpeg' %}">
+            </button>
+            <p class="label-text">Van Heusen</p>
+        </div>
+
+        <div class="item-wrapper">
+            <button type="button" class="brand-pillar-shape brand-bg-jk" onclick="location.href='{% url 'brand_products' 'Jockey' %}'">
+                <img class="brand-img brand-img-square" src="{% static 'images/jk.png' %}">
+            </button>
+            <p class="label-text">Jockey</p>
+        </div>
+
+        <div class="item-wrapper">
+            <button type="button" class="brand-pillar-shape brand-bg-rm" onclick="location.href='{% url 'brand_products' 'Raymond' %}'">
+                <img class="brand-img brand-img-square" src="{% static 'images/rm.png' %}">
+            </button>
+            <p class="label-text">Raymond</p>
+        </div>
+
+        <div class="item-wrapper">
+            <button type="button" class="brand-pillar-shape brand-bg-ar" onclick="location.href='{% url 'brand_products' 'Arrow' %}'">
+                <img class="brand-img brand-img-square" src="{% static 'images/ar.png' %}">
+            </button>
+            <p class="label-text">Arrow</p>
+        </div>
+
+        <div class="item-wrapper">
+            <button type="button" class="brand-pillar-shape brand-bg-ls" onclick="location.href='{% url 'brand_products' 'Levis' %}'">
+                <img class="brand-img brand-img-levis" src="{% static 'images/ls.jpg' %}">
+            </button>
+            <p class="label-text">Levi's</p>
+        </div>
+
+        <div class="item-wrapper">
+            <button type="button" class="brand-pillar-shape brand-bg-lp" onclick="location.href='{% url 'brand_products' 'Louis Philippe' %}'">
+                <img class="brand-img brand-img-square" src="{% static 'images/lp.png' %}">
+            </button>
+            <p class="label-text">Louis Philippe</p>
+        </div>
+
+        <div class="item-wrapper">
+            <button type="button" class="brand-pillar-shape brand-bg-gap" onclick="location.href='{% url 'brand_products' 'GAP' %}'">
+                <img class="brand-img brand-img-square" src="{% static 'images/Gap.png' %}">
+            </button>
+            <p class="label-text">GAP</p>
+        </div>
+
+        <div class="item-wrapper">
+            <button type="button" class="brand-pillar-shape brand-bg-sp" onclick="location.href='{% url 'brand_products' 'Spykar' %}'">
+                <img class="brand-img brand-img-square" src="{% static 'images/sp.png' %}">
+            </button>
+            <p class="label-text">Spykar</p>
+        </div>
+
+        <div class="item-wrapper">
+            <button type="button" class="brand-pillar-shape brand-bg-ad" onclick="location.href='{% url 'brand_products' 'Adidas' %}'">
+                <img class="brand-img brand-img-tall" src="{% static 'images/ad.jpg' %}">
+            </button>
+            <p class="label-text">Adidas</p>
+        </div>
+
+        <div class="item-wrapper">
+            <button type="button" class="brand-pillar-shape brand-bg-rr" onclick="location.href='{% url 'brand_products' 'Rare Rabbit' %}'">
+                <img class="brand-img brand-img-square" src="{% static 'images/rr.jpeg' %}">
+            </button>
+            <p class="label-text">Rare Rabbit</p>
+        </div>
+
+        <div class="item-wrapper">
+            <button type="button" class="brand-pillar-shape brand-bg-ch" onclick="location.href='{% url 'brand_products' 'Chanel' %}'">
+                <img class="brand-img brand-img-tall" src="{% static 'images/ch.jpg' %}">
+            </button>
+            <p class="label-text">Chanel</p>
+        </div>
+
+        <div class="item-wrapper">
+            <button type="button" class="brand-pillar-shape brand-bg-la" onclick="location.href='{% url 'brand_products' 'Lacoste' %}'">
+                <img class="brand-img brand-img-square" src="{% static 'images/la.jpg' %}">
+            </button>
+            <p class="label-text">Lacoste</p>
+        </div>
+
+        <div class="item-wrapper">
+            <button type="button" class="brand-pillar-shape brand-bg-puma" onclick="location.href='{% url 'brand_products' 'Puma' %}'">
+                <img class="brand-img brand-img-tall" src="{% static 'images/puma.jpg' %}">
+            </button>
+            <p class="label-text">Puma</p>
+        </div>
+
+        <div class="item-wrapper">
+            <button type="button" class="brand-pillar-shape brand-bg-ua" onclick="location.href='{% url 'brand_products' 'Under Armour' %}'">
+                <img class="brand-img brand-img-ua" src="{% static 'images/ua.jpg' %}">
+            </button>
+            <p class="label-text">Under Armour</p>
+        </div>
         </div>
     </div>
 
@@ -177,63 +242,63 @@
         <div class="universal-grid-9">
             <!-- s.png Ray-Ban bg:#f3383d wide -->
             <div class="item-wrapper">
-                <button type="button" class="brand-pillar-shape" style="background:#f3383d;overflow:hidden;" onclick="location.href='#'">
+                <button type="button" class="brand-pillar-shape" style="background:#f3383d;overflow:hidden;" onclick="location.href='{% url 'brand_products' 'Rayban' %}'">
                     <div class="brand-img-wrap"><img class="brand-img brand-img-wide" src="{% static 'images/s.png' %}"></div>
                 </button>
                 <p class="label-text">Ray-Ban</p>
             </div>
             <!-- s1.png Police bg:#ffffff square -->
             <div class="item-wrapper">
-                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='#'">
+                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='{% url 'brand_products' 'Police' %}'">
                     <div class="brand-img-wrap"><img class="brand-img brand-img-square" src="{% static 'images/s1.png' %}"></div>
                 </button>
                 <p class="label-text">Police</p>
             </div>
             <!-- s2.jpg Oakley bg:#000000 tall -->
             <div class="item-wrapper">
-                <button type="button" class="brand-pillar-shape" style="background:#000000;overflow:hidden;" onclick="location.href='#'">
+                <button type="button" class="brand-pillar-shape" style="background:#000000;overflow:hidden;" onclick="location.href='{% url 'brand_products' 'Oakley' %}'">
                     <div class="brand-img-wrap" style="background:#000000;"><img class="brand-img brand-img-tall" src="{% static 'images/s2.jpg' %}"></div>
                 </button>
                 <p class="label-text">Oakley</p>
             </div>
             <!-- s3.png Fastrack bg:#ffffff square -->
             <div class="item-wrapper">
-                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='#'">
+                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='{% url 'brand_products' 'Fastrack' %}'">
                     <div class="brand-img-wrap"><img class="brand-img brand-img-square" src="{% static 'images/s3.png' %}"></div>
                 </button>
                 <p class="label-text">Fastrack</p>
             </div>
             <!-- s4.png Titan bg:#ffffff square -->
             <div class="item-wrapper">
-                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='#'">
+                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='{% url 'brand_products' 'Titan' %}'">
                     <div class="brand-img-wrap"><img class="brand-img brand-img-square" src="{% static 'images/s4.png' %}"></div>
                 </button>
                 <p class="label-text">Titan</p>
             </div>
             <!-- s5.png Vincent Chase bg:#ffffff square -->
             <div class="item-wrapper">
-                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='#'">
+                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='{% url 'brand_products' 'Vincent Chase' %}'">
                     <div class="brand-img-wrap"><img class="brand-img brand-img-square" src="{% static 'images/s5.png' %}"></div>
                 </button>
                 <p class="label-text">Vincent Chase</p>
             </div>
             <!-- s6.png Carrera bg:#ffffff square -->
             <div class="item-wrapper">
-                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='#'">
+                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='{% url 'brand_products' 'Carrera' %}'">
                     <div class="brand-img-wrap"><img class="brand-img brand-img-square" src="{% static 'images/s6.png' %}"></div>
                 </button>
                 <p class="label-text">Carrera</p>
             </div>
             <!-- s7.png Maui Jim bg:#ffffff square -->
             <div class="item-wrapper">
-                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='#'">
+                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='{% url 'brand_products' 'Maui Jim' %}'">
                     <div class="brand-img-wrap"><img class="brand-img brand-img-square" src="{% static 'images/s7.png' %}"></div>
                 </button>
                 <p class="label-text">Maui Jim</p>
             </div>
             <!-- s8.png Scott bg:#ffffff square -->
             <div class="item-wrapper">
-                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='#'">
+                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='{% url 'brand_products' 'Scott' %}'">
                     <div class="brand-img-wrap"><img class="brand-img brand-img-square" src="{% static 'images/s8.png' %}"></div>
                 </button>
                 <p class="label-text">Scott</p>
@@ -247,63 +312,63 @@
         <div class="universal-grid-9">
             <!-- m1.png Lakme bg:#ffffff square -->
             <div class="item-wrapper">
-                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='#'">
+                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='{% url 'brand_products' 'Lakme' %}'">
                     <div class="brand-img-wrap"><img class="brand-img brand-img-square" src="{% static 'images/m1.png' %}"></div>
                 </button>
                 <p class="label-text">Lakme</p>
             </div>
             <!-- m2.png Maybelline bg:#000000 square -->
             <div class="item-wrapper">
-                <button type="button" class="brand-pillar-shape" style="background:#000000;overflow:hidden;" onclick="location.href='#'">
+                <button type="button" class="brand-pillar-shape" style="background:#000000;overflow:hidden;" onclick="location.href='{% url 'brand_products' 'Maybelline' %}'">
                     <div class="brand-img-wrap" style="background:#000000;"><img class="brand-img brand-img-square" src="{% static 'images/m2.png' %}"></div>
                 </button>
                 <p class="label-text">Maybelline</p>
             </div>
             <!-- m3.png MAC bg:#000000 square -->
             <div class="item-wrapper">
-                <button type="button" class="brand-pillar-shape" style="background:#000000;overflow:hidden;" onclick="location.href='#'">
+                <button type="button" class="brand-pillar-shape" style="background:#000000;overflow:hidden;" onclick="location.href='{% url 'brand_products' 'MAC' %}'">
                     <div class="brand-img-wrap" style="background:#000000;"><img class="brand-img brand-img-square" src="{% static 'images/m3.png' %}"></div>
                 </button>
                 <p class="label-text">MAC</p>
             </div>
             <!-- m4.png L'Oreal bg:#ffffff square -->
             <div class="item-wrapper">
-                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='#'">
+                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='{% url 'brand_products' 'L\'Oréal' %}'">
                     <div class="brand-img-wrap"><img class="brand-img brand-img-square" src="{% static 'images/m4.png' %}"></div>
                 </button>
                 <p class="label-text">L'Oréal</p>
             </div>
             <!-- m5.png Nykaa bg:#fb2778 pink square -->
             <div class="item-wrapper">
-                <button type="button" class="brand-pillar-shape" style="background:#fb2778;overflow:hidden;" onclick="location.href='#'">
+                <button type="button" class="brand-pillar-shape" style="background:#fb2778;overflow:hidden;" onclick="location.href='{% url 'brand_products' 'Nykaa' %}'">
                     <div class="brand-img-wrap" style="background:#fb2778;"><img class="brand-img brand-img-square" src="{% static 'images/m5.png' %}"></div>
                 </button>
                 <p class="label-text">Nykaa</p>
             </div>
             <!-- m6.png Colorbar bg:#000000 square -->
             <div class="item-wrapper">
-                <button type="button" class="brand-pillar-shape" style="background:#000000;overflow:hidden;" onclick="location.href='#'">
+                <button type="button" class="brand-pillar-shape" style="background:#000000;overflow:hidden;" onclick="location.href='{% url 'brand_products' 'Colorbar' %}'">
                     <div class="brand-img-wrap" style="background:#000000;"><img class="brand-img brand-img-square" src="{% static 'images/m6.png' %}"></div>
                 </button>
                 <p class="label-text">Colorbar</p>
             </div>
             <!-- m7.png Faces Canada bg:#000000 square -->
             <div class="item-wrapper">
-                <button type="button" class="brand-pillar-shape" style="background:#000000;overflow:hidden;" onclick="location.href='#'">
+                <button type="button" class="brand-pillar-shape" style="background:#000000;overflow:hidden;" onclick="location.href='{% url 'brand_products' 'Faces Canada' %}'">
                     <div class="brand-img-wrap" style="background:#000000;"><img class="brand-img brand-img-square" src="{% static 'images/m7.png' %}"></div>
                 </button>
                 <p class="label-text">Faces Canada</p>
             </div>
             <!-- m8.png Sugar bg:#000000 square -->
             <div class="item-wrapper">
-                <button type="button" class="brand-pillar-shape" style="background:#000000;overflow:hidden;" onclick="location.href='#'">
+                <button type="button" class="brand-pillar-shape" style="background:#000000;overflow:hidden;" onclick="location.href='{% url 'brand_products' 'Sugar' %}'">
                     <div class="brand-img-wrap" style="background:#000000;"><img class="brand-img brand-img-square" src="{% static 'images/m8.png' %}"></div>
                 </button>
                 <p class="label-text">Sugar</p>
             </div>
             <!-- m9.png Biotique bg:#000000 wide -->
             <div class="item-wrapper">
-                <button type="button" class="brand-pillar-shape" style="background:#000000;overflow:hidden;" onclick="location.href='#'">
+                <button type="button" class="brand-pillar-shape" style="background:#000000;overflow:hidden;" onclick="location.href='{% url 'brand_products' 'Biotique' %}'">
                     <div class="brand-img-wrap" style="background:#000000;"><img class="brand-img brand-img-wide" src="{% static 'images/m9.png' %}"></div>
                 </button>
                 <p class="label-text">Biotique</p>
@@ -317,63 +382,63 @@
         <div class="universal-grid-9">
             <!-- b1.png Hidesign bg:#fefefe square -->
             <div class="item-wrapper">
-                <button type="button" class="brand-pillar-shape" style="background:#fefefe;overflow:hidden;" onclick="location.href='#'">
+                <button type="button" class="brand-pillar-shape" style="background:#fefefe;overflow:hidden;" onclick="location.href='{% url 'brand_products' 'Hidesign' %}'">
                     <div class="brand-img-wrap"><img class="brand-img brand-img-square" src="{% static 'images/b1.png' %}"></div>
                 </button>
                 <p class="label-text">Hidesign</p>
             </div>
             <!-- b2.png Wildcraft bg:#4c4f54 dark grey -->
             <div class="item-wrapper">
-                <button type="button" class="brand-pillar-shape" style="background:#4c4f54;overflow:hidden;" onclick="location.href='#'">
+                <button type="button" class="brand-pillar-shape" style="background:#4c4f54;overflow:hidden;" onclick="location.href='{% url 'brand_products' 'Wildcraft' %}'">
                     <div class="brand-img-wrap" style="background:#4c4f54;"><img class="brand-img brand-img-square" src="{% static 'images/b2.png' %}"></div>
                 </button>
                 <p class="label-text">Wildcraft</p>
             </div>
             <!-- b3.png Samsonite bg:#ffffff square -->
             <div class="item-wrapper">
-                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='#'">
+                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='{% url 'brand_products' 'Samsonite' %}'">
                     <div class="brand-img-wrap"><img class="brand-img brand-img-square" src="{% static 'images/b3.png' %}"></div>
                 </button>
                 <p class="label-text">Samsonite</p>
             </div>
             <!-- b4.png Baggit bg:#ffffff square -->
             <div class="item-wrapper">
-                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='#'">
+                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='{% url 'brand_products' 'Baggit' %}'">
                     <div class="brand-img-wrap"><img class="brand-img brand-img-square" src="{% static 'images/b4.png' %}"></div>
                 </button>
                 <p class="label-text">Baggit</p>
             </div>
             <!-- b5.png Caprese bg:#fefefe square -->
             <div class="item-wrapper">
-                <button type="button" class="brand-pillar-shape" style="background:#fefefe;overflow:hidden;" onclick="location.href='#'">
+                <button type="button" class="brand-pillar-shape" style="background:#fefefe;overflow:hidden;" onclick="location.href='{% url 'brand_products' 'Caprese' %}'">
                     <div class="brand-img-wrap"><img class="brand-img brand-img-square" src="{% static 'images/b5.png' %}"></div>
                 </button>
                 <p class="label-text">Caprese</p>
             </div>
             <!-- b6.png American Tourister bg:#000000 square -->
             <div class="item-wrapper">
-                <button type="button" class="brand-pillar-shape" style="background:#000000;overflow:hidden;" onclick="location.href='#'">
+                <button type="button" class="brand-pillar-shape" style="background:#000000;overflow:hidden;" onclick="location.href='{% url 'brand_products' 'American Tourister' %}'">
                     <div class="brand-img-wrap" style="background:#000000;"><img class="brand-img brand-img-square" src="{% static 'images/b6.png' %}"></div>
                 </button>
-                <p class="label-text">American Tourister</p>
+                <p class="label-text">American<br>Tourister</p>
             </div>
             <!-- b7.png VIP bg:#ffffff square -->
             <div class="item-wrapper">
-                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='#'">
+                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='{% url 'brand_products' 'VIP' %}'">
                     <div class="brand-img-wrap"><img class="brand-img brand-img-square" src="{% static 'images/b7.png' %}"></div>
                 </button>
                 <p class="label-text">VIP</p>
             </div>
             <!-- b8.png Skybags bg:#0177bf blue wide -->
             <div class="item-wrapper">
-                <button type="button" class="brand-pillar-shape" style="background:#0177bf;overflow:hidden;" onclick="location.href='#'">
+                <button type="button" class="brand-pillar-shape" style="background:#0177bf;overflow:hidden;" onclick="location.href='{% url 'brand_products' 'Skybags' %}'">
                     <div class="brand-img-wrap" style="background:#0177bf;"><img class="brand-img brand-img-wide" src="{% static 'images/b8.png' %}"></div>
                 </button>
                 <p class="label-text">Skybags</p>
             </div>
             <!-- b9.png Da Milano bg:#ffffff square -->
             <div class="item-wrapper">
-                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='#'">
+                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='{% url 'brand_products' 'Da Milano' %}'">
                     <div class="brand-img-wrap"><img class="brand-img brand-img-square" src="{% static 'images/b9.png' %}"></div>
                 </button>
                 <p class="label-text">Da Milano</p>
@@ -387,63 +452,63 @@
         <div class="universal-grid-9">
             <!-- Caprese — reuse b5.png -->
             <div class="item-wrapper">
-                <button type="button" class="brand-pillar-shape" style="background:#fefefe;overflow:hidden;" onclick="location.href='#'">
+                <button type="button" class="brand-pillar-shape" style="background:#fefefe;overflow:hidden;" onclick="location.href='{% url 'brand_products' 'Caprese' %}'">
                     <div class="brand-img-wrap"><img class="brand-img brand-img-square" src="{% static 'images/b5.png' %}"></div>
                 </button>
                 <p class="label-text">Caprese</p>
             </div>
             <!-- Baggit — reuse b4.png -->
             <div class="item-wrapper">
-                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='#'">
+                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='{% url 'brand_products' 'Baggit' %}'">
                     <div class="brand-img-wrap"><img class="brand-img brand-img-square" src="{% static 'images/b4.png' %}"></div>
                 </button>
                 <p class="label-text">Baggit</p>
             </div>
             <!-- Hidesign — reuse b1.png -->
             <div class="item-wrapper">
-                <button type="button" class="brand-pillar-shape" style="background:#fefefe;overflow:hidden;" onclick="location.href='#'">
+                <button type="button" class="brand-pillar-shape" style="background:#fefefe;overflow:hidden;" onclick="location.href='{% url 'brand_products' 'Hidesign' %}'">
                     <div class="brand-img-wrap"><img class="brand-img brand-img-square" src="{% static 'images/b1.png' %}"></div>
                 </button>
                 <p class="label-text">Hidesign</p>
             </div>
             <!-- Da Milano — reuse b9.png -->
             <div class="item-wrapper">
-                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='#'">
+                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='{% url 'brand_products' 'Da Milano' %}'">
                     <div class="brand-img-wrap"><img class="brand-img brand-img-square" src="{% static 'images/b9.png' %}"></div>
                 </button>
                 <p class="label-text">Da Milano</p>
             </div>
             <!-- Lavie — p6.png bg:#ffffff square -->
             <div class="item-wrapper">
-                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='#'">
+                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='{% url 'brand_products' 'Lavie' %}'">
                     <div class="brand-img-wrap"><img class="brand-img brand-img-square" src="{% static 'images/p6.png' %}"></div>
                 </button>
                 <p class="label-text">Lavie</p>
             </div>
             <!-- Aldo — new p4.png bg:#ffffff wide -->
             <div class="item-wrapper">
-                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='#'">
+                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='{% url 'brand_products' 'Aldo' %}'">
                     <div class="brand-img-wrap"><img class="brand-img brand-img-wide" src="{% static 'images/p4.png' %}"></div>
                 </button>
                 <p class="label-text">Aldo</p>
             </div>
             <!-- Lino Perros — new p7.png bg:#fdfeff square -->
             <div class="item-wrapper">
-                <button type="button" class="brand-pillar-shape" style="background:#fdfeff;overflow:hidden;" onclick="location.href='#'">
+                <button type="button" class="brand-pillar-shape" style="background:#fdfeff;overflow:hidden;" onclick="location.href='{% url 'brand_products' 'Lino Perros' %}'">
                     <div class="brand-img-wrap"><img class="brand-img brand-img-square" src="{% static 'images/p7.png' %}"></div>
                 </button>
                 <p class="label-text">Lino Perros</p>
             </div>
             <!-- Fastrack — reuse s3.png -->
             <div class="item-wrapper">
-                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='#'">
+                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='{% url 'brand_products' 'Fastrack' %}'">
                     <div class="brand-img-wrap"><img class="brand-img brand-img-square" src="{% static 'images/s3.png' %}"></div>
                 </button>
                 <p class="label-text">Fastrack</p>
             </div>
             <!-- Dior — new p9.png bg:#ffffff square (replaces Eske) -->
             <div class="item-wrapper">
-                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='#'">
+                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='{% url 'brand_products' 'Dior' %}'">
                     <div class="brand-img-wrap"><img class="brand-img brand-img-square" src="{% static 'images/p9.png' %}"></div>
                 </button>
                 <p class="label-text">Dior</p>
@@ -457,63 +522,63 @@
         <div class="universal-grid-9">
             <!-- Peter England — reuse pe.png bg:#0a233e -->
             <div class="item-wrapper">
-                <button type="button" class="brand-pillar-shape" style="background:#0a233e;overflow:hidden;" onclick="location.href='#'">
+                <button type="button" class="brand-pillar-shape" style="background:#0a233e;overflow:hidden;" onclick="location.href='{% url 'brand_products' 'Peter England' %}'">
                     <div class="brand-img-wrap" style="background:#0a233e;"><img class="brand-img brand-img-square" src="{% static 'images/pe.png' %}"></div>
                 </button>
                 <p class="label-text">Peter England</p>
             </div>
             <!-- Allen Solly — reuse as.jpg bg:#ffffff -->
             <div class="item-wrapper">
-                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='#'">
+                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='{% url 'brand_products' 'Allen Solly' %}'">
                     <div class="brand-img-wrap"><img class="brand-img brand-img-square" src="{% static 'images/as.jpg' %}"></div>
                 </button>
                 <p class="label-text">Allen Solly</p>
             </div>
             <!-- Arrow — reuse ar.png bg:#ffffff -->
             <div class="item-wrapper">
-                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='#'">
+                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='{% url 'brand_products' 'Arrow' %}'">
                     <div class="brand-img-wrap"><img class="brand-img brand-img-square" src="{% static 'images/ar.png' %}"></div>
                 </button>
                 <p class="label-text">Arrow</p>
             </div>
             <!-- Hidesign — reuse b1.png bg:#fefefe -->
             <div class="item-wrapper">
-                <button type="button" class="brand-pillar-shape" style="background:#fefefe;overflow:hidden;" onclick="location.href='#'">
+                <button type="button" class="brand-pillar-shape" style="background:#fefefe;overflow:hidden;" onclick="location.href='{% url 'brand_products' 'Hidesign' %}'">
                     <div class="brand-img-wrap"><img class="brand-img brand-img-square" src="{% static 'images/b1.png' %}"></div>
                 </button>
                 <p class="label-text">Hidesign</p>
             </div>
             <!-- Levi's — reuse ls.jpg bg:#d94a5d -->
             <div class="item-wrapper">
-                <button type="button" class="brand-pillar-shape" style="background:#d94a5d;overflow:hidden;" onclick="location.href='#'">
-                    <div class="brand-img-wrap" style="background:#d94a5d;"><img class="brand-img brand-img-levis" src="{% static 'images/ls.jpg' %}"></div>
+                <button type="button" class="brand-pillar-shape" style="background:#C3263d;overflow:hidden;" onclick="location.href='{% url 'brand_products' 'Levi\'s' %}'">
+                    <div class="brand-img-wrap" style="background:#C3263d;"><img class="brand-img brand-img-levis" src="{% static 'images/ls.jpg' %}"></div>
                 </button>
                 <p class="label-text">Levi's</p>
             </div>
             <!-- Louis Philippe — reuse lp.png bg:#ffffff -->
             <div class="item-wrapper">
-                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='#'">
+                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='{% url 'brand_products' 'Louis Philippe' %}'">
                     <div class="brand-img-wrap"><img class="brand-img brand-img-square" src="{% static 'images/lp.png' %}"></div>
                 </button>
                 <p class="label-text">Louis Philippe</p>
             </div>
             <!-- Woodland — bl.png bg:#00652d -->
             <div class="item-wrapper">
-                <button type="button" class="brand-pillar-shape" style="background:#00652d;overflow:hidden;" onclick="location.href='#'">
+                <button type="button" class="brand-pillar-shape" style="background:#00652d;overflow:hidden;" onclick="location.href='{% url 'brand_products' 'Woodland' %}'">
                     <div class="brand-img-wrap" style="background:#00652d;"><img class="brand-img brand-img-square" src="{% static 'images/bl.png' %}"></div>
                 </button>
                 <p class="label-text">Woodland</p>
             </div>
             <!-- Fastrack — reuse s3.png bg:#ffffff -->
             <div class="item-wrapper">
-                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='#'">
+                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='{% url 'brand_products' 'Fastrack' %}'">
                     <div class="brand-img-wrap"><img class="brand-img brand-img-square" src="{% static 'images/s3.png' %}"></div>
                 </button>
                 <p class="label-text">Fastrack</p>
             </div>
             <!-- Raymond — reuse rm.png bg:#ca142b -->
             <div class="item-wrapper">
-                <button type="button" class="brand-pillar-shape" style="background:#ca142b;overflow:hidden;" onclick="location.href='#'">
+                <button type="button" class="brand-pillar-shape" style="background:#ca142b;overflow:hidden;" onclick="location.href='{% url 'brand_products' 'Raymond' %}'">
                     <div class="brand-img-wrap" style="background:#ca142b;"><img class="brand-img brand-img-square" src="{% static 'images/rm.png' %}"></div>
                 </button>
                 <p class="label-text">Raymond</p>
@@ -527,63 +592,63 @@
         <div class="universal-grid-9">
             <!-- f1.png Bata bg:#ffffff -->
             <div class="item-wrapper">
-                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='#'">
+                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='{% url 'brand_products' 'Bata' %}'">
                     <div class="brand-img-wrap"><img class="brand-img brand-img-square" src="{% static 'images/f1.png' %}"></div>
                 </button>
                 <p class="label-text">Bata</p>
             </div>
             <!-- f2.png Paragon bg:#000000 -->
             <div class="item-wrapper">
-                <button type="button" class="brand-pillar-shape" style="background:#000000;overflow:hidden;" onclick="location.href='#'">
+                <button type="button" class="brand-pillar-shape" style="background:#000000;overflow:hidden;" onclick="location.href='{% url 'brand_products' 'Paragon' %}'">
                     <div class="brand-img-wrap" style="background:#000000;"><img class="brand-img brand-img-square" src="{% static 'images/f2.png' %}"></div>
                 </button>
                 <p class="label-text">Paragon</p>
             </div>
             <!-- f3.png Campus bg:#000000 -->
             <div class="item-wrapper">
-                <button type="button" class="brand-pillar-shape" style="background:#000000;overflow:hidden;" onclick="location.href='#'">
+                <button type="button" class="brand-pillar-shape" style="background:#000000;overflow:hidden;" onclick="location.href='{% url 'brand_products' 'Campus' %}'">
                     <div class="brand-img-wrap" style="background:#000000;"><img class="brand-img brand-img-square" src="{% static 'images/f3.png' %}"></div>
                 </button>
                 <p class="label-text">Campus</p>
             </div>
             <!-- f4.png Metro bg:#000000 -->
             <div class="item-wrapper">
-                <button type="button" class="brand-pillar-shape" style="background:#000000;overflow:hidden;" onclick="location.href='#'">
+                <button type="button" class="brand-pillar-shape" style="background:#000000;overflow:hidden;" onclick="location.href='{% url 'brand_products' 'Metro' %}'">
                     <div class="brand-img-wrap" style="background:#000000;"><img class="brand-img brand-img-square" src="{% static 'images/f4.png' %}"></div>
                 </button>
                 <p class="label-text">Metro</p>
             </div>
             <!-- f5.png Flite bg:#ffffff -->
             <div class="item-wrapper">
-                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='#'">
+                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='{% url 'brand_products' 'Flite' %}'">
                     <div class="brand-img-wrap"><img class="brand-img brand-img-square" src="{% static 'images/f5.png' %}"></div>
                 </button>
                 <p class="label-text">Flite</p>
             </div>
             <!-- f6.png Nike bg:#ffffff -->
             <div class="item-wrapper">
-                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='#'">
+                <button type="button" class="brand-pillar-shape" style="background:#ffffff;overflow:hidden;" onclick="location.href='{% url 'brand_products' 'Nike' %}'">
                     <div class="brand-img-wrap"><img class="brand-img brand-img-square" src="{% static 'images/f6.png' %}"></div>
                 </button>
                 <p class="label-text">Nike</p>
             </div>
             <!-- Woodland — reuse bl.png bg:#00652d -->
             <div class="item-wrapper">
-                <button type="button" class="brand-pillar-shape" style="background:#00652d;overflow:hidden;" onclick="location.href='#'">
+                <button type="button" class="brand-pillar-shape" style="background:#00652d;overflow:hidden;" onclick="location.href='{% url 'brand_products' 'Woodland' %}'">
                     <div class="brand-img-wrap" style="background:#00652d;"><img class="brand-img brand-img-square" src="{% static 'images/bl.png' %}"></div>
                 </button>
                 <p class="label-text">Woodland</p>
             </div>
             <!-- Puma — reuse puma.jpg bg:#000000 -->
             <div class="item-wrapper">
-                <button type="button" class="brand-pillar-shape brand-bg-puma" onclick="location.href='#'">
+                <button type="button" class="brand-pillar-shape brand-bg-puma" onclick="location.href='{% url 'brand_products' 'Puma' %}'">
                     <img class="brand-img brand-img-tall" src="{% static 'images/puma.jpg' %}">
                 </button>
                 <p class="label-text">Puma</p>
             </div>
             <!-- Adidas — reuse ad.jpg bg:#000000 -->
             <div class="item-wrapper">
-                <button type="button" class="brand-pillar-shape brand-bg-ad" onclick="location.href='#'">
+                <button type="button" class="brand-pillar-shape brand-bg-ad" onclick="location.href='{% url 'brand_products' 'Adidas' %}'">
                     <img class="brand-img brand-img-tall" src="{% static 'images/ad.jpg' %}">
                 </button>
                 <p class="label-text">Adidas</p>

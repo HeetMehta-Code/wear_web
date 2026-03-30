@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="category-page">
+
+    <div class="breadcrumb">
+        <a href="{% url 'customer_dashboard' %}" class="breadcrumb-link">Home</a>
+        <span class="breadcrumb-sep">›</span>
+        <span class="breadcrumb-current">Kids' Wear</span>
+    </div>
+
+    <div class="section-container">
+        <h2 class="section-title">Shop by Gender</h2>
+        <div class="subcat-grid">
+
+            <a href="{% url 'sub_category_view' 'kids' 'boy' %}" class="subcat-card subcat-card-visual">
+                <div class="visual-container">
+                    <img src="{% static 'images/bk.png' %}" class="card-img" alt="Boys Wear">
+                </div>
+                <div class="card-overlay-blur"></div>
+                <div class="card-overlay-gradient"></div>
+                <div class="card-content">
+                    <div class="subcat-info">
+                        <span class="subcat-name">Boys</span>
+                        <span class="subcat-desc">Ethnic, Casual & Sportswear</span>
+                    </div>
+                    <span class="subcat-arrow">›</span>
+                </div>
+            </a>
+
+            <a href="{% url 'sub_category_view' 'kids' 'girl' %}" class="subcat-card subcat-card-visual">
+                <div class="visual-container">
+                    <img src="{% static 'images/gk.png' %}" class="card-img" alt="Girls Wear">
+                </div>
+                <div class="card-overlay-blur"></div>
+                <div class="card-overlay-gradient"></div>
+                <div class="card-content">
+                    <div class="subcat-info">
+                        <span class="subcat-name">Girls</span>
+                        <span class="subcat-desc">Frocks, Ethnic & Westerns</span>
+                    </div>
+                    <span class="subcat-arrow">›</span>
+                </div>
+            </a>
+
+        </div>
+    </div>
+</div>
+
+<style>
+/* 1. PAGE CONFIGURATION */
+.category-page {
+    width: 90%;
+    max-width: 1500px;
+    margin: 28px auto 80px;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+}
+
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 600;
+}
+.breadcrumb-link { color: #78b388; text-decoration: none; }
+.breadcrumb-sep { color: white; }
+.breadcrumb-current { color: #cfffdc; font-weight: 800; }
+
+.section-title {
+    font-size: 24px;
+    font-weight: 900;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+}
+
+/* 2. GRID - Showing 2 items per row */
+.subcat-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+/* 3. CARD & ROUNDED CORNER FIX */
+.subcat-card {
+    display: flex;
+    align-items: center;
+    background: #000;
+    border: 3px solid #000;
+    border-radius: 22px;
+    padding: 0;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden; 
+    isolation: isolate; 
+    -webkit-mask-image: -webkit-radial-gradient(white, black);
+    mask-image: radial-gradient(white, black);
+    min-height: 250px; /* Slightly taller for the 2-button layout */
+}
+
+.subcat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 24px rgba(120, 179, 136, 0.4);
+}
+
+.visual-container {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 50%; 
+    height: 100%;
+    z-index: 1;
+    overflow: hidden;
+}
+
+.card-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.subcat-card:hover .card-img {
+    transform: scale(1.1);
+}
+
+/* Blur & Gradient Overlays */
+.card-overlay-blur {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 65%; 
+    height: 100%;
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    z-index: 2;
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, black 40%);
+    mask-image: linear-gradient(to right, transparent 0%, black 40%);
+}
+
+.card-overlay-gradient {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to right, transparent 15%, rgba(0,0,0,0.85) 75%);
+    z-index: 3;
+    pointer-events: none;
+    box-shadow: inset 0 0 0 1px #000; 
+}
+
+.card-content {
+    position: relative;
+    z-index: 4;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: flex-end; 
+    align-items: center;
+    padding-right: 40px;
+}
+
+/* 4. TYPOGRAPHY */
+.subcat-info {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    text-align: right;
+}
+
+.subcat-name {
+    font-size: 28px; /* Slightly larger for emphasis */
+    font-weight: 900;
+    color: #cfffdc; 
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.subcat-desc {
+    font-size: 14px;
+    color: rgba(255,255,255,0.6);
+}
+
+.subcat-arrow {
+    font-size: 2.2rem;
+    color: #cfffdc;
+    margin-left: 20px;
+    transition: transform 0.2s;
+}
+
+.subcat-card:hover .subcat-arrow {
+    transform: translateX(8px);
+}
+
+/* 5. RESPONSIVE */
+@media (max-width: 768px) {
+    .subcat-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endblock %}

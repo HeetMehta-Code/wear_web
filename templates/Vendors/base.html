@@ -1,0 +1,117 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAMYA | Vendor Panel</title>
+    <link rel="stylesheet" href="{% static 'c_style.css' %}">
+    <style>
+        /* Vendor specific dark theme override */
+        body.dashboard-body {
+            background-color: #000000;
+            margin: 0;
+            color: white;
+        }
+        /* Hide cart globally for vendors */
+        .header-cart { display: none !important; }
+        
+        /* Optional: Green tint for Vendor header to distinguish from Customer side */
+        .main-header { border-bottom: 1px solid #cfffdc33; }
+        .header-logo { color: #cfffdc !important; }
+    </style>
+</head>
+<body class="dashboard-body">
+
+    <header class="main-header">
+        <div class="header-inner">
+
+            <a href="{% url 'vendor_dashboard' %}" class="header-logo">RAMYA <span style="font-size: 10px; vertical-align: middle; opacity: 0.6;">VENDOR</span></a>
+            <div class="header-search">
+                <form action="{% url 'vendor_dashboard' %}" method="GET">
+                <svg class="search-icon" width="50" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <circle cx="11" cy="11" r="8"/>
+                    <path d="m21 21-4.35-4.35"/>
+                </svg>
+               <input type="text" 
+               name="q" 
+               class="search-input" 
+               placeholder="Search your products..." 
+               value="{{ request.GET.q }}">
+             </form>
+            </div>
+            <div class="header-right">
+                
+                {% if user.is_authenticated %}
+                    <a href="{% url 'vendor_profile_view' %}" class="header-profile" title="Shop Profile">
+                        {% if user.vendor_profile.vendor_logo %}
+                            <img src="{{ user.vendor_profile_view.vendor_logo.url }}" alt="Shop Logo" class="profile-img">
+                        {% else %}
+                            <span class="profile-initial" style="background: #cfffdc; color: #000;">{{ user.email|first|upper }}</span>
+                        {% endif %}
+                    </a>
+                    
+                    <a href="{% url 'logout' %}" class="header-logout" style="margin-left: 10px; color: #ff7575; text-decoration: none; font-size: 14px; font-weight: 600;">Logout</a>
+                {% else %}
+                    <a href="{% url 'login' %}" class="header-login">Login</a>
+                {% endif %}
+
+            </div>
+        </div>
+
+        <button class="mobile-toggle" id="mobileToggle">&#9776;</button>
+        <nav class="mobile-nav" id="mobileNav">
+            {% if user.is_authenticated %}
+                <a href="{% url 'vendor_dashboard' %}">Dashboard</a>
+                <a href="{% url 'vendor_profile_view' %}">Shop Profile</a>
+                <a href="{% url 'vendor_upload_product' %}">Upload Product</a>
+                <a href="{% url 'logout' %}">Logout</a>
+            {% else %}
+                <a href="{% url 'login' %}">Login</a>
+            {% endif %}
+        </nav>
+    </header>
+
+    <main>
+        {% block content %}{% endblock content %}
+    </main>
+
+    <footer class="main-footer">
+        <div class="footer-inner">
+            <div class="footer-brand-col">
+                <span class="footer-logo">RAMYA</span>
+                <p class="footer-tagline">Vendor Control Panel.<br>Empowering your fashion business.</p>
+            </div>
+
+            <div class="footer-col">
+                <h4 class="footer-col-title">Resources</h4>
+                <a href="#" class="footer-text-link">Seller Guidelines →</a>
+            </div>
+
+            <div class="footer-col">
+                <h4 class="footer-col-title">Support</h4>
+                <div class="footer-contact-item"><span>vendor.support@ramya.com</span></div>
+            </div>
+
+            <div class="footer-col">
+                <h4 class="footer-col-title">Help</h4>
+                <a href="mailto:ramya.wearweb@gmail.com" class="footer-mail-btn">Contact Admin</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <span>© 2026 RAMYA Fashion Vendor Portal.</span>
+        </div>
+    </footer>
+
+    <script>
+        document.getElementById('mobileToggle').addEventListener('click', function () {
+            document.getElementById('mobileNav').classList.toggle('open');
+        });
+
+        window.addEventListener('scroll', function () {
+            document.querySelector('.main-header').classList.toggle('header-scrolled', window.scrollY > 50);
+        });
+    </script>
+
+</body>
+</html>

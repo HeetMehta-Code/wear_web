@@ -1,8 +1,238 @@
-{% extends 'base.html' %}
-
-{% block title %}Vendor Dashboard{% endblock %}
+{% extends "Vendors/base.html" %}
+{% load static %}
 
 {% block content %}
-    <h1>Vendor Dashboard</h1>
-    <p>Welcome, {{ user.email }}. Your store management links go here.</p>
+<div class="vendor-dashboard">
+
+    <div class="vendor-hero">
+        <div class="vendor-hero-left">
+            <span class="vendor-hero-tag">Vendor Dashboard</span>
+            <h1 class="vendor-hero-name">Welcome, {{ vendor.shopname|default:"Vendor" }} 👋</h1>
+            <p class="vendor-hero-sub">Manage your products, track views and grow your store on RAMYA.</p>
+        </div>
+        <div class="vendor-hero-right">
+            <a href="{% url 'vendor_upload_product' %}" class="vendor-hero-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Upload New Product
+            </a>
+        </div>
+    </div>
+
+    <div class="vendor-stats-row">
+        <div class="vendor-stat-card">
+            <div class="vendor-stat-icon">📦</div>
+            <div class="vendor-stat-info">
+                <span class="vendor-stat-num">{{ products.count }}</span>
+                <span class="vendor-stat-label">Total Products</span>
+            </div>
+        </div>
+        <div class="vendor-stat-card">
+            <div class="vendor-stat-icon">✅</div>
+            <div class="vendor-stat-info">
+                <span class="vendor-stat-num">{{ total_stock|default:"0" }}</span>
+                <span class="vendor-stat-label">Total Stock</span>
+            </div>
+        </div>
+        <div class="vendor-stat-card">
+            <div class="vendor-stat-icon">👁️</div>
+            <div class="vendor-stat-info">
+                <span class="vendor-stat-num">{{ total_views }}</span>
+                <span class="vendor-stat-label">Total Views</span>
+            </div>
+        </div>
+        <div class="vendor-stat-card">
+            <div class="vendor-stat-icon">🛍️</div>
+            <div class="vendor-stat-info">
+                <span class="vendor-stat-num">0</span>
+                <span class="vendor-stat-label">Total Orders</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="vendor-analytics-row">
+
+        <div class="vendor-chart-card">
+            <div class="vendor-card-header">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
+                Most Viewed Products
+            </div>
+            <div class="vendor-card-body chart-body">
+                {% if products %}
+                    <canvas id="viewsPieChart" width="240" height="240"></canvas>
+                    <div class="chart-legend" id="chartLegend"></div>
+                {% else %}
+                    <div class="vendor-empty-small">
+                        <span>📊</span>
+                        <p>Upload products to see analytics</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="vendor-top-card">
+            <div class="vendor-card-header">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+                Product Performance
+            </div>
+            <div class="vendor-card-body" style="padding:0;">
+                {% if products %}
+                <table class="vendor-table">
+                    <thead>
+                        <tr>
+                            <th>No.</th>
+                            <th>Product</th>
+                            <th>Price</th>
+                            <th>Stock</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in products %}
+                        <tr id="row-{{ product.id }}">
+                            <td class="table-num">{{ forloop.counter }}</td>
+                            <td class="table-name">
+                                {% if product.product_image %}
+                                    <img src="{{ product.product_image.url }}" class="table-thumb" alt="{{ product.name }}">
+                                {% endif %}
+                                <span class="table-product-link">{{ product.name }}</span>
+                            </td>
+                            <td class="table-price">₹{{ product.price }}</td>
+                            <td class="table-stock {% if product.stock < 5 %}stock-low{% endif %}">
+                                {{ product.stock }}
+                            </td>
+                            <td>
+                                <div style="display: flex; gap: 8px;">
+                                    <button class="toggle-btn {% if product.is_active %}toggle-hide{% else %}toggle-show{% endif %}"
+                                            id="btn-{{ product.id }}" onclick="toggleProduct({{ product.id }})">
+                                        {% if product.is_active %}Hide{% else %}Show{% endif %}
+                                    </button>
+                                    <a href="{% url 'vendor_edit' product.id %}" class="toggle-btn edit-link">Edit</a>
+                                    <a href="{% url 'vendor_delete' product.id %}" class="toggle-btn delete-link" 
+                                       onclick="return confirm('Delete this product permanently?')">Delete</a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                    <div class="vendor-empty-small" style="padding:40px;">
+                        <span>📋</span>
+                        <p>No products yet!</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="section-container">
+        <h2 class="section-title" style="color: #cfffdc; margin-bottom: 20px;">My Products</h2>
+        {% if products %}
+        <div class="vendor-products-grid">
+            {% for product in products %}
+            <div class="vendor-product-card" id="card-{{ product.id }}">
+                <a href="{% url 'vendor_edit' product.id %}" class="vendor-product-img-wrap">
+                    {% if product.product_image %}
+                        <img src="{{ product.product_image.url }}" alt="{{ product.name }}" class="vendor-product-img">
+                    {% endif %}
+                    <div class="vendor-product-edit-overlay">Click to Edit</div>
+                    {% if not product.is_active %}
+                        <div class="vendor-product-hidden-overlay" id="overlay-{{ product.id }}">Hidden</div>
+                    {% endif %}
+                </a>
+                <div class="vendor-product-info">
+                    <div class="vendor-product-name">{{ product.name }}</div>
+                    <div class="vendor-product-price">₹{{ product.price }}</div>
+                    <div class="vendor-product-meta">
+                        <span>Stock: {{ product.stock }}</span>
+                        <span>Views: {{ product.view_count }}</span>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="vendor-empty">
+            <div class="vendor-empty-icon">🛍️</div>
+            <h3>No products found</h3>
+            <a href="{% url 'vendor_upload' %}" class="vendor-empty-btn">Add Product</a>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+
+<style>
+.header-cart { display: none !important; }
+.vendor-dashboard { width: 92%; max-width: 1500px; margin: 28px auto 80px; display: flex; flex-direction: column; gap: 28px; }
+.vendor-hero { background: #000; border: 3px solid #000; border-radius: 28px; padding: 36px 44px; display: flex; align-items: center; justify-content: space-between; box-shadow: inset 0 0 0 2px #cfffdc; }
+.vendor-hero-name { font-size: 2rem; font-weight: 900; color: #cfffdc; margin: 0; }
+.vendor-hero-sub { font-size: 13px; color: rgba(255,255,255,0.4); }
+.vendor-hero-btn { background: #cfffdc; color: #000; text-decoration: none; font-size: 13px; font-weight: 800; padding: 14px 28px; border-radius: 24px; display: flex; align-items: center; gap: 8px; }
+
+.vendor-stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+.vendor-stat-card { background: #78b388; border: 3px solid #000; border-radius: 20px; padding: 24px 22px; display: flex; align-items: center; gap: 16px; box-shadow: inset 0 0 0 2px #000; }
+.vendor-stat-num { font-size: 2rem; font-weight: 900; color: #000; }
+.vendor-stat-label { font-size: 11px; font-weight: 700; color: rgba(0,0,0,0.55); text-transform: uppercase; }
+
+.vendor-analytics-row { display: grid; grid-template-columns: 320px 1fr; gap: 20px; }
+.vendor-chart-card, .vendor-top-card { background: #78b388; border: 3px solid #000; border-radius: 24px; overflow: hidden; box-shadow: inset 0 0 0 2px #000; }
+.vendor-card-header { background: #000; color: #cfffdc; padding: 13px 20px; font-size: 0.8rem; font-weight: 800; border-bottom: 2px solid #cfffdc; display: flex; align-items: center; gap: 10px; }
+.vendor-card-body { padding: 20px; }
+
+.vendor-table { width: 100%; border-collapse: collapse; }
+.vendor-table th { padding: 15px; text-align: left; font-size: 10px; font-weight: 800; text-transform: uppercase; border-bottom: 2px solid rgba(0,0,0,0.15); }
+.vendor-table td { padding: 12px 15px; border-bottom: 1px solid rgba(0,0,0,0.08); color: #000; font-size: 13px; vertical-align: middle; }
+.table-thumb { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; border: 2px solid rgba(0,0,0,0.1); margin-right: 10px; }
+.table-product-link { font-weight: 700; color: #000; text-decoration: none; }
+.stock-low { color: #c0392b; font-weight: 900; }
+
+.toggle-btn { border: none; padding: 6px 12px; border-radius: 8px; font-size: 9px; font-weight: 800; cursor: pointer; text-transform: uppercase; }
+.toggle-hide { background: #000; color: #cfffdc; }
+.toggle-show { background: #cfffdc; color: #000; }
+.edit-link { background: #000; color: #fff; text-decoration: none; }
+.delete-link { background: #331111; color: #ff5555; text-decoration: none; }
+
+.vendor-products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+.vendor-product-card { background: #fff; border: 3px solid #000; border-radius: 16px; overflow: hidden; transition: 0.3s; }
+.vendor-product-card:hover { border-color: #cfffdc; transform: translateY(-4px); }
+.vendor-product-img-wrap { position: relative; display: block; aspect-ratio: 1/1; }
+.vendor-product-img { width: 100%; height: 100%; object-fit: cover; }
+.vendor-product-edit-overlay { position: absolute; inset: 0; background: rgba(120, 179, 136, 0.5); display: flex; align-items: center; justify-content: center; color: #000; font-weight: 900; opacity: 0; transition: 0.3s; }
+.vendor-product-img-wrap:hover .vendor-product-edit-overlay { opacity: 1; }
+.vendor-product-info { padding: 12px; }
+.vendor-product-name { font-weight: 800; color: #000; font-size: 13px; }
+.vendor-product-price { color: #000; font-weight: 900; font-size: 16px; margin-top: 5px; }
+.vendor-product-meta { display: flex; justify-content: space-between; font-size: 10px; color: #666; margin-top: 8px; }
+.vendor-product-hidden-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 900; color: #eee01a }
+</style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script>
+const labels = {{ labels|safe }};
+const chartData = {{ chart_data|safe }};
+if (labels.length > 0 && document.getElementById('viewsPieChart')) {
+    const ctx = document.getElementById('viewsPieChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: chartData,
+                backgroundColor: ['#b115b1','#d36913','#1356d3','#eee01a','#666'],
+                borderColor: '#000',
+                borderWidth: 2,
+            }]
+        },
+        options: { responsive: false, plugins: { legend: { display: false } }, cutout: '60%' }
+    });
+}
+
+function toggleProduct(productId) {
+    fetch('/vendor/toggle/' + productId + '/', {
+        method: 'POST',
+        headers: { 'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/json' }
+    }).then(() => location.reload());
+}
+</script>
 {% endblock %}

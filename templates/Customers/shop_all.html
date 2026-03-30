@@ -1,0 +1,256 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+    /* ══════════════ GLOBAL PAGE WRAPPER ══════════════ */
+    .shop-page-wrapper {
+        background-color: #142c1e; /* Dark Forest Green from your final design */
+        min-height: 100vh;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+    }
+
+    .shop-container {
+        display: flex;
+        width: 100%;
+        max-width: 1450px;
+        padding: 40px 20px;
+        gap: 30px;
+        font-family: 'Assistant', 'Inter', sans-serif;
+    }
+
+    /* ══════════════ SIDEBAR: MINT & BLACK ══════════════ */
+    .filter-sidebar {
+        width: 280px;
+        flex-shrink: 0;
+        background: #cfffdc; /* Mint Background */
+        padding: 25px;
+        border: 5px solid black; /* Bold Black Border */
+        height: fit-content;
+        position: sticky;
+        top: 20px;
+        border-radius: 8px;
+    }
+
+    .filter-section {
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid rgba(0,0,0,0.1);
+    }
+
+    .filter-title {
+        font-size: 14px;
+        font-weight: 800;
+        text-transform: uppercase;
+        color: black;
+        letter-spacing: 1.2px;
+        margin-bottom: 15px;
+        display: block;
+    }
+
+    .filter-label {
+        display: flex;
+        align-items: center;
+        font-size: 14px;
+        color: black;
+        margin-bottom: 10px;
+        cursor: pointer;
+        font-weight: 500;
+    }
+
+    .filter-label input {
+        margin-right: 12px;
+        width: 17px;
+        height: 17px;
+        accent-color: #000;
+    }
+
+    /* ══════════════ PRODUCT AREA ══════════════ */
+    .product-content {
+        flex-grow: 1;
+    }
+
+    .results-header {
+        margin-bottom: 25px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid rgba(207, 255, 220, 0.2);
+    }
+
+    .results-count {
+        font-size: 22px;
+        font-weight: 700;
+        color: #cfffdc; /* Mint text on Dark Background */
+    }
+
+    /* ══════════════ PRODUCT GRID ══════════════ */
+    .myntra-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 30px 20px;
+    }
+
+    .myntra-card {
+        text-decoration: none;
+        color: inherit;
+        background: #fff;
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        border: 4px solid #cfffdc; /* Mint Frame */
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .myntra-card:hover {
+        box-shadow: 0 12px 30px rgba(0,0,0,0.3);
+        transform: translateY(-8px);
+        border-color: #ffffff;
+    }
+
+    .img-wrap {
+        width: 100%;
+        height: 320px;
+        background-color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+
+    .img-wrap img {
+        max-width: 90%;
+        max-height: 90%;
+        object-fit: contain;
+        transition: transform 0.5s ease;
+    }
+
+    .myntra-card:hover .img-wrap img {
+        transform: scale(1.08);
+    }
+
+    /* INFO SECTION: GREEN BOX */
+    .info-wrap {
+        padding: 15px;
+        background-color: #78b388; /* Sage Green Info Box */
+        border-top: 2px solid black;
+    }
+
+    .brand-name {
+        font-size: 15px;
+        font-weight: 800;
+        color: black;
+        margin-bottom: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .product-name {
+        font-size: 14px;
+        color: #1a1a1a;
+        margin-bottom: 12px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-weight: 400;
+    }
+
+    .price-wrap {
+        font-size: 16px;
+        font-weight: 800;
+        color: black;
+        display: flex;
+        align-items: center;
+    }
+
+    .old-price {
+        font-size: 12px;
+        color: #333;
+        text-decoration: line-through;
+        font-weight: 400;
+        margin-left: 8px;
+    }
+
+    .discount-tag {
+        font-size: 12px;
+        color: #d32f2f; /* Dark Red for contrast */
+        font-weight: 800;
+        margin-left: auto;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 900px) {
+        .filter-sidebar { display: none; }
+        .myntra-grid { grid-template-columns: repeat(2, 1fr); }
+        .shop-container { padding: 20px 10px; }
+    }
+</style>
+
+<div class="shop-page-wrapper">
+    <div class="shop-container">
+        <aside class="filter-sidebar">
+            <div class="filter-section">
+                <span class="filter-title">Current Category</span>
+                <label class="filter-label">
+                    <input type="checkbox" checked disabled> {{ category_name }}
+                </label>
+            </div>
+
+            <div class="filter-section">
+                <span class="filter-title">Brand</span>
+                <label class="filter-label"><input type="checkbox"> Premium Choice</label>
+                <label class="filter-label"><input type="checkbox"> Exclusive</label>
+            </div>
+
+            <div class="filter-section">
+                <span class="filter-title">Price Range</span>
+                <label class="filter-label"><input type="radio" name="p"> Below Rs. 999</label>
+                <label class="filter-label"><input type="radio" name="p"> Rs. 1000 - 2000</label>
+                <label class="filter-label"><input type="radio" name="p"> Above Rs. 2000</label>
+            </div>
+        </aside>
+
+        <main class="product-content">
+            <div class="results-header">
+                <div class="results-count">
+                    {{ category_name }} <span style="font-weight:400; font-size:15px; color:#cfffdc; opacity:0.8;">— {{ products.count }} items</span>
+                </div>
+            </div>
+
+            <div class="myntra-grid">
+                {% for product in products %}
+                <a href="{% url 'product_detail' product.id %}" class="myntra-card">
+                    <div class="img-wrap">
+                        {% if product.product_image %}
+                            <img src="{{ product.product_image.url }}" alt="{{ product.name }}">
+                        {% else %}
+                            <img src="{% static 'images/placeholder.png' %}" alt="No Image">
+                        {% endif %}
+                    </div>
+                    
+                    <div class="info-wrap">
+                        <div class="brand-name">{{ product.brand_name|default:"Chizi Collection" }}</div>
+                        <div class="product-name">{{ product.name }}</div>
+                        <div class="price-wrap">
+                            Rs. {{ product.price }}
+                            {% if product.original_price %}
+                                <span class="old-price">Rs. {{ product.original_price }}</span>
+                                <span class="discount-tag">{{ product.discount_percent }}% OFF</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </a>
+                {% empty %}
+                <div style="grid-column: 1/-1; text-align: center; padding: 100px 0; background: #cfffdc; border-radius: 12px; border: 4px dashed black;">
+                    <p style="font-size: 20px; color: black; font-weight: 700;">No products found in {{ category_name }}.</p>
+                    <p style="color: #333;">Check back later for new arrivals!</p>
+                </div>
+                {% endfor %}
+            </div>
+        </main>
+    </div>
+</div>
+{% endblock %}

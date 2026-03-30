@@ -257,7 +257,6 @@ body.dashboard-body {
     width: 100%;
     background-color: #000;
     color: #fff;
-    margin-top: 40px;
 }
 
 .footer-inner {
@@ -611,35 +610,6 @@ main { flex: 1; }
     position: static; transform: none; border-radius: 0;
 }
 
-.featured-section {
-    width: 90%;
-    max-width: 1500px;
-    margin: 30px 0;
-    display: grid;
-    grid-template-columns: 1fr 2fr;
-    gap: 20px;
-}
-
-.accessories-col { display: flex; flex-direction: column; gap: 16px; }
-
-.accessory-banner {
-    border: 5px solid #000;
-    border-radius: 24px;
-    overflow: hidden;
-    background: #000;
-    flex: 1;
-    min-height: 120px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 18px 22px;
-    cursor: pointer;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    position: relative;
-    box-shadow: inset 0 0 0 3px #cfffdc;
-    text-decoration: none;
-}
-
 .accessory-banner:hover {
     transform: translateY(-4px);
     box-shadow: inset 0 0 0 3px #cfffdc, 0 0 14px 4px #cfffdc, 0 8px 20px rgba(0,0,0,0.3);
@@ -651,21 +621,18 @@ main { flex: 1; }
 .accessory-banner-sub { font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.55); letter-spacing: 1px; margin-top: 3px; }
 .accessory-banner-img { width: 80px; height: 80px; object-fit: contain; flex-shrink: 0; opacity: 0.92; filter: drop-shadow(0 2px 8px rgba(207,255,220,0.3)); }
 
-.acc-sunglass { background: linear-gradient(135deg, #1a1a2e 0%, #000 100%); }
-.acc-makeup   { background: linear-gradient(135deg, #2d0a1e 0%, #000 100%); }
-.acc-bag      { background: linear-gradient(135deg, #0a1a2d 0%, #000 100%); }
-.acc-purse    { background: linear-gradient(135deg, #1a2d0a 0%, #000 100%); }
-.acc-belt     { background: linear-gradient(135deg, #2d1a0a 0%, #000 100%); }
-
 .new-arrivals-col {
     border: 5px solid #000;
     border-radius: 24px;
     overflow: hidden;
-    background: #cfffdc;
+    background: white;
     box-shadow: inset 0 0 0 3px #000, 0 6px 20px rgba(0,0,0,0.2);
     padding: 0 14px 18px 14px;
     display: flex;
     flex-direction: column;
+    max-width: 1200px;
+    width: 100%;
+    height: 700px;
 }
 
 .new-arrivals-header {
@@ -688,7 +655,7 @@ main { flex: 1; }
     font-weight: 800;
     letter-spacing: 2px;
     text-transform: uppercase;
-    padding: 5px 12px;
+    padding: 4px 2px;
     border-radius: 16px;
     border: 2px solid #cfffdc;
     cursor: pointer;
@@ -707,6 +674,7 @@ main { flex: 1; }
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     display: flex;
     flex-direction: column;
+    height: 200px;
 }
 .product-card:hover {
     transform: translateY(-4px);
@@ -731,12 +699,16 @@ main { flex: 1; }
 .product-card-price span { font-size: 9px; font-weight: 600; color: #888; text-decoration: line-through; margin-left: 4px; }
 
 .product-card-btn {
-    margin: 4px 8px 8px;
-    background: #000; color: #cfffdc;
-    border: none; border-radius: 8px;
-    padding: 6px 0; font-size: 9px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase;
-    cursor: pointer; transition: background 0.25s, box-shadow 0.25s;
-    width: calc(100% - 16px);
+    width: 100%;
+    padding: 12px;
+    background: #000;
+    color: #cfffdc;
+    border: none;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: 0.3s;
 }
 .product-card-btn:hover { background: #1a1a1a; box-shadow: 0 0 8px 2px #142c1e; }
 

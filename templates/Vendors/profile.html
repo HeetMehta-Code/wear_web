@@ -1,0 +1,74 @@
+{% extends "Vendors/base.html" %}
+{% block content %}
+
+<div class="vendor-profile-container">
+    <div class="profile-card">
+        <div class="profile-header">
+            <h2>Shop Settings</h2>
+            <p>Update your business details on RAMYA</p>
+        </div>
+
+        <form method="POST" enctype="multipart/form-data" class="profile-form">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label>Vendor / Shop Name</label>
+                <input type="text" name="shopname" value="{{ vendor.shopname|default:'' }}" placeholder="Enter shop name">
+            </div>
+
+            <div class="form-group">
+                <label>Shop Address</label>
+                <textarea name="shop_address" rows="3" placeholder="Enter physical or business address">{{ vendor.shop_address|default:'' }}</textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Shop Start Date</label>
+                <input type="date" name="shop_start_date" value="{{ vendor.shop_start_date|date:'Y-m-d' }}">
+            </div>
+
+            <div class="form-group">
+                <label>Shop Logo</label>
+                {% if vendor.vendor_logo %}
+                    <img src="{{ vendor.vendor_logo.url }}" class="current-logo-preview" alt="Current Logo">
+                {% endif %}
+                <input type="file" name="vendor_logo" class="file-input">
+            </div>
+
+            <button type="submit" class="save-profile-btn">Save Shop Profile</button>
+        </form>
+    </div>
+</div>
+
+<style>
+    .vendor-profile-container {
+        display: flex; justify-content: center; padding: 50px 20px;
+        background: #142c1e; min-height: 80vh;
+    }
+    .profile-card {
+        background: #000; border: 3px solid #78b388; border-radius: 24px;
+        width: 100%; max-width: 500px; padding: 30px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .profile-header h2 { color: #cfffdc; font-weight: 900; margin-bottom: 5px; text-transform: uppercase; }
+    .profile-header p { color: #78b388; font-size: 13px; margin-bottom: 25px; }
+    
+    .form-group { margin-bottom: 20px; display: flex; flex-direction: column; gap: 8px; }
+    .form-group label { color: #cfffdc; font-size: 12px; font-weight: 700; text-transform: uppercase; }
+    
+    .form-group input, .form-group textarea {
+        background: #111; border: 2px solid #222; border-radius: 12px;
+        padding: 12px; color: #fff; font-family: inherit;
+    }
+    .form-group input:focus { border-color: #78b388; outline: none; }
+    
+    .current-logo-preview { width: 60px; height: 60px; border-radius: 10px; object-fit: cover; margin-bottom: 10px; border: 1px solid #78b388; }
+    
+    .save-profile-btn {
+        width: 100%; background: #78b388; color: #000; border: none;
+        padding: 15px; border-radius: 12px; font-weight: 800; cursor: pointer;
+        text-transform: uppercase; letter-spacing: 1px; margin-top: 10px;
+    }
+    .save-profile-btn:hover { background: #a8ffc4; transform: translateY(-2px); transition: 0.2s; }
+</style>
+
+{% endblock %}

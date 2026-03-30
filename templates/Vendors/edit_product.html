@@ -1,0 +1,243 @@
+{% extends "Vendors/base.html" %}
+
+{% block content %}
+<style>
+    /* 1. Wrapper and Card */
+    .upload-box { 
+        display: flex; 
+        justify-content: center; 
+        padding: 40px 20px; 
+        background: #142c1e; 
+        min-height: 100vh; 
+    }
+    .card { 
+        background: #000; 
+        border: 3px solid #78b388; 
+        border-radius: 24px; 
+        width: 100%; 
+        max-width: 950px; 
+        padding: 40px; 
+        box-shadow: 0 0px 50px #cfffdc; 
+    }
+    
+    /* 2. Typography */
+    .card h2 { color: #cfffdc; margin-top: 0; font-size: 24px; letter-spacing: 1px; }
+    .card h3 { color: #78b388; font-size: 16px; margin-bottom: 15px; }
+    .card label { 
+        display: block; 
+        color: #cfffdc; 
+        font-size: 15px; 
+        font-weight: 800; 
+        text-transform: uppercase; 
+        margin-bottom: 8px; 
+        margin-top: 15px; 
+    }
+    
+    /* 3. UNIFORM INPUTS (Matching Upload File) */
+    .card input[type="text"], 
+    .card input[type="number"], 
+    .card input[type="file"],
+    .card select, 
+    .card textarea { 
+        width: 100%; 
+        background: #111; 
+        border: 1px solid #222; 
+        padding: 12px; 
+        color: #fff; 
+        border-radius: 12px; 
+        transition: 0.3s; 
+        box-sizing: border-box; 
+        outline: none;
+        font-family: inherit;
+        font-size: 13px;
+        height: 45px; 
+    }
+
+    .card input[type="file"] { padding: 8px 12px; cursor: pointer; }
+    .card textarea { height: auto; }
+    .card input:focus, .card select:focus, .card textarea:focus { border-color: #78b388; background: #161616; }
+
+    /* 4. Variant Section - 4 Equal Columns + Action */
+    .variant-row { 
+        display: grid; 
+        grid-template-columns: 1fr 1fr 1fr 1fr 45px; 
+        gap: 12px; 
+        background: #0a0a0a; 
+        padding: 15px; 
+        border-radius: 15px; 
+        margin-bottom: 10px; 
+        border: 1px solid #1a1a1a;
+        align-items: center;
+    }
+
+    .variant-img-preview {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #78b388;
+        font-size: 10px;
+    }
+
+    .variant-img-preview img {
+        width: 35px;
+        height: 35px;
+        border-radius: 5px;
+        object-fit: cover;
+        border: 1px solid #78b388;
+    }
+    
+    .add-variant-btn { 
+        background: transparent; color: #78b388; border: 2px dashed #333; 
+        padding: 12px; width: 100%; border-radius: 12px; cursor: pointer; 
+        font-weight: 700; transition: 0.3s; margin-bottom: 25px;
+    }
+    .add-variant-btn:hover { border-color: #78b388; background: #0a110c; color: #cfffdc; }
+    
+    .remove-btn { 
+        background: #221111; color: #ff5555; border: 1px solid #442222; 
+        border-radius: 10px; cursor: pointer; font-weight: 900; height: 45px;
+    }
+
+    /* 5. Action Buttons */
+    .btn-row {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 15px;
+        margin-top: 20px;
+    }
+    .btn-publish { 
+        width: 100%; background: #cfffdc; color: #000; padding: 18px; 
+        border: none; border-radius: 15px; font-weight: 900; cursor: pointer; 
+        font-size: 16px; text-transform: uppercase; transition: 0.3s;
+    }
+    .btn-delete {
+        background: #221111; color: #ff5555; border: 1px solid #442222;
+        border-radius: 15px; font-weight: 900; display: flex; 
+        align-items: center; justify-content: center; text-decoration: none;
+    }
+</style>
+
+<div class="upload-box">
+    <div class="card">
+        <h2>Edit Product: {{ product.name }}</h2>
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div>
+                    <label>Product Name</label>
+                    <input type="text" name="name" value="{{ product.name }}" required>
+                </div>
+                <div>
+                    <label>Brand Name</label>
+                    <input type="text" name="brand" value="{{ product.brand_name }}">
+                </div>
+            </div>
+
+            <label>Description</label>
+            <textarea name="description" rows="3">{{ product.description }}</textarea>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div>
+                    <label>Category</label>
+                    <select name="category" id="id_category" required onchange="updateSubCategories()">
+                        <option value="mens" {% if product.category == 'mens' %}selected{% endif %}>Men's Wear</option>
+                        <option value="womens" {% if product.category == 'womens' %}selected{% endif %}>Women's Wear</option>
+                        <option value="kids" {% if product.category == 'kids' %}selected{% endif %}>Kid's Wear</option>
+                        <option value="bags" {% if product.category == 'bags' %}selected{% endif %}>Bags</option>
+                        <option value="footwear" {% if product.category == 'footwear' %}selected{% endif %}>Footwear</option>
+                        <option value="makeup" {% if product.category == 'makeup' %}selected{% endif %}>Makeup</option>
+                        <option value="sunglasses" {% if product.category == 'sunglasses' %}selected{% endif %}>Sunglasses</option>
+                        <option value="belts" {% if product.category == 'belts' %}selected{% endif %}>Belts</option>
+                        <option value="purses" {% if product.category == 'purses' %}selected{% endif %}>Purses</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Sub-Category</label>
+                    <select name="sub_category" id="id_sub_category">
+                        <option value="{{ product.sub_category }}">{{ product.sub_category|title }}</option>
+                    </select>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div>
+                    <label>Selling Price (₹)</label>
+                    <input type="number" step="0.01" name="price" value="{{ product.price }}" required>
+                </div>
+                <div>
+                    <label>Original Price (₹)</label>
+                    <input type="number" step="0.01" name="original_price" value="{{ product.original_price }}">
+                </div>
+            </div>
+
+            <hr style="border: 0; border-top: 1px solid #222; margin: 30px 0;">
+
+            <h3>Product Variations</h3>
+            
+            <div id="variant-container">
+                {% for variant in product.variants.all %}
+                <div class="variant-row">
+                    <input type="text" name="variant_color[]" value="{{ variant.color }}" placeholder="Color" required>
+                    <input type="text" name="variant_size[]" value="{{ variant.size }}" placeholder="Size">
+                    <input type="number" name="variant_qty[]" value="{{ variant.stock }}" placeholder="Stock" required>
+                    <div class="variant-img-preview">
+                        <input type="file" name="variant_image[]" accept="image/*">
+                        {% if variant.image %}<img src="{{ variant.image.url }}">{% endif %}
+                    </div>
+                    <button type="button" class="remove-btn" onclick="this.parentElement.remove()">×</button>
+                </div>
+                {% endfor %}
+            </div>
+
+            <button type="button" class="add-variant-btn" onclick="addVariantRow()">+ Add Another Variation</button>
+
+            <div class="btn-row">
+                <button type="submit" class="btn-publish">Update Product</button>
+                <a href="{% url 'vendor_delete' product.id %}" class="btn-delete" onclick="return confirm('Delete this product permanently?')">Delete</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    const subData = {
+        'mens': ['Jacket', 'T-Shirt', 'Shirt', 'Hoodie', 'Pants', 'Traditional'],
+        'womens': ['Saree', 'Kurti', 'Pant', 'T-Shirt', 'Western', 'Sweateshirt'],
+        'kids': ['Boys', 'Girls']
+    };
+
+    function updateSubCategories() {
+        const cat = document.getElementById('id_category').value;
+        const subSelect = document.getElementById('id_sub_category');
+        const currentSub = "{{ product.sub_category }}"; // To keep current selected
+        subSelect.innerHTML = '';
+        
+        const options = subData[cat] || ['Other'];
+        options.forEach(opt => {
+            const el = document.createElement('option');
+            el.value = opt.toLowerCase();
+            el.textContent = opt;
+            if(el.value === currentSub) el.selected = true;
+            subSelect.appendChild(el);
+        });
+    }
+
+    function addVariantRow() {
+        const container = document.getElementById('variant-container');
+        const div = document.createElement('div');
+        div.className = 'variant-row';
+        div.innerHTML = `
+            <input type="text" name="variant_color[]" placeholder="Color" required>
+            <input type="text" name="variant_size[]" placeholder="Size">
+            <input type="number" name="variant_qty[]" placeholder="Stock" required>
+            <input type="file" name="variant_image[]" accept="image/*">
+            <button type="button" class="remove-btn" onclick="this.parentElement.remove()">×</button>
+        `;
+        container.appendChild(div);
+    }
+
+    // Initialize sub-categories on load
+    updateSubCategories();
+</script>
+{% endblock %}
