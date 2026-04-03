@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="static-page">
+
+    <!-- Hero -->
+    <div class="static-hero">
+        <div class="static-hero-text">
+            <span class="static-tag">Our Story</span>
+            <h1 class="static-title">About RAMYA</h1>
+            <p class="static-subtitle">India's curated multi-brand fashion platform — bringing you the finest clothing, accessories and lifestyle products from top brands and local vendors.</p>
+        </div>
+        <div class="static-hero-emoji">🏪</div>
+    </div>
+
+    <!-- Mission -->
+    <div class="section-container">
+        <h2 class="section-title">Our Mission</h2>
+        <div class="about-grid">
+            <div class="about-card">
+                <div class="about-card-icon">🎯</div>
+                <h3 class="about-card-title">Our Vision</h3>
+                <p class="about-card-text">To become India's most trusted fashion marketplace where every customer finds exactly what they love — from premium brands to local artisans, all in one place.</p>
+            </div>
+            <div class="about-card">
+                <div class="about-card-icon">🤝</div>
+                <h3 class="about-card-title">Vendor First</h3>
+                <p class="about-card-text">We empower vendors — big and small — to showcase their products to millions of fashion-forward customers across India with zero hassle.</p>
+            </div>
+            <div class="about-card">
+                <div class="about-card-icon">💚</div>
+                <h3 class="about-card-title">Customer Love</h3>
+                <p class="about-card-text">Every feature we build is designed with our customers in mind. Fast delivery, easy returns, genuine products — that's our promise to you.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="about-stats-row">
+        <div class="about-stat">
+            <span class="about-stat-num">500+</span>
+            <span class="about-stat-label">Brands</span>
+        </div>
+        <div class="about-stat">
+            <span class="about-stat-num">10K+</span>
+            <span class="about-stat-label">Products</span>
+        </div>
+        <div class="about-stat">
+            <span class="about-stat-num">50K+</span>
+            <span class="about-stat-label">Happy Customers</span>
+        </div>
+        <div class="about-stat">
+            <span class="about-stat-num">28</span>
+            <span class="about-stat-label">States Served</span>
+        </div>
+    </div>
+
+    <!-- Team / Story -->
+    <div class="section-container">
+        <h2 class="section-title">Our Story</h2>
+        <div class="about-story">
+            <p>RAMYA Fashion was born out of a simple idea — why should great fashion be hard to find? Founded in 2024 in Gandhinagar, Gujarat, we set out to build a platform where customers could discover clothing, accessories, makeup and footwear from India's best brands — all in one seamless experience.</p>
+            <p>We believe fashion is personal. That's why we've built RAMYA to feel like your own personal stylist — showing you what's new, what's trending, and what fits your unique style.</p>
+            <p>Today, RAMYA Fashion is home to hundreds of brands and thousands of products, delivered with love to customers across India.</p>
+        </div>
+    </div>
+
+</div>
+
+<style>
+.static-page {
+    width: 90%; max-width: 1300px;
+    margin: 28px auto 80px;
+    display: flex; flex-direction: column; gap: 28px;
+}
+.static-hero {
+    background: #000; border: 3px solid #000; border-radius: 28px;
+    padding: 44px 52px; display: flex; align-items: center;
+    justify-content: space-between; gap: 24px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 0 0 2px #cfffdc;
+}
+.static-tag { font-size: 10px; font-weight: 700; letter-spacing: 4px; text-transform: uppercase; color: rgba(207,255,220,0.5); display: block; margin-bottom: 10px; }
+.static-title { font-size: 2.8rem; font-weight: 900; color: #cfffdc; letter-spacing: 2px; margin: 0 0 12px; }
+.static-subtitle { font-size: 14px; color: rgba(255,255,255,0.45); line-height: 1.8; max-width: 480px; }
+.static-hero-emoji { font-size: 6rem; opacity: 0.85; flex-shrink: 0; }
+.section-container { width: 100%; max-width: 1160px; }
+/* About cards */
+.about-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; padding: 4px 0 8px; }
+.about-card {
+    background: #000; border: 2px solid rgba(207,255,220,0.15);
+    border-radius: 20px; padding: 28px 24px;
+    display: flex; flex-direction: column; gap: 12px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.about-card:hover { border-color: #cfffdc; box-shadow: 0 0 14px rgba(207,255,220,0.15); }
+.about-card-icon { font-size: 2.2rem; }
+.about-card-title { font-size: 1rem; font-weight: 900; color: #cfffdc; letter-spacing: 0.5px; }
+.about-card-text { font-size: 13px; color: rgba(255,255,255,0.5); line-height: 1.8; }
+
+/* Stats row */
+.about-stats-row {
+    display: grid; grid-template-columns: repeat(4,1fr); gap: 16px;
+}
+.about-stat {
+    background: #78b388; border: 3px solid #000; border-radius: 20px;
+    padding: 28px 20px; display: flex; flex-direction: column;
+    align-items: center; gap: 6px;
+    box-shadow: inset 0 0 0 2px #000;
+    transition: transform 0.25s;
+}
+.about-stat:hover { transform: translateY(-4px); }
+.about-stat-num { font-size: 2.2rem; font-weight: 900; color: #000; }
+.about-stat-label { font-size: 11px; font-weight: 700; color: rgba(0,0,0,0.55); text-transform: uppercase; letter-spacing: 1.5px; }
+
+/* Story text */
+.about-story { padding: 4px 4px 8px; display: flex; flex-direction: column; gap: 16px; }
+.about-story p { font-size: 14px; color: #000; line-height: 1.9; }
+
+@media (max-width: 860px) {
+    .about-grid { grid-template-columns: 1fr; }
+    .about-stats-row { grid-template-columns: repeat(2,1fr); }
+    .static-hero { flex-direction: column; padding: 28px 24px; }
+    .static-title { font-size: 2rem; }
+    .static-hero-emoji { font-size: 4rem; }
+}
+</style>
+
+{% endblock %}

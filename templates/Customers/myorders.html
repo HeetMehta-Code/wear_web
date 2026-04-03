@@ -1,0 +1,245 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="orders-page">
+
+    <!-- Hero -->
+    <div class="orders-hero">
+        <div>
+            <span class="orders-tag">Your Account</span>
+            <h1 class="orders-title">My Orders</h1>
+            <p class="orders-sub">{{ orders.count }} order{{ orders.count|pluralize }} placed</p>
+        </div>
+        <div class="orders-hero-emoji">🛍️</div>
+    </div>
+
+    {% if orders %}
+        <div class="orders-list">
+            {% for order in orders %}
+            <div class="order-card">
+
+                <!-- Order Header -->
+                <div class="order-card-header">
+                    <div class="order-header-left">
+                        <span class="order-id-label">Order</span>
+                        <span class="order-id">#{{ order.id }}</span>
+                    </div>
+                    <div class="order-header-center">
+                        <span class="order-date-label">Placed on</span>
+                        <span class="order-date">{{ order.orderDate|date:"d M Y" }}</span>
+                    </div>
+                    <div class="order-header-right">
+                        <span class="order-amount-label">Total</span>
+                        <span class="order-amount">₹{{ order.totalAmount|floatformat:0 }}</span>
+                    </div>
+                    <div class="order-header-status">
+                        <span class="order-status-badge order-status-{{ order.status|lower }}">{{ order.status }}</span>
+                    </div>
+                </div>
+
+                <!-- Delivery Timeline -->
+                <div class="order-timeline">
+                    <div class="timeline-step {% if order.status == 'Pending' or order.status == 'Confirmed' or order.status == 'Shipped' or order.status == 'Delivered' %}tl-done{% endif %}">
+                        <div class="tl-dot"></div>
+                        <div class="tl-label">Order Placed</div>
+                        <div class="tl-date">{{ order.orderDate|date:"d M" }}</div>
+                    </div>
+                    <div class="timeline-bar {% if order.status == 'Confirmed' or order.status == 'Shipped' or order.status == 'Delivered' %}tl-bar-done{% endif %}"></div>
+                    <div class="timeline-step {% if order.status == 'Confirmed' or order.status == 'Shipped' or order.status == 'Delivered' %}tl-done{% endif %}">
+                        <div class="tl-dot"></div>
+                        <div class="tl-label">Confirmed</div>
+                        <div class="tl-date">
+                            {% if order.status == 'Pending' %}<span class="tl-pending">Pending</span>
+                            {% else %}+1 day{% endif %}
+                        </div>
+                    </div>
+                    <div class="timeline-bar {% if order.status == 'Shipped' or order.status == 'Delivered' %}tl-bar-done{% endif %}"></div>
+                    <div class="timeline-step {% if order.status == 'Shipped' or order.status == 'Delivered' %}tl-done{% endif %}">
+                        <div class="tl-dot"></div>
+                        <div class="tl-label">Shipped</div>
+                        <div class="tl-date">
+                            {% if order.status == 'Shipped' or order.status == 'Delivered' %}+2 days
+                            {% else %}<span class="tl-pending">–</span>{% endif %}
+                        </div>
+                    </div>
+                    <div class="timeline-bar {% if order.status == 'Delivered' %}tl-bar-done{% endif %}"></div>
+                    <div class="timeline-step {% if order.status == 'Delivered' %}tl-done{% endif %}">
+                        <div class="tl-dot"></div>
+                        <div class="tl-label">Delivered</div>
+                        <div class="tl-date">
+                            {% if order.status == 'Delivered' %}✓ Done
+                            {% else %}<span class="tl-pending">5–7 days</span>{% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Estimated delivery -->
+                <div class="order-eta">
+                    {% if order.status == 'Delivered' %}
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                        <span>Delivered successfully</span>
+                    {% elif order.status == 'Cancelled' %}
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                        <span>This order was cancelled</span>
+                    {% else %}
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        <span>Estimated delivery: <strong>5–7 business days</strong> from order date</span>
+                    {% endif %}
+                </div>
+
+            </div>
+            {% endfor %}
+        </div>
+
+    {% else %}
+        <!-- Empty state -->
+        <div class="orders-empty">
+            <div class="orders-empty-icon">🛍️</div>
+            <h3>No orders yet</h3>
+            <p>Looks like you haven't placed any orders yet.<br>Start shopping and your orders will appear here.</p>
+            <a href="{% url 'customer_dashboard' %}" class="orders-shop-btn">Start Shopping →</a>
+        </div>
+    {% endif %}
+
+</div>
+
+<style>
+.orders-page {
+    width: 90%; max-width: 1100px;
+    margin: 28px auto 80px;
+    display: flex; flex-direction: column; gap: 24px;
+}
+
+/* Hero */
+.orders-hero {
+    background: #000; border: 3px solid #000; border-radius: 28px;
+    padding: 36px 44px; display: flex; align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 0 0 2px #cfffdc;
+}
+.orders-tag { font-size: 10px; font-weight: 700; letter-spacing: 4px; text-transform: uppercase; color: rgba(207,255,220,0.5); display: block; margin-bottom: 8px; }
+.orders-title { font-size: 2rem; font-weight: 900; color: #cfffdc; margin: 0 0 6px; }
+.orders-sub { font-size: 13px; color: rgba(255,255,255,0.4); }
+.orders-hero-emoji { font-size: 5rem; }
+
+/* Order cards */
+.orders-list { display: flex; flex-direction: column; gap: 18px; }
+
+.order-card {
+    background: #78b388;
+    border: 3px solid #000;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: inset 0 0 0 2px #000, 0 4px 20px rgba(0,0,0,0.15);
+}
+
+/* Card header */
+.order-card-header {
+    background: #000; padding: 16px 24px;
+    display: flex; align-items: center; gap: 24px;
+    border-bottom: 2px solid #cfffdc;
+    flex-wrap: wrap;
+}
+.order-header-left, .order-header-center, .order-header-right { display: flex; flex-direction: column; gap: 2px; }
+.order-id-label, .order-date-label, .order-amount-label {
+    font-size: 9px; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; color: rgba(207,255,220,0.4);
+}
+.order-id { font-size: 16px; font-weight: 900; color: #cfffdc; }
+.order-date { font-size: 13px; font-weight: 600; color: #fff; }
+.order-amount { font-size: 16px; font-weight: 900; color: #cfffdc; }
+.order-header-status { margin-left: auto; }
+
+/* Status badges */
+.order-status-badge {
+    font-size: 10px; font-weight: 800; letter-spacing: 1.5px;
+    text-transform: uppercase; padding: 6px 14px; border-radius: 20px;
+}
+.order-status-pending   { background: #fff3cd; color: #856404; }
+.order-status-confirmed { background: #cce5ff; color: #004085; }
+.order-status-shipped   { background: #d1ecf1; color: #0c5460; }
+.order-status-delivered { background: #d4edda; color: #155724; }
+.order-status-cancelled { background: #f8d7da; color: #721c24; }
+
+/* Delivery timeline */
+.order-timeline {
+    padding: 24px 28px 8px;
+    display: flex; align-items: flex-start;
+}
+
+.timeline-step {
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    flex-shrink: 0; min-width: 80px;
+}
+
+.tl-dot {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.2);
+    border: 3px solid rgba(0,0,0,0.3);
+    transition: background 0.3s, border-color 0.3s;
+}
+
+.tl-done .tl-dot {
+    background: #000;
+    border-color: #000;
+    box-shadow: 0 0 0 3px rgba(0,0,0,0.15);
+}
+
+.tl-label {
+    font-size: 10px; font-weight: 800; color: #000;
+    text-transform: uppercase; letter-spacing: 1px; text-align: center;
+}
+.tl-date {
+    font-size: 10px; font-weight: 500; color: rgba(0,0,0,0.5); text-align: center;
+}
+.tl-pending { color: rgba(0,0,0,0.35); font-style: italic; }
+
+.tl-done .tl-label { color: #000; }
+.tl-done .tl-date { color: rgba(0,0,0,0.7); font-weight: 700; }
+
+.timeline-bar {
+    flex: 1; height: 3px;
+    background: rgba(0,0,0,0.15);
+    margin-top: 8px; border-radius: 3px;
+    transition: background 0.3s;
+}
+.tl-bar-done { background: #000; }
+
+/* ETA row */
+.order-eta {
+    display: flex; align-items: center; gap: 8px;
+    padding: 12px 28px 18px;
+    font-size: 12px; font-weight: 600; color: rgba(0,0,0,0.6);
+}
+.order-eta svg { color: #000; flex-shrink: 0; }
+.order-eta strong { color: #000; }
+
+/* Empty state */
+.orders-empty {
+    background: #78b388; border: 3px solid #000; border-radius: 24px;
+    padding: 60px 20px;
+    display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center;
+    box-shadow: inset 0 0 0 2px #000;
+}
+.orders-empty-icon { font-size: 3.5rem; }
+.orders-empty h3 { font-size: 1.2rem; font-weight: 800; color: #000; }
+.orders-empty p { font-size: 13px; color: rgba(0,0,0,0.55); line-height: 1.8; }
+.orders-shop-btn {
+    background: #000; color: #cfffdc; text-decoration: none;
+    font-size: 12px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase;
+    padding: 12px 26px; border-radius: 22px; margin-top: 6px;
+    transition: background 0.2s, box-shadow 0.2s;
+}
+.orders-shop-btn:hover { background: #1a1a1a; box-shadow: 0 0 12px rgba(207,255,220,0.3); }
+
+@media (max-width: 700px) {
+    .order-card-header { gap: 14px; }
+    .order-timeline { padding: 18px 16px 8px; }
+    .timeline-step { min-width: 60px; }
+    .orders-hero { flex-direction: column; gap: 16px; padding: 28px 24px; }
+}
+</style>
+
+{% endblock %}

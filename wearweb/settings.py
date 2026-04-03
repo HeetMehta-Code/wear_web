@@ -11,7 +11,10 @@ DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# settings.py
 
+RAZORPAY_KEY_ID = 'rzp_test_SYWhkXzNxlN3UA'
+RAZORPAY_KEY_SECRET = '5XAjSVf9FktmTcb36ZYJ1GJG'
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 

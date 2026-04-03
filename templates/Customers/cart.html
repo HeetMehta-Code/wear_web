@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="cart-page">
+    <h1 class="cart-title">Your Shopping Bag</h1>
+
+    {% if cart_items %}
+    <div class="cart-container">
+        <div class="cart-items-list">
+            {% for item in cart_items %}
+            <div class="cart-card">
+                <a href="{% url 'product_detail' item.product.id %}" class="cart-img-link">
+                    <img src="{{ item.product.product_image.url }}" alt="{{ item.product.name }}">
+                </a>
+                
+                <div class="cart-info">
+                    <div class="cart-brand">{{ item.product.vendor.shopname }}</div>
+                    <a href="{% url 'product_detail' item.product.id %}" class="cart-name">{{ item.product.name }}</a>
+                    <div class="cart-qty">Qty: {{ item.quantity }}</div>
+                    <div class="cart-price">₹{{ item.product.price }}</div>
+                </div>
+
+                <a href="{% url 'remove_from_cart' item.product.id %}" class="cart-remove-btn" title="Remove Product">
+                    ✕
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="cart-summary">
+            <div class="summary-box">
+                <h2 class="summary-title">Order Summary</h2>
+                <div class="summary-row">
+                    <span>Subtotal</span>
+                    <span>₹{{ total_price }}</span>
+                </div>
+                <div class="summary-row">
+                    <span>Delivery</span>
+                    <span style="color: #4caf50;">FREE</span>
+                </div>
+                <hr>
+                <div class="summary-row total">
+                    <span>Total Amount</span>
+                    <span>₹{{ total_price }}</span>
+                </div>
+                <button class="buy-all-btn">Proceed to Buy All</button>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="empty-cart">
+        <p>Your bag is empty.</p>
+        <button onclick="location.href='{% url 'customer_dashboard' %}'">Start Shopping</button>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.cart-page { width: 90%; max-width: 1200px; margin: 40px auto; min-height: 70vh; }
+.cart-title { color: #cfffdc; font-size: 2rem; font-weight: 900; text-transform: uppercase; margin-bottom: 30px; letter-spacing: 2px; }
+
+.cart-container { display: grid; grid-template-columns: 1fr 350px; gap: 30px; }
+
+/* Product Card */
+.cart-card { 
+    background: #000; border: 2px solid #333; border-radius: 20px; 
+    padding: 20px; display: flex; align-items: center; gap: 20px; 
+    margin-bottom: 15px; position: relative; transition: 0.3s;
+}
+.cart-card:hover { border-color: #cfffdc; }
+.cart-card img { width: 100px; height: 120px; object-fit: cover; border-radius: 12px; }
+
+.cart-info { flex: 1; }
+.cart-brand { font-size: 10px; font-weight: 800; color: rgba(207,255,220,0.5); text-transform: uppercase; letter-spacing: 2px; }
+.cart-name { font-size: 1.2rem; font-weight: 700; color: #fff; text-decoration: none; display: block; margin: 5px 0; }
+.cart-qty { color: #aaa; font-size: 13px; }
+.cart-price { color: #cfffdc; font-weight: 900; font-size: 1.1rem; margin-top: 8px; }
+
+/* Remove Button */
+.cart-remove-btn { 
+    background: #333; color: #fff; text-decoration: none; width: 30px; height: 30px; 
+    display: flex; align-items: center; justify-content: center; border-radius: 50%; 
+    font-size: 12px; font-weight: 900; transition: 0.3s;
+}
+.cart-remove-btn:hover { background: #e63946; color: #fff; transform: rotate(90deg); }
+
+/* Summary Side */
+.summary-box { background: #cfffdc; padding: 30px; border-radius: 25px; color: #000; position: sticky; top: 20px; }
+.summary-title { font-weight: 900; text-transform: uppercase; margin-bottom: 20px; font-size: 1.2rem; }
+.summary-row { display: flex; justify-content: space-between; margin-bottom: 15px; font-weight: 600; }
+.total { font-size: 1.3rem; font-weight: 900; border-top: 2px solid #000; padding-top: 15px; }
+
+.buy-all-btn { 
+    width: 100%; background: #000; color: #cfffdc; border: none; 
+    padding: 18px; border-radius: 15px; font-weight: 900; cursor: pointer; 
+    text-transform: uppercase; letter-spacing: 2px; margin-top: 20px; transition: 0.3s;
+}
+.buy-all-btn:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+
+.empty-cart { text-align: center; color: #fff; padding: 100px 0; }
+.empty-cart button { background: #cfffdc; color: #000; border: none; padding: 15px 40px; border-radius: 50px; font-weight: 900; cursor: pointer; margin-top: 20px; }
+
+@media (max-width: 900px) {
+    .cart-container { grid-template-columns: 1fr; }
+}
+</style>
+{% endblock %}

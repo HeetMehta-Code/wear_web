@@ -1,0 +1,253 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="pay-page">
+
+    <!-- Breadcrumb -->
+    <div class="pay-breadcrumb">
+        <a href="{% url 'customer_dashboard' %}">Home</a>
+        <span>›</span>
+        <a href="{% url 'product_detail' product.id %}">{{ product.name }}</a>
+        <span>›</span>
+        <strong>Checkout</strong>
+    </div>
+
+    <div class="pay-layout">
+
+        <!-- LEFT: Order Summary -->
+        <div class="pay-summary-col">
+            <div class="section-container">
+                <h2 class="section-title">Order Summary</h2>
+                <div class="pay-summary-body">
+
+                    <!-- Product -->
+                    <div class="pay-product-row">
+                        {% if product.product_image %}
+                            <img src="{{ product.product_image.url }}" alt="{{ product.name }}" class="pay-product-img">
+                        {% else %}
+                            <div class="pay-product-no-img">No Image</div>
+                        {% endif %}
+                        <div class="pay-product-info">
+                            <div class="pay-product-brand">{{ product.vendor.shopname }}</div>
+                            <div class="pay-product-name">{{ product.name }}</div>
+                            <div class="pay-product-cat">{{ product.get_category_display }}</div>
+                        </div>
+                    </div>
+
+                    <div class="pay-divider"></div>
+
+                    <!-- Price breakdown -->
+                    <div class="pay-price-row">
+                        <span>Product Price</span>
+                        <span>₹{{ amount_display }}</span>
+                    </div>
+                    <div class="pay-price-row">
+                        <span>Delivery</span>
+                        <span class="pay-free">FREE</span>
+                    </div>
+                    {% if product.original_price %}
+                    <div class="pay-price-row pay-saving">
+                        <span>You Save</span>
+                        <span>₹{{ product.original_price|floatformat:0 }}</span>
+                    </div>
+                    {% endif %}
+
+                    <div class="pay-divider"></div>
+
+                    <div class="pay-price-row pay-total">
+                        <span>Total Payable</span>
+                        <span>₹{{ amount_display }}</span>
+                    </div>
+
+                    <p class="pay-secure-note">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        100% Secure Payment · Powered by Razorpay
+                    </p>
+                </div>
+            </div>
+
+            <!-- Order ID info -->
+            <div class="pay-order-info">
+                <span class="pay-order-label">Order ID</span>
+                <span class="pay-order-val">#{{ order.id }}</span>
+            </div>
+        </div>
+
+        <!-- RIGHT: Pay Button -->
+        <div class="pay-action-col">
+            <div class="section-container">
+                <h2 class="section-title">Payment</h2>
+                <div class="pay-action-body">
+
+                    <div class="pay-razorpay-logo">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="#072654"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                        <span>Razorpay Secure Checkout</span>
+                    </div>
+
+                    <div class="pay-amount-display">
+                        <span class="pay-amount-label">Amount to Pay</span>
+                        <span class="pay-amount-big">₹{{ amount_display }}</span>
+                    </div>
+
+                    <div class="pay-methods">
+                        <span class="pay-method-tag">💳 Cards</span>
+                        <span class="pay-method-tag">🏦 Net Banking</span>
+                        <span class="pay-method-tag">📱 UPI</span>
+                        <span class="pay-method-tag">💰 Wallets</span>
+                    </div>
+
+                    <!-- The actual pay button — triggers Razorpay modal -->
+                    <button id="rzp-button" class="pay-btn">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                        Pay ₹{{ amount_display }} Securely
+                    </button>
+
+                    <p class="pay-test-note">
+                        🧪 <strong>Test Mode:</strong> Use card <code>4111 1111 1111 1111</code>, any future expiry, CVV <code>111</code>
+                    </p>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Hidden form to POST payment data back after success -->
+<form id="payment-form" method="POST" action="{% url 'payment_success' %}" style="display:none;">
+    {% csrf_token %}
+    <input type="hidden" name="razorpay_payment_id" id="razorpay_payment_id">
+    <input type="hidden" name="razorpay_order_id"   id="razorpay_order_id">
+    <input type="hidden" name="razorpay_signature"  id="razorpay_signature">
+</form>
+
+<!-- Razorpay JS SDK -->
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<script>
+var options = {
+    key:         "{{ razorpay_key }}",
+    amount:      "{{ amount }}",          // in paise
+    currency:    "INR",
+    name:        "RAMYA Fashion",
+    description: "{{ product.name }}",
+    order_id:    "{{ razorpay_order_id }}",
+    prefill: {
+        name:  "{{ customer_name }}",
+        email: "{{ customer_email }}",
+    },
+    theme: {
+        color: "#000000"
+    },
+    handler: function(response) {
+        // Payment succeeded — fill hidden form and submit
+        document.getElementById('razorpay_payment_id').value = response.razorpay_payment_id;
+        document.getElementById('razorpay_order_id').value   = response.razorpay_order_id;
+        document.getElementById('razorpay_signature').value  = response.razorpay_signature;
+        document.getElementById('payment-form').submit();
+    },
+    modal: {
+        ondismiss: function() {
+            // User closed the modal without paying
+            alert('Payment cancelled. You can try again.');
+        }
+    }
+};
+
+document.getElementById('rzp-button').addEventListener('click', function(e) {
+    e.preventDefault();
+    var rzp = new Razorpay(options);
+    rzp.open();
+});
+</script>
+
+<style>
+.pay-page {
+    width: 90%; max-width: 1100px;
+    margin: 28px auto 80px;
+    display: flex; flex-direction: column; gap: 24px;
+}
+
+/* Breadcrumb */
+.pay-breadcrumb { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; }
+.pay-breadcrumb a { color: #cfffdc; text-decoration: none; opacity: 0.7; transition: opacity 0.2s; }
+.pay-breadcrumb a:hover { opacity: 1; }
+.pay-breadcrumb span { color: rgba(207,255,220,0.35); }
+.pay-breadcrumb strong { color: #cfffdc; }
+
+/* Layout */
+.pay-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
+
+/* Summary */
+.pay-summary-body { padding: 8px 4px; display: flex; flex-direction: column; gap: 14px; }
+
+.pay-product-row { display: flex; gap: 16px; align-items: flex-start; }
+.pay-product-img { width: 80px; height: 80px; border-radius: 12px; object-fit: cover; border: 2px solid #000; flex-shrink: 0; }
+.pay-product-no-img { width: 80px; height: 80px; border-radius: 12px; background: #ddd; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #aaa; flex-shrink: 0; }
+.pay-product-info { display: flex; flex-direction: column; gap: 3px; }
+.pay-product-brand { font-size: 9px; font-weight: 800; color: rgba(0,0,0,0.45); text-transform: uppercase; letter-spacing: 1.5px; }
+.pay-product-name { font-size: 14px; font-weight: 800; color: #000; }
+.pay-product-cat { font-size: 11px; color: rgba(0,0,0,0.5); }
+
+.pay-divider { height: 1px; background: rgba(0,0,0,0.12); }
+
+.pay-price-row { display: flex; justify-content: space-between; font-size: 13px; color: #000; font-weight: 500; }
+.pay-free { color: #2e7d32; font-weight: 700; }
+.pay-saving { color: #2e7d32; }
+.pay-total { font-size: 16px; font-weight: 900; color: #000; }
+
+.pay-secure-note {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 10px; color: rgba(0,0,0,0.45); font-weight: 500;
+}
+
+.pay-order-info {
+    background: rgba(207,255,220,0.1); border: 1.5px solid rgba(207,255,220,0.2);
+    border-radius: 12px; padding: 12px 16px;
+    display: flex; align-items: center; justify-content: space-between;
+}
+.pay-order-label { font-size: 10px; font-weight: 700; color: rgba(207,255,220,0.5); text-transform: uppercase; letter-spacing: 2px; }
+.pay-order-val { font-size: 14px; font-weight: 900; color: #cfffdc; }
+
+/* Action col */
+.pay-action-body { padding: 8px 4px; display: flex; flex-direction: column; gap: 20px; }
+
+.pay-razorpay-logo {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 13px; font-weight: 700; color: #000;
+}
+
+.pay-amount-display { display: flex; flex-direction: column; gap: 4px; }
+.pay-amount-label { font-size: 10px; font-weight: 700; color: rgba(0,0,0,0.45); text-transform: uppercase; letter-spacing: 2px; }
+.pay-amount-big { font-size: 2.4rem; font-weight: 900; color: #000; }
+
+.pay-methods { display: flex; flex-wrap: wrap; gap: 8px; }
+.pay-method-tag {
+    background: rgba(0,0,0,0.08); color: #000;
+    font-size: 11px; font-weight: 600;
+    padding: 5px 12px; border-radius: 16px;
+    border: 1.5px solid rgba(0,0,0,0.1);
+}
+
+.pay-btn {
+    background: #000; color: #cfffdc; border: none;
+    border-radius: 16px; padding: 18px 28px;
+    font-size: 15px; font-weight: 800; letter-spacing: 1px;
+    text-transform: uppercase; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 12px;
+    width: 100%; transition: background 0.2s, box-shadow 0.2s;
+}
+.pay-btn:hover { background: #1a1a1a; box-shadow: 0 0 20px rgba(207,255,220,0.4); }
+
+.pay-test-note {
+    font-size: 11px; color: rgba(0,0,0,0.5); line-height: 1.7;
+    background: rgba(0,0,0,0.05); border-radius: 10px; padding: 10px 14px;
+}
+.pay-test-note code { background: rgba(0,0,0,0.1); padding: 1px 6px; border-radius: 4px; font-size: 11px; }
+
+@media (max-width: 860px) {
+    .pay-layout { grid-template-columns: 1fr; }
+}
+</style>
+
+{% endblock %}

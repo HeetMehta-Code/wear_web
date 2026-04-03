@@ -70,7 +70,7 @@
             <div class="new-arrivals-grid">
                 {% if new_arrivals %}
                     {% for product in new_arrivals %}
-                    <div class="product-card">
+                    <a href="{% url 'product_detail' product.id %}" class="product-card product-card-link">
                         <div class="product-card-img-wrap">
                             <img class="product-card-img" src="{{ product.product_image.url }}" alt="{{ product.name }}">
                             <span class="product-card-new-tag">New</span>
@@ -83,8 +83,8 @@
                                 {% if product.original_price %}<span>₹{{ product.original_price }}</span>{% endif %}
                             </div>
                         </div>
-                        <button class="product-card-btn">Add to Cart</button>
-                    </div>
+                        <button class="product-card-btn">View Product</button>
+                    </a>
                     {% endfor %}
                 {% else %}
                     <div class="product-card"><div class="product-card-img-wrap"><img class="product-card-img" src="{% static 'images/person1.png' %}" alt="Product"><span class="product-card-new-tag">New</span></div><div class="product-card-info"><div class="product-card-brand">Allen Solly</div><div class="product-card-name">Slim Fit Shirt</div><div class="product-card-price">₹1,299 <span>₹1,999</span></div></div><button class="product-card-btn">Add to Cart</button></div>
@@ -760,7 +760,8 @@
 .na-popup-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 14px; padding: 20px 22px 24px; }
 @media (max-width: 900px) { .na-popup-grid { grid-template-columns: repeat(3,1fr); } }
 @media (max-width: 580px) { .na-popup-grid { grid-template-columns: repeat(2,1fr); } }
-.na-popup-card { background: #fff; border: 3px solid #000; border-radius: 14px; overflow: hidden; cursor: pointer; transition: transform 0.3s, box-shadow 0.3s; display: flex; flex-direction: column; }
+.na-popup-card { background: #fff; border: 3px solid #000; border-radius: 14px; overflow: hidden; cursor: pointer; transition: transform 0.3s, box-shadow 0.3s; display: flex; flex-direction: column; text-decoration: none; color: inherit; }
+.product-card-link { text-decoration: none; color: inherit; display: flex; flex-direction: column; }
 .na-popup-card:hover { transform: translateY(-5px); box-shadow: 0 0 12px 4px #cfffdc, 0 8px 20px rgba(0,0,0,0.2); }
 .na-popup-card-img-wrap { width: 100%; aspect-ratio: 3/4; overflow: hidden; background: #f0f0f0; position: relative; }
 .na-popup-card-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s; }
@@ -849,11 +850,12 @@ function renderPopupGrid(products) {
     grid.style.display  = 'grid';
     grid.innerHTML = products.map(p => {
         const oldPrice = p.original_price ? `<s>₹${parseFloat(p.original_price).toLocaleString('en-IN')}</s>` : '';
+        const productUrl = p.url || `/product/${p.id}/`;
         const discTag  = p.discount > 0 ? `<span class="na-popup-discount">−${p.discount}%</span>` : '';
         return `
-        <div class="na-popup-card">
+        <a href="${productUrl}" class="na-popup-card">
             <div class="na-popup-card-img-wrap">
-                <img class="na-popup-card-img" src="${p.image}" alt="${p.name}" loading="lazy">
+                <img class="na-popup-card-img" src="${p.image_url || p.image || ''}" alt="${p.name}" loading="lazy">
                 <span class="na-popup-tag">New</span>${discTag}
             </div>
             <div class="na-popup-card-info">
@@ -862,8 +864,8 @@ function renderPopupGrid(products) {
                 <div class="na-popup-card-cat">${p.category}</div>
                 <div class="na-popup-card-price">₹${parseFloat(p.price).toLocaleString('en-IN')} ${oldPrice}</div>
             </div>
-            <button class="na-popup-card-btn">Add to Cart</button>
-        </div>`;
+            <button class="na-popup-card-btn">View Product</button>
+        </a>`;
     }).join('');
 }
 </script>

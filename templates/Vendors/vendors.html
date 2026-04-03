@@ -4,6 +4,7 @@
 {% block content %}
 <div class="vendor-dashboard">
 
+    <!-- ══════════ HERO ══════════ -->
     <div class="vendor-hero">
         <div class="vendor-hero-left">
             <span class="vendor-hero-tag">Vendor Dashboard</span>
@@ -18,6 +19,7 @@
         </div>
     </div>
 
+    <!-- ══════════ STATS ROW ══════════ -->
     <div class="vendor-stats-row">
         <div class="vendor-stat-card">
             <div class="vendor-stat-icon">📦</div>
@@ -49,8 +51,10 @@
         </div>
     </div>
 
+    <!-- ══════════ CHART + TABLE ══════════ -->
     <div class="vendor-analytics-row">
 
+        <!-- Doughnut Chart — fixed size, no overflow -->
         <div class="vendor-chart-card">
             <div class="vendor-card-header">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
@@ -58,7 +62,10 @@
             </div>
             <div class="vendor-card-body chart-body">
                 {% if products %}
-                    <canvas id="viewsPieChart" width="240" height="240"></canvas>
+                    <div class="chart-canvas-wrap">
+                        <canvas id="viewsPieChart"></canvas>
+                    </div>
+                    <!-- Legend: shows color dot + product name + views -->
                     <div class="chart-legend" id="chartLegend"></div>
                 {% else %}
                     <div class="vendor-empty-small">
@@ -69,14 +76,16 @@
             </div>
         </div>
 
+        <!-- Product Performance Table — 5 rows then scroll -->
         <div class="vendor-top-card">
             <div class="vendor-card-header">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
                 Product Performance
             </div>
-            <div class="vendor-card-body" style="padding:0;">
+            <div class="vendor-card-body table-card-body">
                 {% if products %}
-                <table class="vendor-table">
+                <!-- Sticky header outside scroll area -->
+                <table class="vendor-table vendor-table-head">
                     <thead>
                         <tr>
                             <th>No.</th>
@@ -86,35 +95,40 @@
                             <th>Action</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        {% for product in products %}
-                        <tr id="row-{{ product.id }}">
-                            <td class="table-num">{{ forloop.counter }}</td>
-                            <td class="table-name">
-                                {% if product.product_image %}
-                                    <img src="{{ product.product_image.url }}" class="table-thumb" alt="{{ product.name }}">
-                                {% endif %}
-                                <span class="table-product-link">{{ product.name }}</span>
-                            </td>
-                            <td class="table-price">₹{{ product.price }}</td>
-                            <td class="table-stock {% if product.stock < 5 %}stock-low{% endif %}">
-                                {{ product.stock }}
-                            </td>
-                            <td>
-                                <div style="display: flex; gap: 8px;">
-                                    <button class="toggle-btn {% if product.is_active %}toggle-hide{% else %}toggle-show{% endif %}"
-                                            id="btn-{{ product.id }}" onclick="toggleProduct({{ product.id }})">
-                                        {% if product.is_active %}Hide{% else %}Show{% endif %}
-                                    </button>
-                                    <a href="{% url 'vendor_edit' product.id %}" class="toggle-btn edit-link">Edit</a>
-                                    <a href="{% url 'vendor_delete' product.id %}" class="toggle-btn delete-link" 
-                                       onclick="return confirm('Delete this product permanently?')">Delete</a>
-                                </div>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
                 </table>
+                <!-- Scrollable tbody — shows 5 rows, scroll for more -->
+                <div class="table-scroll-body">
+                    <table class="vendor-table">
+                        <tbody>
+                            {% for product in products %}
+                            <tr id="row-{{ product.id }}">
+                                <td class="table-num">{{ forloop.counter }}</td>
+                                <td class="table-name">
+                                    {% if product.product_image %}
+                                        <img src="{{ product.product_image.url }}" class="table-thumb" alt="{{ product.name }}">
+                                    {% endif %}
+                                    <span class="table-product-link">{{ product.name }}</span>
+                                </td>
+                                <td class="table-price">₹{{ product.price }}</td>
+                                <td class="table-stock {% if product.stock < 5 %}stock-low{% endif %}">
+                                    {{ product.stock }}
+                                </td>
+                                <td>
+                                    <div class="action-btns">
+                                        <button class="toggle-btn {% if product.is_active %}toggle-hide{% else %}toggle-show{% endif %}"
+                                                id="btn-{{ product.id }}" onclick="toggleProduct({{ product.id }})">
+                                            {% if product.is_active %}Hide{% else %}Show{% endif %}
+                                        </button>
+                                        <a href="{% url 'vendor_edit' product.id %}" class="toggle-btn edit-link">Edit</a>
+                                        <a href="{% url 'vendor_delete' product.id %}" class="toggle-btn delete-link"
+                                           onclick="return confirm('Delete this product permanently?')">Delete</a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
                 {% else %}
                     <div class="vendor-empty-small" style="padding:40px;">
                         <span>📋</span>
@@ -123,116 +137,665 @@
                 {% endif %}
             </div>
         </div>
+
     </div>
 
+    <!-- ══════════ MY PRODUCTS — 2 rows then scroll ══════════ -->
     <div class="section-container">
-        <h2 class="section-title" style="color: #cfffdc; margin-bottom: 20px;">My Products</h2>
+        <h2 class="section-title">My Products</h2>
         {% if products %}
-        <div class="vendor-products-grid">
-            {% for product in products %}
-            <div class="vendor-product-card" id="card-{{ product.id }}">
-                <a href="{% url 'vendor_edit' product.id %}" class="vendor-product-img-wrap">
-                    {% if product.product_image %}
-                        <img src="{{ product.product_image.url }}" alt="{{ product.name }}" class="vendor-product-img">
-                    {% endif %}
-                    <div class="vendor-product-edit-overlay">Click to Edit</div>
-                    {% if not product.is_active %}
-                        <div class="vendor-product-hidden-overlay" id="overlay-{{ product.id }}">Hidden</div>
-                    {% endif %}
-                </a>
-                <div class="vendor-product-info">
-                    <div class="vendor-product-name">{{ product.name }}</div>
-                    <div class="vendor-product-price">₹{{ product.price }}</div>
-                    <div class="vendor-product-meta">
-                        <span>Stock: {{ product.stock }}</span>
-                        <span>Views: {{ product.view_count }}</span>
+        <div class="vendor-products-scroll-wrap">
+            <div class="vendor-products-grid">
+                {% for product in products %}
+                <div class="vendor-product-card" id="card-{{ product.id }}">
+                    <a href="{% url 'vendor_edit' product.id %}" class="vendor-product-img-wrap">
+                        {% if product.product_image %}
+                            <img src="{{ product.product_image.url }}" alt="{{ product.name }}" class="vendor-product-img">
+                        {% else %}
+                            <div class="vendor-product-no-img">No Image</div>
+                        {% endif %}
+                        <div class="vendor-product-edit-overlay">Click to Edit</div>
+                        {% if not product.is_active %}
+                            <div class="vendor-product-hidden-overlay" id="overlay-{{ product.id }}">Hidden</div>
+                        {% endif %}
+                    </a>
+                    <div class="vendor-product-info">
+                        <div class="vendor-product-name">{{ product.name }}</div>
+                        <div class="vendor-product-price">₹{{ product.price }}</div>
+                        <div class="vendor-product-meta">
+                            <span>📦 {{ product.stock }}</span>
+                            <span>👁 {{ product.view_count }}</span>
+                        </div>
                     </div>
                 </div>
+                {% endfor %}
             </div>
-            {% endfor %}
         </div>
         {% else %}
         <div class="vendor-empty">
             <div class="vendor-empty-icon">🛍️</div>
             <h3>No products found</h3>
-            <a href="{% url 'vendor_upload' %}" class="vendor-empty-btn">Add Product</a>
+            <a href="{% url 'vendor_upload_product' %}" class="vendor-empty-btn">Add Product</a>
         </div>
         {% endif %}
+    </div>
+
+
+    <!-- ══════════ ACCOUNTING & FINANCE ══════════ -->
+    <div class="section-container">
+        <h2 class="section-title">💰 Accounting & Finance</h2>
+
+        <!-- Finance Stats Row -->
+        <div class="acc-stats-row">
+            <div class="acc-stat-card acc-stat-green">
+                <div class="acc-stat-icon">💵</div>
+                <div class="acc-stat-info">
+                    <span class="acc-stat-num">₹{{ total_revenue|floatformat:0|default:"0" }}</span>
+                    <span class="acc-stat-label">Total Revenue</span>
+                    <span class="acc-stat-sub">From completed orders</span>
+                </div>
+            </div>
+            <div class="acc-stat-card acc-stat-blue">
+                <div class="acc-stat-icon">🧾</div>
+                <div class="acc-stat-info">
+                    <span class="acc-stat-num">{{ total_orders|default:"0" }}</span>
+                    <span class="acc-stat-label">Orders Completed</span>
+                    <span class="acc-stat-sub">Payments received</span>
+                </div>
+            </div>
+            <div class="acc-stat-card acc-stat-yellow">
+                <div class="acc-stat-icon">📦</div>
+                <div class="acc-stat-info">
+                    <span class="acc-stat-num">{{ total_stock|default:"0" }}</span>
+                    <span class="acc-stat-label">Stock Remaining</span>
+                    <span class="acc-stat-sub">Units in inventory</span>
+                </div>
+            </div>
+            <div class="acc-stat-card acc-stat-red">
+                <div class="acc-stat-icon">⚠️</div>
+                <div class="acc-stat-info">
+                    <span class="acc-stat-num">{{ out_of_stock|default:"0" }}</span>
+                    <span class="acc-stat-label">Out of Stock</span>
+                    <span class="acc-stat-sub">Products need restocking</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Two column: Payment Methods + Low Stock -->
+        <div class="acc-body-row">
+
+            <!-- Payment Methods Breakdown -->
+            <div class="acc-card">
+                <div class="vendor-card-header">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                    Payment Methods
+                </div>
+                <div class="vendor-card-body">
+                    {% if payment_methods %}
+                        <div class="pay-method-list">
+                            {% for method, count in payment_methods.items %}
+                            <div class="pay-method-row">
+                                <div class="pay-method-left">
+                                    <span class="pay-method-icon">
+                                        {% if method == 'razorpay' %}💳
+                                        {% elif method == 'upi' %}📱
+                                        {% elif method == 'netbanking' %}🏦
+                                        {% elif method == 'wallet' %}👛
+                                        {% else %}💰{% endif %}
+                                    </span>
+                                    <span class="pay-method-name">
+                                        {% if method == 'razorpay' %}Razorpay (Card/UPI/Net)
+                                        {% elif method == 'upi' %}UPI
+                                        {% elif method == 'netbanking' %}Net Banking
+                                        {% elif method == 'wallet' %}Wallet
+                                        {% else %}{{ method|title }}{% endif %}
+                                    </span>
+                                </div>
+                                <span class="pay-method-count">{{ count }} order{{ count|pluralize }}</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="vendor-empty-small">
+                            <span>💳</span>
+                            <p>No payment data yet</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Low Stock Alert -->
+            <div class="acc-card">
+                <div class="vendor-card-header">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    Low Stock Alert
+                </div>
+                <div class="vendor-card-body">
+                    {% if low_stock_products %}
+                        <div class="low-stock-list">
+                            {% for product in low_stock_products %}
+                            <div class="low-stock-row">
+                                {% if product.product_image %}
+                                    <img src="{{ product.product_image.url }}" class="low-stock-img" alt="{{ product.name }}">
+                                {% endif %}
+                                <div class="low-stock-info">
+                                    <span class="low-stock-name">{{ product.name }}</span>
+                                    <span class="low-stock-price">₹{{ product.price }}</span>
+                                </div>
+                                <span class="low-stock-badge {% if product.stock == 0 %}stock-badge-out{% else %}stock-badge-low{% endif %}">
+                                    {% if product.stock == 0 %}Out{% else %}{{ product.stock }} left{% endif %}
+                                </span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="vendor-empty-small">
+                            <span>✅</span>
+                            <p>All products well stocked</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Recent Transactions -->
+            <div class="acc-card acc-card-wide">
+                <div class="vendor-card-header">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                    Recent Transactions
+                </div>
+                <div class="vendor-card-body" style="padding:0;">
+                    {% if recent_transactions %}
+                    <table class="vendor-table" style="table-layout:fixed;">
+                        <thead>
+                            <tr>
+                                <th style="width:50px;">No.</th>
+                                <th>Order ID</th>
+                                <th>Amount</th>
+                                <th>Method</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                    </table>
+                    <div class="table-scroll-body">
+                        <table class="vendor-table" style="table-layout:fixed;">
+                            <tbody>
+                                {% for payment in recent_transactions %}
+                                <tr>
+                                    <td class="table-num" style="width:50px;">{{ forloop.counter }}</td>
+                                    <td style="font-weight:700;">#{{ payment.order.id }}</td>
+                                    <td style="font-weight:900; color:#000;">₹{{ payment.order.totalAmount|floatformat:0 }}</td>
+                                    <td>
+                                        <span class="pay-tag">
+                                            {% if payment.paymentType == 'razorpay' %}💳 Razorpay
+                                            {% elif payment.paymentType == 'upi' %}📱 UPI
+                                            {% elif payment.paymentType == 'netbanking' %}🏦 Net Banking
+                                            {% else %}💰 {{ payment.paymentType|title }}{% endif %}
+                                        </span>
+                                    </td>
+                                    <td style="color:rgba(0,0,0,0.5); font-size:11px;">{{ payment.order.orderDate|date:"d M Y" }}</td>
+                                    <td>
+                                        <span class="txn-status txn-{{ payment.paymentStatus|lower }}">{{ payment.paymentStatus }}</span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                        <div class="vendor-empty-small" style="padding:36px;">
+                            <span>🧾</span>
+                            <p>No transactions yet</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+        </div>
     </div>
 
 </div>
 
 <style>
+/* ══ HIDE CART ══ */
 .header-cart { display: none !important; }
-.vendor-dashboard { width: 92%; max-width: 1500px; margin: 28px auto 80px; display: flex; flex-direction: column; gap: 28px; }
-.vendor-hero { background: #000; border: 3px solid #000; border-radius: 28px; padding: 36px 44px; display: flex; align-items: center; justify-content: space-between; box-shadow: inset 0 0 0 2px #cfffdc; }
-.vendor-hero-name { font-size: 2rem; font-weight: 900; color: #cfffdc; margin: 0; }
+
+/* ══ LAYOUT ══ */
+.vendor-dashboard {
+    width: 92%; max-width: 1500px;
+    margin: 28px auto 80px;
+    display: flex; flex-direction: column; gap: 28px;
+}
+
+.section-container {
+    width: 100%; max-width: 1190px;
+}
+/* ══ HERO ══ */
+.vendor-hero {
+    background: #000; border: 3px solid #000; border-radius: 28px;
+    padding: 36px 44px; display: flex; align-items: center;
+    justify-content: space-between;
+    box-shadow: inset 0 0 0 2px #cfffdc;
+}
+.vendor-hero-tag {
+    font-size: 10px; font-weight: 700; letter-spacing: 4px;
+    text-transform: uppercase; color: rgba(207,255,220,0.5);
+    display: block; margin-bottom: 8px;
+}
+.vendor-hero-name { font-size: 2rem; font-weight: 900; color: #cfffdc; margin: 0 0 6px; }
 .vendor-hero-sub { font-size: 13px; color: rgba(255,255,255,0.4); }
-.vendor-hero-btn { background: #cfffdc; color: #000; text-decoration: none; font-size: 13px; font-weight: 800; padding: 14px 28px; border-radius: 24px; display: flex; align-items: center; gap: 8px; }
+.vendor-hero-btn {
+    background: #cfffdc; color: #000; text-decoration: none;
+    font-size: 13px; font-weight: 800; padding: 14px 28px;
+    border-radius: 24px; display: flex; align-items: center; gap: 8px;
+    transition: background 0.2s, box-shadow 0.2s;
+}
+.vendor-hero-btn:hover { background: #a8ffc4; box-shadow: 0 0 14px rgba(207,255,220,0.4); }
 
-.vendor-stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
-.vendor-stat-card { background: #78b388; border: 3px solid #000; border-radius: 20px; padding: 24px 22px; display: flex; align-items: center; gap: 16px; box-shadow: inset 0 0 0 2px #000; }
-.vendor-stat-num { font-size: 2rem; font-weight: 900; color: #000; }
-.vendor-stat-label { font-size: 11px; font-weight: 700; color: rgba(0,0,0,0.55); text-transform: uppercase; }
+/* ══ STATS ══ */
+.vendor-stats-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 18px; }
+.vendor-stat-card {
+    background: #78b388; border: 3px solid #000; border-radius: 20px;
+    padding: 24px 22px; display: flex; align-items: center; gap: 16px;
+    box-shadow: inset 0 0 0 2px #000; transition: transform 0.25s;
+}
+.vendor-stat-card:hover { transform: translateY(-4px); }
+.vendor-stat-icon { font-size: 2.2rem; }
+.vendor-stat-num { display: block; font-size: 2rem; font-weight: 900; color: #000; line-height: 1; }
+.vendor-stat-label { display: block; font-size: 11px; font-weight: 700; color: rgba(0,0,0,0.55); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
 
-.vendor-analytics-row { display: grid; grid-template-columns: 320px 1fr; gap: 20px; }
-.vendor-chart-card, .vendor-top-card { background: #78b388; border: 3px solid #000; border-radius: 24px; overflow: hidden; box-shadow: inset 0 0 0 2px #000; }
-.vendor-card-header { background: #000; color: #cfffdc; padding: 13px 20px; font-size: 0.8rem; font-weight: 800; border-bottom: 2px solid #cfffdc; display: flex; align-items: center; gap: 10px; }
+/* ══ ANALYTICS ROW ══ */
+.vendor-analytics-row { display: grid; grid-template-columns: 300px 1fr; gap: 20px; }
+
+.vendor-chart-card, .vendor-top-card {
+    background: #78b388; border: 3px solid #000;
+    border-radius: 24px; overflow: hidden;
+    box-shadow: inset 0 0 0 2px #000;
+}
+.vendor-card-header {
+    background: #000; color: #cfffdc; padding: 13px 20px;
+    font-size: 0.8rem; font-weight: 800; letter-spacing: 3px;
+    text-transform: uppercase; border-bottom: 2px solid #cfffdc;
+    display: flex; align-items: center; gap: 10px;
+}
 .vendor-card-body { padding: 20px; }
 
-.vendor-table { width: 100%; border-collapse: collapse; }
-.vendor-table th { padding: 15px; text-align: left; font-size: 10px; font-weight: 800; text-transform: uppercase; border-bottom: 2px solid rgba(0,0,0,0.15); }
-.vendor-table td { padding: 12px 15px; border-bottom: 1px solid rgba(0,0,0,0.08); color: #000; font-size: 13px; vertical-align: middle; }
-.table-thumb { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; border: 2px solid rgba(0,0,0,0.1); margin-right: 10px; }
-.table-product-link { font-weight: 700; color: #000; text-decoration: none; }
-.stock-low { color: #c0392b; font-weight: 900; }
+/* ══ CHART — fixed size, no growth ══ */
+.chart-body { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+.chart-canvas-wrap {
+    width: 200px; height: 200px;
+    flex-shrink: 0;
+}
+#viewsPieChart { width: 200px !important; height: 200px !important; }
 
-.toggle-btn { border: none; padding: 6px 12px; border-radius: 8px; font-size: 9px; font-weight: 800; cursor: pointer; text-transform: uppercase; }
+/* Legend — color dot + name + views */
+.chart-legend { width: 100%; display: flex; flex-direction: column; gap: 8px; }
+.legend-item {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 11px; font-weight: 600; color: #000;
+}
+.legend-dot {
+    width: 12px; height: 12px; border-radius: 50%;
+    flex-shrink: 0; border: 1.5px solid #000;
+}
+.legend-views {
+    margin-left: auto;
+    background: #000; color: #cfffdc;
+    font-size: 9px; font-weight: 800;
+    padding: 2px 7px; border-radius: 8px;
+}
+
+/* ══ TABLE with scroll ══ */
+.table-card-body { padding: 0; display: flex; flex-direction: column; }
+
+/* Sticky thead */
+.vendor-top-card > .vendor-card-body > .vendor-table { width: 100%; border-collapse: collapse; }
+
+/* Scrollable tbody — 5 rows visible */
+.table-scroll-body {
+    max-height: 280px;   /* ~5 rows */
+    overflow-y: auto;
+}
+.table-scroll-body::-webkit-scrollbar { width: 5px; }
+.table-scroll-body::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); }
+.table-scroll-body::-webkit-scrollbar-thumb { background: #000; border-radius: 4px; }
+
+.vendor-table { width: 100%; border-collapse: collapse; font-size: 12px; table-layout: fixed; }
+.vendor-table thead tr { background: rgba(0,0,0,0.1); }
+.vendor-table th {
+    padding: 11px 14px; text-align: left;
+    font-size: 12px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase;
+    color: #000; border-bottom: 2px solid rgba(0,0,0,0.15);
+}
+/* Fixed column widths so header aligns exactly with data */
+.vendor-table th:nth-child(1), .vendor-table td:nth-child(1) { width: 48px; }
+.vendor-table th:nth-child(2), .vendor-table td:nth-child(2) { width: auto; }
+.vendor-table th:nth-child(3), .vendor-table td:nth-child(3) { width: 90px; }
+.vendor-table th:nth-child(4), .vendor-table td:nth-child(4) { width: 70px; }
+.vendor-table th:nth-child(5), .vendor-table td:nth-child(5) { width: 180px; }
+
+.vendor-table td {
+    padding: 10px 14px; border-bottom: 1px solid rgba(0,0,0,0.08);
+    color: #000; vertical-align: middle;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.vendor-table tr:last-child td { border-bottom: none; }
+.vendor-table tr:hover td { background: rgba(0,0,0,0.04); }
+
+.table-num { font-weight: 800; color: rgba(0,0,0,0.35); font-size: 11px; width: 36px; }
+.table-name { display: flex; align-items: center; gap: 10px; font-weight: 700; }
+.table-thumb { width: 38px; height: 38px; border-radius: 8px; object-fit: cover; border: 2px solid rgba(0,0,0,0.1); flex-shrink: 0; }
+.table-product-link { font-weight: 700; color: #000; }
+.table-price { font-weight: 800; white-space: nowrap; }
+.table-stock { font-weight: 800; }
+.stock-low { color: #c0392b; }
+
+.action-btns { display: flex; gap: 6px; }
+.toggle-btn {
+    border: none; padding: 6px 10px; border-radius: 8px;
+    font-size: 9px; font-weight: 800; cursor: pointer;
+    text-transform: uppercase; text-decoration: none;
+    display: inline-flex; align-items: center; transition: 0.2s;
+    white-space: nowrap;
+}
 .toggle-hide { background: #000; color: #cfffdc; }
+.toggle-hide:hover { background: #1a1a1a; }
 .toggle-show { background: #cfffdc; color: #000; }
-.edit-link { background: #000; color: #fff; text-decoration: none; }
-.delete-link { background: #331111; color: #ff5555; text-decoration: none; }
+.toggle-show:hover { background: #a8ffc4; }
+.edit-link { background: #142c1e; color: #cfffdc; }
+.edit-link:hover { background: #1e3d28; }
+.delete-link { background: #2d0a0a; color: #ff7575; }
+.delete-link:hover { background: #3d0f0f; }
 
-.vendor-products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
-.vendor-product-card { background: #fff; border: 3px solid #000; border-radius: 16px; overflow: hidden; transition: 0.3s; }
-.vendor-product-card:hover { border-color: #cfffdc; transform: translateY(-4px); }
-.vendor-product-img-wrap { position: relative; display: block; aspect-ratio: 1/1; }
-.vendor-product-img { width: 100%; height: 100%; object-fit: cover; }
-.vendor-product-edit-overlay { position: absolute; inset: 0; background: rgba(120, 179, 136, 0.5); display: flex; align-items: center; justify-content: center; color: #000; font-weight: 900; opacity: 0; transition: 0.3s; }
+/* ══ MY PRODUCTS — 2 rows then vertical scroll ══ */
+.vendor-products-scroll-wrap {
+    max-height: 560px;  /* exactly 2 rows of cards */
+    overflow-y: auto;
+    padding-right: 6px;
+}
+.vendor-products-scroll-wrap::-webkit-scrollbar { width: 6px; }
+.vendor-products-scroll-wrap::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); border-radius: 4px; }
+.vendor-products-scroll-wrap::-webkit-scrollbar-thumb { background: #000; border-radius: 4px; }
+
+.vendor-products-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 28px;
+    padding: 4px 0 8px;
+}
+
+.vendor-product-card {
+    background: #fff; border: 3px solid #000; border-radius: 16px;
+    overflow: hidden; display: flex; flex-direction: column;
+    transition: transform 0.25s, box-shadow 0.25s;
+}
+.vendor-product-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 0 12px 3px #cfffdc, 0 8px 20px rgba(0,0,0,0.2);
+}
+.vendor-product-img-wrap {
+    width: 100%; aspect-ratio: 1/1;
+    overflow: hidden; background: #f5f5f5;
+    position: relative; display: block; text-decoration: none;
+}
+.vendor-product-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s; }
+.vendor-product-card:hover .vendor-product-img { transform: scale(1.06); }
+.vendor-product-edit-overlay {
+    position: absolute; inset: 0;
+    background: rgba(120,179,136,0.6);
+    display: flex; align-items: center; justify-content: center;
+    color: #000; font-weight: 900; font-size: 12px;
+    letter-spacing: 1px; text-transform: uppercase;
+    opacity: 0; transition: opacity 0.3s;
+}
 .vendor-product-img-wrap:hover .vendor-product-edit-overlay { opacity: 1; }
-.vendor-product-info { padding: 12px; }
-.vendor-product-name { font-weight: 800; color: #000; font-size: 13px; }
-.vendor-product-price { color: #000; font-weight: 900; font-size: 16px; margin-top: 5px; }
-.vendor-product-meta { display: flex; justify-content: space-between; font-size: 10px; color: #666; margin-top: 8px; }
-.vendor-product-hidden-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 900; color: #eee01a }
+.vendor-product-hidden-overlay {
+    position: absolute; inset: 0; background: rgba(0,0,0,0.55);
+    display: flex; align-items: center; justify-content: center;
+    color: #eee01a; font-weight: 900; font-size: 11px;
+    letter-spacing: 2px; text-transform: uppercase;
+}
+.vendor-product-no-img {
+    width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; color: #aaa; font-weight: 600;
+}
+.vendor-product-info { padding: 10px 12px 8px; display: flex; flex-direction: column; gap: 3px; }
+.vendor-product-name { font-size: 12px; font-weight: 800; color: #000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.vendor-product-price { font-size: 14px; font-weight: 900; color: #000; }
+.vendor-product-meta { display: flex; gap: 10px; font-size: 10px; color: #666; font-weight: 600; margin-top: 2px; }
+
+/* ══ EMPTY STATES ══ */
+.vendor-empty {
+    display: flex; flex-direction: column; align-items: center;
+    padding: 50px 20px; gap: 10px; text-align: center;
+}
+.vendor-empty-icon { font-size: 3rem; }
+.vendor-empty h3 { font-size: 1.1rem; font-weight: 800; color: #000; }
+.vendor-empty-btn {
+    background: #000; color: #cfffdc; text-decoration: none;
+    font-size: 11px; font-weight: 800; letter-spacing: 1.5px;
+    text-transform: uppercase; padding: 10px 22px; border-radius: 20px;
+    margin-top: 6px; transition: background 0.2s;
+}
+.vendor-empty-btn:hover { background: #1a1a1a; }
+.vendor-empty-small { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 24px; text-align: center; color: rgba(0,0,0,0.5); font-size: 12px; }
+.vendor-empty-small span { font-size: 2rem; }
+
+/* ══ RESPONSIVE ══ */
+@media (max-width: 1200px) {
+    .vendor-products-grid { grid-template-columns: repeat(4,1fr); }
+    .vendor-analytics-row { grid-template-columns: 1fr; }
+}
+@media (max-width: 900px) {
+    .vendor-stats-row { grid-template-columns: repeat(2,1fr); }
+    .vendor-products-grid { grid-template-columns: repeat(3,1fr); }
+    .vendor-hero { flex-direction: column; gap: 20px; padding: 28px 24px; }
+}
+@media (max-width: 600px) {
+    .vendor-products-grid { grid-template-columns: repeat(2,1fr); }
+}
+
+/* ══════════════════════════════════
+   ACCOUNTING SECTION
+══════════════════════════════════ */
+.acc-stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    padding: 4px 0 20px;
+}
+
+.acc-stat-card {
+    border: 2.5px solid #000;
+    border-radius: 18px;
+    padding: 20px 18px;
+    display: flex; align-items: center; gap: 14px;
+    box-shadow: inset 0 0 0 1.5px rgba(0,0,0,0.08);
+    transition: transform 0.25s;
+}
+.acc-stat-card:hover { transform: translateY(-3px); }
+.acc-stat-green { background: #d4edda; }
+.acc-stat-blue  { background: #cce5ff; }
+.acc-stat-yellow { background: #fff3cd; }
+.acc-stat-red   { background: #f8d7da; }
+
+.acc-stat-icon { font-size: 2rem; flex-shrink: 0; }
+.acc-stat-num  { display: block; font-size: 1.6rem; font-weight: 900; color: #000; line-height: 1; }
+.acc-stat-label { display: block; font-size: 10px; font-weight: 800; color: rgba(0,0,0,0.55); text-transform: uppercase; letter-spacing: 1px; margin-top: 3px; }
+.acc-stat-sub  { display: block; font-size: 10px; color: rgba(0,0,0,0.4); margin-top: 2px; }
+
+/* Body row: 3 cards */
+.acc-body-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 2fr;
+    gap: 18px;
+}
+
+.acc-card {
+    background: #78b388;
+    border: 3px solid #000;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: inset 0 0 0 2px #000;
+}
+.acc-card-wide { grid-column: span 1; }
+
+/* Payment method list */
+.pay-method-list { display: flex; flex-direction: column; gap: 10px; }
+.pay-method-row {
+    display: flex; align-items: center; justify-content: space-between;
+    background: rgba(0,0,0,0.07);
+    border: 1.5px solid rgba(0,0,0,0.1);
+    border-radius: 12px; padding: 12px 14px;
+}
+.pay-method-left { display: flex; align-items: center; gap: 10px; }
+.pay-method-icon { font-size: 1.3rem; }
+.pay-method-name { font-size: 13px; font-weight: 700; color: #000; }
+.pay-method-count {
+    background: #000; color: #cfffdc;
+    font-size: 10px; font-weight: 800;
+    padding: 3px 10px; border-radius: 10px;
+}
+
+/* Low stock list */
+.low-stock-list { display: flex; flex-direction: column; gap: 10px; }
+.low-stock-row {
+    display: flex; align-items: center; gap: 12px;
+    background: rgba(0,0,0,0.07);
+    border: 1.5px solid rgba(0,0,0,0.1);
+    border-radius: 12px; padding: 10px 14px;
+}
+.low-stock-img { width: 36px; height: 36px; border-radius: 8px; object-fit: cover; border: 2px solid rgba(0,0,0,0.1); flex-shrink: 0; }
+.low-stock-info { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.low-stock-name { font-size: 12px; font-weight: 700; color: #000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.low-stock-price { font-size: 10px; color: rgba(0,0,0,0.5); }
+.stock-badge-low {
+    background: #fff3cd; color: #856404;
+    font-size: 10px; font-weight: 800;
+    padding: 3px 9px; border-radius: 10px;
+    white-space: nowrap; flex-shrink: 0;
+}
+.stock-badge-out {
+    background: #f8d7da; color: #721c24;
+    font-size: 10px; font-weight: 800;
+    padding: 3px 9px; border-radius: 10px;
+    flex-shrink: 0;
+}
+
+/* Transaction table extras */
+.pay-tag {
+    background: rgba(0,0,0,0.08);
+    color: #000; font-size: 10px; font-weight: 700;
+    padding: 3px 8px; border-radius: 8px; white-space: nowrap;
+}
+.txn-status {
+    font-size: 9px; font-weight: 800; letter-spacing: 1px;
+    text-transform: uppercase; padding: 3px 9px; border-radius: 10px;
+}
+.txn-completed { background: #d4edda; color: #155724; }
+.txn-pending   { background: #fff3cd; color: #856404; }
+.txn-failed    { background: #f8d7da; color: #721c24; }
+
+@media (max-width: 1100px) {
+    .acc-stats-row { grid-template-columns: repeat(2,1fr); }
+    .acc-body-row  { grid-template-columns: 1fr; }
+}
+@media (max-width: 600px) {
+    .acc-stats-row { grid-template-columns: 1fr; }
+}
 </style>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <script>
-const labels = {{ labels|safe }};
+const labels    = {{ labels|safe }};
 const chartData = {{ chart_data|safe }};
+
+// 5 distinct colors that match the design
+const COLORS = ['#F55E27','#FFD863','#F25CB7','#590B99','#27C8D6'];
+
 if (labels.length > 0 && document.getElementById('viewsPieChart')) {
     const ctx = document.getElementById('viewsPieChart').getContext('2d');
+
+    // If all views are 0, show equal segments so chart isn't blank
+    const displayData = chartData.every(v => v === 0)
+        ? chartData.map(() => 1)
+        : chartData;
+
     new Chart(ctx, {
         type: 'doughnut',
         data: {
             labels: labels,
             datasets: [{
-                data: chartData,
-                backgroundColor: ['#b115b1','#d36913','#1356d3','#eee01a','#666'],
+                data: displayData,
+                backgroundColor: COLORS,
                 borderColor: '#000',
                 borderWidth: 2,
+                hoverOffset: 6,
             }]
         },
-        options: { responsive: false, plugins: { legend: { display: false } }, cutout: '60%' }
+        options: {
+            responsive: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(ctx) {
+                            return ' ' + ctx.label + ': ' + chartData[ctx.dataIndex] + ' views';
+                        }
+                    }
+                }
+            },
+            cutout: '58%',
+        }
+    });
+
+    // Build custom legend with color, name, view count
+    const legend = document.getElementById('chartLegend');
+    labels.forEach(function(label, i) {
+        const item = document.createElement('div');
+        item.className = 'legend-item';
+        item.innerHTML =
+            '<span class="legend-dot" style="background:' + COLORS[i] + ';"></span>' +
+            '<span>' + label + '</span>' +
+            '<span class="legend-views">' + chartData[i] + ' views</span>';
+        legend.appendChild(item);
     });
 }
 
+// Toggle product active/inactive
 function toggleProduct(productId) {
     fetch('/vendor/toggle/' + productId + '/', {
         method: 'POST',
-        headers: { 'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/json' }
-    }).then(() => location.reload());
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+        if (data.status === 'ok') {
+            const isActive = data.is_active;
+            const btn      = document.getElementById('btn-' + productId);
+            if (btn) {
+                btn.textContent = isActive ? 'Hide' : 'Show';
+                btn.className   = 'toggle-btn ' + (isActive ? 'toggle-hide' : 'toggle-show');
+            }
+            const imgWrap = document.querySelector('#card-' + productId + ' .vendor-product-img-wrap');
+            if (imgWrap) {
+                let overlay = document.getElementById('overlay-' + productId);
+                if (!isActive && !overlay) {
+                    overlay = document.createElement('div');
+                    overlay.className = 'vendor-product-hidden-overlay';
+                    overlay.id = 'overlay-' + productId;
+                    overlay.textContent = 'Hidden';
+                    imgWrap.appendChild(overlay);
+                } else if (isActive && overlay) {
+                    overlay.remove();
+                }
+            }
+        }
+    });
 }
 </script>
 {% endblock %}

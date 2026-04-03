@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="result-page">
+
+    <div class="result-card result-success">
+        <div class="result-icon">✅</div>
+        <h1 class="result-title">Payment Successful!</h1>
+        <p class="result-sub">Your order has been placed and confirmed. Thank you for shopping with RAMYA!</p>
+
+        <div class="result-details">
+            <div class="result-detail-row">
+                <span class="result-detail-label">Order ID</span>
+                <span class="result-detail-val">#{{ order.id }}</span>
+            </div>
+            <div class="result-detail-row">
+                <span class="result-detail-label">Amount Paid</span>
+                <span class="result-detail-val">₹{{ order.totalAmount|floatformat:0 }}</span>
+            </div>
+            <div class="result-detail-row">
+                <span class="result-detail-label">Payment ID</span>
+                <span class="result-detail-val">{{ payment.razorpay_payment_id }}</span>
+            </div>
+            <div class="result-detail-row">
+                <span class="result-detail-label">Status</span>
+                <span class="result-detail-val result-status-ok">Confirmed ✓</span>
+            </div>
+            <div class="result-detail-row">
+                <span class="result-detail-label">Delivery</span>
+                <span class="result-detail-val">Expected in 5–7 business days</span>
+            </div>
+        </div>
+
+        <div class="result-actions">
+            <a href="{% url 'my_orders' %}" class="result-btn-primary">View My Orders</a>
+            <a href="{% url 'customer_dashboard' %}" class="result-btn-secondary">Continue Shopping</a>
+        </div>
+    </div>
+
+</div>
+
+<style>
+.result-page {
+    width: 90%; max-width: 600px;
+    margin: 60px auto 80px;
+    display: flex; flex-direction: column; align-items: center;
+}
+.result-card {
+    width: 100%; border: 3px solid #000;
+    border-radius: 28px; overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    display: flex; flex-direction: column; align-items: center;
+    padding: 48px 40px; gap: 16px; text-align: center;
+}
+.result-success { background: #78b388; box-shadow: inset 0 0 0 2px #000, 0 8px 32px rgba(0,0,0,0.25); }
+.result-icon { font-size: 4rem; }
+.result-title { font-size: 2rem; font-weight: 900; color: #000; margin: 0; }
+.result-sub { font-size: 14px; color: rgba(0,0,0,0.6); line-height: 1.7; max-width: 380px; }
+
+.result-details {
+    width: 100%; background: rgba(0,0,0,0.08);
+    border: 1.5px solid rgba(0,0,0,0.12); border-radius: 16px;
+    padding: 18px 20px; display: flex; flex-direction: column; gap: 12px;
+    margin-top: 8px;
+}
+.result-detail-row { display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
+.result-detail-label { font-size: 10px; font-weight: 700; color: rgba(0,0,0,0.45); text-transform: uppercase; letter-spacing: 1.5px; }
+.result-detail-val { font-size: 13px; font-weight: 700; color: #000; }
+.result-status-ok { color: #1a5c1a; font-weight: 900; }
+
+.result-actions { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-top: 8px; }
+.result-btn-primary {
+    background: #000; color: #cfffdc; text-decoration: none;
+    font-size: 12px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase;
+    padding: 13px 28px; border-radius: 22px;
+    transition: background 0.2s, box-shadow 0.2s;
+}
+.result-btn-primary:hover { background: #1a1a1a; box-shadow: 0 0 14px rgba(207,255,220,0.4); }
+.result-btn-secondary {
+    background: transparent; color: #000; text-decoration: none;
+    font-size: 12px; font-weight: 700; letter-spacing: 1px;
+    padding: 12px 24px; border-radius: 22px;
+    border: 2px solid rgba(0,0,0,0.3);
+    transition: border-color 0.2s, background 0.2s;
+}
+.result-btn-secondary:hover { border-color: #000; background: rgba(0,0,0,0.06); }
+</style>
+{% endblock %}

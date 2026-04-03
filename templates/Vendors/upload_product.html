@@ -108,6 +108,53 @@
     }
     .remove-btn:hover { background: #441111; }
 
+    /* Color block styles */
+    .color-block {
+        background: #0a0a0a;
+        border: 1px solid #222;
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 16px;
+    }
+    .color-block-header {
+        display: flex;
+        gap: 16px;
+        align-items: flex-start;
+        margin-bottom: 16px;
+    }
+    .color-header-fields {
+        display: grid;
+        grid-template-columns: 1fr 1fr auto;
+        gap: 16px;
+        flex: 1;
+        align-items: end;
+    }
+    .size-rows-container {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+    .size-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr 45px;
+        gap: 12px;
+        align-items: center;
+    }
+    .add-size-btn {
+        background: transparent;
+        color: #78b388;
+        border: 1px dashed #333;
+        padding: 8px 16px;
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 700;
+        transition: 0.2s;
+        width: fit-content;
+    }
+    .add-size-btn:hover { border-color: #78b388; color: #cfffdc; }
+
     /* 6. Submit Button */
     .btn-publish { 
         width: 100%; 
@@ -188,20 +235,15 @@
 
             <hr style="border: 0; border-top: 1px solid #222; margin: 30px 0;">
 
-            <h3 style="color: #78b388;">Product Variants (Size & Color)</h3>
-            <p style="color: #666; font-size: 12px; margin-bottom: 15px;">The photo of the first variant will be used as the main product image.</p>
-            
-            <div id="variant-container">
-                <div class="variant-row">
-                    <input type="text" name="variant_color[]" placeholder="Color" required>
-                    <input type="text" name="variant_size[]" placeholder="Size">
-                    <input type="number" name="variant_qty[]" placeholder="Stock" required>
-                    <input type="file" name="variant_image[]" accept="image/*" required>
-                    <button type="button" class="remove-btn" onclick="this.parentElement.remove()">×</button>
-                </div>
-            </div>
+            <h3 style="color: #78b388;">Product Variants</h3>
+            <p style="color: #666; font-size: 12px; margin-bottom: 20px;">
+                Add one colour at a time — upload <strong style="color:#cfffdc;">one image per colour</strong>. 
+                Then add all sizes for that colour below it. The first colour's image becomes the main product photo.
+            </p>
 
-            <button type="button" class="add-variant-btn" onclick="addVariantRow()">+ Add Another Variation</button>
+            <div id="color-container"></div>
+
+            <button type="button" class="add-variant-btn" onclick="addColorBlock()">+ Add Colour</button>
 
             <button type="submit" class="btn-publish">Publish Product</button>
         </form>
@@ -209,17 +251,17 @@
 </div>
 
 <script>
+    // ── Subcategory data ──
     const subData = {
-        'mens': ['Jacket', 'T-Shirt', 'Shirt', 'Hoodie', 'Pants', 'Traditional'],
-        'womens': ['Saree', 'Kurti', 'Pant', 'T-Shirt', 'Western', 'Sweateshirt'],
-        'kids': ['Boys', 'Girls']
+        'mens':   ['Jacket', 'T-Shirt', 'Shirt', 'Hoodie', 'Pants', 'Traditional'],
+        'womens': ['Saree', 'Kurti', 'Pant', 'T-Shirt', 'Western', 'Sweatshirt'],
+        'kids':   ['Boys', 'Girls']
     };
 
     function updateSubCategories() {
         const cat = document.getElementById('id_category').value;
         const subSelect = document.getElementById('id_sub_category');
         subSelect.innerHTML = '';
-        
         const options = subData[cat] || ['Other'];
         options.forEach(opt => {
             const el = document.createElement('option');
@@ -229,20 +271,82 @@
         });
     }
 
-    function addVariantRow() {
-        const container = document.getElementById('variant-container');
-        const div = document.createElement('div');
-        div.className = 'variant-row';
-        div.innerHTML = `
-            <input type="text" name="variant_color[]" placeholder="Color">
-            <input type="text" name="variant_size[]" placeholder="Size">
-            <input type="number" name="variant_qty[]" placeholder="Stock" required>
-            <input type="file" name="variant_image[]" accept="image/*">
-            <button type="button" class="remove-btn" onclick="this.parentElement.remove()">×</button>
+    // ── Add a colour block (one image per colour, multiple sizes under it) ──
+    function addColorBlock() {
+        const container = document.getElementById('color-container');
+        const colorId = Date.now();
+        const block = document.createElement('div');
+        block.className = 'color-block';
+        block.id = 'color-' + colorId;
+        block.innerHTML = `
+            <div class="color-block-header">
+                <div class="color-header-fields">
+                    <div>
+                        <label style="color:#cfffdc;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;">Colour Name</label>
+                        <input type="text" name="variant_color[]" placeholder="e.g. Red, Navy Blue" class="color-name-input" oninput="updateColorPreview(this)" required>
+                    </div>
+                    <div>
+                        <label style="color:#cfffdc;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;">Colour Image</label>
+                        <input type="file" name="variant_image[]" accept="image/*" onchange="previewColorImg(this)" required>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:10px;margin-top:20px;">
+                        <div class="color-preview-dot" id="dot-${colorId}" style="width:32px;height:32px;border-radius:50%;border:2px solid #333;background:#333;flex-shrink:0;"></div>
+                        <img id="imgPreview-${colorId}" src="" style="display:none;width:50px;height:50px;object-fit:cover;border-radius:8px;border:2px solid #78b388;">
+                    </div>
+                </div>
+                <button type="button" class="remove-btn" style="width:45px;height:45px;margin-top:20px;flex-shrink:0;" onclick="document.getElementById('color-${colorId}').remove()">×</button>
+            </div>
+
+            <div class="size-rows-container" id="sizes-${colorId}">
+                <div class="size-row">
+                    <input type="text" name="variant_size[]" placeholder="Size (e.g. S, M, XL, 42)">
+                    <input type="number" name="variant_qty[]" placeholder="Stock qty" min="0" required>
+                    <button type="button" class="remove-btn" style="width:45px;height:45px;" onclick="this.parentElement.remove()">×</button>
+                </div>
+            </div>
+
+            <button type="button" class="add-size-btn" onclick="addSizeRow('sizes-${colorId}', '${colorId}')">+ Add Size</button>
         `;
-        container.appendChild(div);
+        container.appendChild(block);
     }
 
+    function addSizeRow(containerId, colorId) {
+        const container = document.getElementById(containerId);
+        // Get the color name from this block
+        const block = document.getElementById('color-' + colorId);
+        const colorName = block.querySelector('.color-name-input').value;
+        const row = document.createElement('div');
+        row.className = 'size-row';
+        row.innerHTML = `
+            <input type="text" name="variant_size[]" placeholder="Size (e.g. S, M, XL, 42)">
+            <input type="number" name="variant_qty[]" placeholder="Stock qty" min="0" required>
+            <button type="button" class="remove-btn" style="width:45px;height:45px;" onclick="this.parentElement.remove()">×</button>
+        `;
+        container.appendChild(row);
+    }
+
+    function updateColorPreview(input) {
+        const block = input.closest('.color-block');
+        const colorId = block.id.replace('color-', '');
+        const dot = document.getElementById('dot-' + colorId);
+        if (dot) {
+            dot.style.backgroundColor = input.value.toLowerCase() || '#333';
+        }
+    }
+
+    function previewColorImg(input) {
+        const block = input.closest('.color-block');
+        const colorId = block.id.replace('color-', '');
+        const preview = document.getElementById('imgPreview-' + colorId);
+        if (input.files && input.files[0] && preview) {
+            const reader = new FileReader();
+            reader.onload = e => { preview.src = e.target.result; preview.style.display = 'block'; };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    // Add first color block on load
+    addColorBlock();
     updateSubCategories();
 </script>
 {% endblock %}

@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="static-page">
+
+    <!-- Hero -->
+    <div class="static-hero">
+        <div class="static-hero-text">
+            <span class="static-tag">Get In Touch</span>
+            <h1 class="static-title">Contact Us</h1>
+            <p class="static-subtitle">Have a question, complaint or just want to say hello? We're always happy to hear from you.</p>
+        </div>
+        <div class="static-hero-emoji">📬</div>
+    </div>
+
+    <div class="contact-layout">
+
+        <!-- LEFT: Contact Info -->
+        <div class="contact-info-col">
+            <div class="section-container">
+                <h2 class="section-title">Reach Us</h2>
+                <div class="contact-info-body">
+                    <div class="contact-info-item">
+                        <div class="contact-info-icon">📞</div>
+                        <div class="contact-info-text">
+                            <span class="contact-info-label">Phone</span>
+                            <span class="contact-info-value">+91 98765 43210</span>
+                            <span class="contact-info-sub">Mon–Sat, 10am–6pm IST</span>
+                        </div>
+                    </div>
+                    <div class="contact-info-item">
+                        <div class="contact-info-icon">✉️</div>
+                        <div class="contact-info-text">
+                            <span class="contact-info-label">Email</span>
+                            <a href="mailto:ramya.wearweb@gmail.com" class="contact-info-value contact-link">ramya.wearweb@gmail.com</a>
+                            <span class="contact-info-sub">We reply within 24 hours</span>
+                        </div>
+                    </div>
+                    <div class="contact-info-item">
+                        <div class="contact-info-icon">📍</div>
+                        <div class="contact-info-text">
+                            <span class="contact-info-label">Address</span>
+                            <span class="contact-info-value">RAMYA Fashion HQ</span>
+                            <span class="contact-info-sub">Gandhinagar, Gujarat, India — 382010</span>
+                        </div>
+                    </div>
+                    <div class="contact-info-item">
+                        <div class="contact-info-icon">🕐</div>
+                        <div class="contact-info-text">
+                            <span class="contact-info-label">Support Hours</span>
+                            <span class="contact-info-value">Mon – Sat</span>
+                            <span class="contact-info-sub">10:00 AM to 6:00 PM IST</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT: Message Form -->
+        <div class="contact-form-col">
+            <div class="section-container">
+                <h2 class="section-title">Send a Message</h2>
+                <div class="contact-form-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="contact-success">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+                    <form method="POST" action="{% url 'contact_us' %}" class="contact-form">
+                        {% csrf_token %}
+                        <div class="contact-field">
+                            <label class="contact-label">Your Name</label>
+                            <input type="text" name="name" class="contact-input" placeholder="e.g. Priya Sharma" required>
+                        </div>
+                        <div class="contact-field">
+                            <label class="contact-label">Email Address</label>
+                            <input type="email" name="email" class="contact-input" placeholder="your@email.com" required>
+                        </div>
+                        <div class="contact-field">
+                            <label class="contact-label">Subject</label>
+                            <select name="subject" class="contact-input contact-select">
+                                <option value="">Select a topic</option>
+                                <option value="order">Order Issue</option>
+                                <option value="return">Return / Refund</option>
+                                <option value="product">Product Query</option>
+                                <option value="vendor">Become a Vendor</option>
+                                <option value="feedback">General Feedback</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="contact-field">
+                            <label class="contact-label">Your Message</label>
+                            <textarea name="message" class="contact-input contact-textarea" rows="5" placeholder="Tell us how we can help..." required></textarea>
+                        </div>
+                        <button type="submit" class="contact-submit-btn">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                            Send Message
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<style>
+.static-page {
+    width: 90%; max-width: 1300px;
+    margin: 28px auto 80px;
+    display: flex; flex-direction: column; gap: 28px;
+}
+.static-hero {
+    background: #000; border: 3px solid #000; border-radius: 28px;
+    padding: 44px 52px; display: flex; align-items: center;
+    justify-content: space-between; gap: 24px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 0 0 2px #cfffdc;
+}
+.static-tag { font-size: 10px; font-weight: 700; letter-spacing: 4px; text-transform: uppercase; color: rgba(207,255,220,0.5); display: block; margin-bottom: 10px; }
+.static-title { font-size: 2.8rem; font-weight: 900; color: #cfffdc; letter-spacing: 2px; margin: 0 0 12px; }
+.static-subtitle { font-size: 14px; color: rgba(255,255,255,0.45); line-height: 1.8; max-width: 440px; }
+.static-hero-emoji { font-size: 6rem; flex-shrink: 0; }
+
+.contact-layout { display: grid; grid-template-columns: 1fr 1.4fr; gap: 24px; }
+
+/* Info col */
+.contact-info-body { padding: 4px 4px 8px; display: flex; flex-direction: column; gap: 20px; }
+.contact-info-item { display: flex; align-items: flex-start; gap: 16px; padding: 16px; background: rgba(0,0,0,0.06); border-radius: 14px; border: 1.5px solid rgba(0,0,0,0.1); }
+.contact-info-icon { font-size: 1.6rem; flex-shrink: 0; width: 40px; text-align: center; }
+.contact-info-text { display: flex; flex-direction: column; gap: 3px; }
+.contact-info-label { font-size: 9px; font-weight: 800; color: rgba(0,0,0,0.4); text-transform: uppercase; letter-spacing: 2px; }
+.contact-info-value { font-size: 14px; font-weight: 700; color: #000; }
+.contact-info-sub { font-size: 11px; color: rgba(0,0,0,0.45); }
+.contact-link { text-decoration: none; color: #000; }
+.contact-link:hover { text-decoration: underline; }
+
+/* Form */
+.contact-form-body { padding: 4px 4px 8px; }
+.contact-success { background: #d4edda; color: #155724; border: 1.5px solid #c3e6cb; border-radius: 10px; padding: 12px 16px; font-size: 13px; font-weight: 600; margin-bottom: 16px; }
+.contact-form { display: flex; flex-direction: column; gap: 16px; }
+.contact-field { display: flex; flex-direction: column; gap: 6px; }
+.contact-label { font-size: 10px; font-weight: 800; color: rgba(0,0,0,0.5); text-transform: uppercase; letter-spacing: 2px; }
+.contact-input {
+    background: #fff; border: 2px solid rgba(0,0,0,0.15);
+    border-radius: 12px; padding: 12px 16px;
+    font-size: 13px; font-family: Arial, sans-serif;
+    outline: none; color: #000;
+    transition: border-color 0.2s;
+}
+.contact-input:focus { border-color: #000; }
+.contact-input::placeholder { color: #bbb; }
+.contact-select { cursor: pointer; }
+.contact-textarea { resize: vertical; }
+.contact-submit-btn {
+    background: #000; color: #cfffdc; border: none;
+    border-radius: 16px; padding: 14px 32px;
+    font-size: 13px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase;
+    cursor: pointer; display: inline-flex; align-items: center; gap: 10px;
+    align-self: flex-start; transition: background 0.2s, box-shadow 0.2s;
+}
+.contact-submit-btn:hover { background: #1a1a1a; box-shadow: 0 0 14px rgba(207,255,220,0.3); }
+
+@media (max-width: 900px) {
+    .contact-layout { grid-template-columns: 1fr; }
+    .static-hero { flex-direction: column; padding: 28px 24px; }
+    .static-title { font-size: 2rem; }
+    .static-hero-emoji { font-size: 4rem; }
+}
+</style>
+
+{% endblock %}

@@ -158,10 +158,12 @@ class Payment(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
     paymentType = models.CharField(max_length=50)
     paymentStatus = models.CharField(max_length=50)
-
+    razorpay_order_id  = models.CharField(max_length=100, blank=True, null=True)
+    razorpay_payment_id = models.CharField(max_length=100, blank=True, null=True)
+    razorpay_signature  = models.CharField(max_length=200, blank=True, null=True)
+ 
     def __str__(self):
-        return f"Payment for Order {self.order.id}"
-
+        return f"Payment for Order {self.order.id} — {self.paymentStatus}"
 
 class Review(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)

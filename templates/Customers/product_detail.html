@@ -1,0 +1,801 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="pd-page">
+
+    <!-- ══════════ BREADCRUMB ══════════ -->
+    <div class="pd-breadcrumb">
+        <a href="{% url 'customer_dashboard' %}">Home</a>
+        <span>›</span>
+        <a href="#">{{ product.get_category_display }}</a>
+        <span>›</span>
+        <strong>{{ product.name }}</strong>
+    </div>
+
+    <!-- ══════════ TOP SECTION: IMAGE + DETAILS ══════════ -->
+    <div class="pd-top">
+
+        <!-- LEFT: Big Product Image -->
+        <div class="pd-image-col">
+            <div class="pd-main-img-wrap">
+                {% if product.product_image %}
+                    <img src="{{ product.product_image.url }}" alt="{{ product.name }}" class="pd-main-img" id="mainProductImg">
+                {% else %}
+                    <div class="pd-no-img">No Image Available</div>
+                {% endif %}
+                <span class="pd-category-tag">{{ product.get_category_display }}</span>
+                {% if product.discount_percent > 0 %}
+                    <span class="pd-discount-tag">-{{ product.discount_percent }}% OFF</span>
+                {% endif %}
+            </div>
+
+            <!-- Color image switcher — JS handles deduplication -->
+            {% if product.variants.all %}
+            <div class="pd-thumbnails" id="colorThumbnails">
+                {# thumbnails built by JS from variantData below #}
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- RIGHT: Product Details -->
+        <div class="pd-details-col">
+
+            <!-- Product Name -->
+            <div class="pd-vendor-tag">{{ product.vendor.shopname }}</div>
+            <h1 class="pd-product-name">{{ product.name }}</h1>
+
+            <!-- Price -->
+            <div class="pd-price-row">
+                <span class="pd-price">₹{{ product.price }}</span>
+                {% if product.original_price %}
+                    <span class="pd-original-price">₹{{ product.original_price }}</span>
+                    <span class="pd-discount-pill">{{ product.discount_percent }}% OFF</span>
+                {% endif %}
+            </div>
+            <p class="pd-tax-note">Inclusive of all taxes · Free delivery on orders above ₹499</p>
+
+            <!-- Size Selection -->
+            {% if product.variants.all %}
+            <div class="pd-section">
+                <div class="pd-section-label">
+                    Select Size
+                    <span class="pd-size-guide">Size Guide →</span>
+                </div>
+                <div class="pd-size-grid">
+                    {% for variant in product.variants.all %}
+                        {% if variant.size %}
+                        <button class="pd-size-btn {% if variant.variant_stock == 0 %}pd-size-out{% endif %}"
+                                onclick="selectSize(this, '{{ variant.size.name }}')"
+                                {% if variant.variant_stock == 0 %}disabled{% endif %}>
+                            {{ variant.size.name }}
+                            {% if variant.variant_stock == 0 %}<span class="pd-out-label">Out</span>{% endif %}
+                        </button>
+                        {% endif %}
+                    {% empty %}
+                        <span class="pd-no-variants">One size fits all</span>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Color Selection — unique colors only, image switches on click -->
+            <div class="pd-section">
+                <div class="pd-section-label">Select Color</div>
+                <div class="pd-color-row" id="colorButtons">
+                    {# rendered by JS #}
+                </div>
+                <span class="pd-selected-color" id="selectedColorLabel">Select a colour</span>
+            </div>
+            {% else %}
+            <!-- No variants — show stock only -->
+            <div class="pd-section">
+                <div class="pd-stock-info">
+                    {% if product.stock > 0 %}
+                        <span class="pd-in-stock">✓ In Stock</span>
+                        <span class="pd-stock-count">{{ product.stock }} units available</span>
+                    {% else %}
+                        <span class="pd-out-of-stock">✕ Out of Stock</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Action Buttons -->
+            <div class="pd-action-row">
+                <button class="pd-cart-btn" onclick="location.href='{% url 'add_to_cart' product.id %}'">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+                        <line x1="3" y1="6" x2="21" y2="6"/>
+                        <path d="M16 10a4 4 0 0 1-8 0"/>
+                    </svg>
+                    Add to Cart
+                </button>
+                <button class="pd-buy-btn" onclick="location.href='{% url 'initiate_payment' product.id %}'">
+                    Buy Now
+                </button>
+            </div>
+            
+            <!-- Vendor Info -->
+            <div class="pd-vendor-card">
+                <div class="pd-vendor-card-header">
+                    <div class="pd-vendor-avatar">
+                        {% if product.vendor.vendor_logo %}
+                            <img src="{{ product.vendor.vendor_logo.url }}" alt="{{ product.vendor.shopname }}">
+                        {% else %}
+                            <span>{{ product.vendor.shopname|first|upper }}</span>
+                        {% endif %}
+                    </div>
+                    <div class="pd-vendor-info">
+                        <div class="pd-vendor-shop">{{ product.vendor.shopname }}</div>
+                        <div class="pd-vendor-owner">{{ product.vendor.user.get_full_name|default:product.vendor.user.email }}</div>
+                        <div class="pd-vendor-since">
+                            Member since {{ product.vendor.user.date_joined|date:"F Y" }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ══════════ DESCRIPTION ══════════ -->
+    <div class="pd-desc-section section-container">
+        <h2 class="section-title">Product Description</h2>
+        <div class="pd-desc-body">
+            {% if product.description %}
+                <p class="pd-desc-text">{{ product.description }}</p>
+            {% else %}
+                <p class="pd-desc-text pd-desc-placeholder">No description provided for this product.</p>
+            {% endif %}
+
+            <div class="pd-specs-grid">
+                <div class="pd-spec-item">
+                    <span class="pd-spec-label">Category</span>
+                    <span class="pd-spec-value">{{ product.get_category_display }}</span>
+                </div>
+                <div class="pd-spec-item">
+                    <span class="pd-spec-label">Brand</span>
+                    <span class="pd-spec-value">{{ product.vendor.shopname }}</span>
+                </div>
+                <div class="pd-spec-item">
+                    <span class="pd-spec-label">Price</span>
+                    <span class="pd-spec-value">₹{{ product.price }}</span>
+                </div>
+                <div class="pd-spec-item">
+                    <span class="pd-spec-label">Stock</span>
+                    <span class="pd-spec-value">{{ product.stock }} units</span>
+                </div>
+                <div class="pd-spec-item">
+                    <span class="pd-spec-label">Views</span>
+                    <span class="pd-spec-value">{{ product.view_count }}</span>
+                </div>
+                <div class="pd-spec-item">
+                    <span class="pd-spec-label">Listed On</span>
+                    <span class="pd-spec-value">{{ product.created_at|date:"d M Y" }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════ FEEDBACK / REVIEW ══════════ -->
+    <div class="pd-review-section section-container">
+        <h2 class="section-title">Customer Reviews</h2>
+        <div class="pd-review-body">
+
+            <!-- Existing Reviews -->
+            {% if product.review_set.all %}
+            <div class="pd-reviews-list">
+                {% for review in product.review_set.all %}
+                <div class="pd-review-card">
+                    <div class="pd-review-header">
+                        <div class="pd-review-avatar">{{ review.customer.user.email|first|upper }}</div>
+                        <div class="pd-review-meta">
+                            <span class="pd-review-author">{{ review.customer.user.email|cut:"@"|cut:".com"|title }}</span>
+                            <div class="pd-stars">
+                                {% for i in "12345" %}
+                                    <span class="pd-star {% if forloop.counter <= review.rating %}pd-star-filled{% endif %}">★</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    {% if review.comment %}
+                        <p class="pd-review-text">{{ review.comment }}</p>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="pd-no-reviews">
+                <span>💬</span>
+                <p>No reviews yet. Be the first to review this product!</p>
+            </div>
+            {% endif %}
+
+            <!-- Write a Review Form -->
+            <div class="pd-write-review">
+                <h3 class="pd-write-title">Write a Review</h3>
+                <form method="POST" action="#" enctype="multipart/form-data" class="pd-review-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="product_id" value="{{ product.id }}">
+
+                    <!-- Star Rating -->
+                    <div class="pd-form-group">
+                        <label class="pd-form-label">Your Rating</label>
+                        <div class="pd-star-picker" id="starPicker">
+                            <span class="pd-pick-star" data-val="1" onclick="setRating(1)">★</span>
+                            <span class="pd-pick-star" data-val="2" onclick="setRating(2)">★</span>
+                            <span class="pd-pick-star" data-val="3" onclick="setRating(3)">★</span>
+                            <span class="pd-pick-star" data-val="4" onclick="setRating(4)">★</span>
+                            <span class="pd-pick-star" data-val="5" onclick="setRating(5)">★</span>
+                        </div>
+                        <input type="hidden" name="rating" id="ratingInput" value="0">
+                        <span class="pd-rating-label" id="ratingLabel">Click to rate</span>
+                    </div>
+
+                    <!-- Comment -->
+                    <div class="pd-form-group">
+                        <label class="pd-form-label">Your Review</label>
+                        <textarea name="comment" class="pd-textarea" rows="4" placeholder="Share your experience with this product..."></textarea>
+                    </div>
+
+                    <!-- Image Upload -->
+                    <div class="pd-form-group">
+                        <label class="pd-form-label">Add Photos (optional)</label>
+                        <div class="pd-upload-area" onclick="document.getElementById('reviewImg').click()">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                            <span>Click to upload image</span>
+                            <span class="pd-upload-sub">PNG, JPG up to 5MB</span>
+                        </div>
+                        <input type="file" id="reviewImg" name="review_image" accept="image/*" style="display:none" onchange="previewReviewImg(this)">
+                        <div id="reviewImgPreview" class="pd-img-preview" style="display:none;">
+                            <img id="reviewImgThumb" src="" alt="Preview">
+                            <button type="button" onclick="removeReviewImg()" class="pd-remove-img">✕</button>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="pd-submit-btn">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                        Submit Review
+                    </button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<style>
+/* ══════════════════════════════════
+   PRODUCT DETAIL PAGE
+   Colors: #142c1e bg, #78b388 green,
+           #000 black, #cfffdc mint
+══════════════════════════════════ */
+.pd-page {
+    width: 90%;
+    max-width: 1400px;
+    margin: 28px auto 80px;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+}
+
+/* Breadcrumb */
+.pd-breadcrumb {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 13px; font-weight: 600;
+}
+.pd-breadcrumb a { color: #cfffdc; text-decoration: none; opacity: 0.7; transition: opacity 0.2s; }
+.pd-breadcrumb a:hover { opacity: 1; }
+.pd-breadcrumb span { color: rgba(207,255,220,0.35); }
+.pd-breadcrumb strong { color: #cfffdc; }
+
+/* ══ TOP SECTION ══ */
+.pd-top {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    align-items: start;
+}
+
+/* ══ LEFT: IMAGE ══ */
+.pd-image-col { display: flex; flex-direction: column; gap: 14px; }
+
+.pd-main-img-wrap {
+    width: 100%;
+    border: 4px solid #000;
+    border-radius: 24px;
+    overflow: hidden;
+    background: #fff;
+    position: relative;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3), inset 0 0 0 2px #cfffdc;
+}
+.pd-main-img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+.pd-main-img-wrap:hover .pd-main-img { transform: scale(1.04); }
+.pd-no-img {
+    width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; color: #aaa; font-weight: 600;
+}
+.pd-category-tag {
+    position: absolute; top: 14px; left: 14px;
+    background: #000; color: #cfffdc;
+    font-size: 9px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase;
+    padding: 5px 12px; border-radius: 8px;
+}
+.pd-discount-tag {
+    position: absolute; top: 14px; right: 14px;
+    background: #e63946; color: #fff;
+    font-size: 11px; font-weight: 800; letter-spacing: 1px;
+    padding: 5px 12px; border-radius: 8px;
+}
+
+/* Thumbnails */
+.pd-thumbnails {
+    display: flex; gap: 10px; flex-wrap: wrap;
+}
+.pd-thumb {
+    width: 72px; height: 72px;
+    border: 3px solid #000; border-radius: 12px;
+    overflow: hidden; cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    flex-shrink: 0;
+}
+.pd-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.pd-thumb.active, .pd-thumb:hover {
+    border-color: #cfffdc;
+    box-shadow: 0 0 0 2px #cfffdc;
+}
+
+/* ══ RIGHT: DETAILS ══ */
+.pd-details-col {
+    display: flex; flex-direction: column; gap: 20px;
+    padding-top: 8px;
+}
+
+.pd-vendor-tag {
+    font-size: 11px; font-weight: 800; letter-spacing: 3px;
+    text-transform: uppercase; color: rgba(207,255,220,0.6);
+}
+.pd-product-name {
+    font-size: 2rem; font-weight: 900; color: #cfffdc;
+    line-height: 1.15; margin: 0;
+    letter-spacing: 0.5px;
+}
+
+/* Price */
+.pd-price-row {
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.pd-price { font-size: 2rem; font-weight: 900; color: #cfffdc; }
+.pd-original-price { font-size: 1.2rem; font-weight: 500; color: rgba(207,255,220,0.4); text-decoration: line-through; }
+.pd-discount-pill {
+    background: #e63946; color: #fff;
+    font-size: 11px; font-weight: 800; letter-spacing: 1px;
+    padding: 4px 12px; border-radius: 20px;
+}
+.pd-tax-note { font-size: 11px; color: rgba(207,255,220,0.4); margin: -12px 0 0; font-weight: 400; }
+
+/* Sections */
+.pd-section { display: flex; flex-direction: column; gap: 10px; }
+.pd-section-label {
+    font-size: 12px; font-weight: 800; color: #cfffdc;
+    letter-spacing: 2px; text-transform: uppercase;
+    display: flex; align-items: center; gap: 12px;
+}
+.pd-size-guide {
+    font-size: 10px; font-weight: 600; color: rgba(207,255,220,0.5);
+    cursor: pointer; letter-spacing: 1px;
+    transition: color 0.2s;
+}
+.pd-size-guide:hover { color: #cfffdc; }
+
+/* Size grid */
+.pd-size-grid { display: flex; flex-wrap: wrap; gap: 10px; }
+.pd-size-btn {
+    min-width: 54px; height: 54px;
+    background: #000; color: #cfffdc;
+    border: 2.5px solid #333; border-radius: 10px;
+    font-size: 13px; font-weight: 800;
+    cursor: pointer; transition: all 0.2s;
+    position: relative; padding: 0 10px;
+    display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 2px;
+}
+.pd-size-btn:hover:not(:disabled) {
+    border-color: #cfffdc;
+    box-shadow: 0 0 0 2px #cfffdc;
+}
+.pd-size-btn.selected {
+    background: #cfffdc; color: #000;
+    border-color: #cfffdc;
+}
+.pd-size-out { opacity: 0.35; cursor: not-allowed; border-style: dashed; }
+.pd-out-label { font-size: 7px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; }
+.pd-no-variants { font-size: 13px; color: rgba(207,255,220,0.5); }
+
+/* Color row */
+.pd-color-row { display: flex; flex-wrap: wrap; gap: 10px; }
+.pd-color-btn {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    border: 3px solid #333;
+    cursor: pointer;
+    transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+.pd-color-btn:hover { transform: scale(1.15); border-color: #cfffdc; }
+.pd-color-btn.selected {
+    border-color: #cfffdc;
+    box-shadow: 0 0 0 3px #cfffdc;
+    transform: scale(1.1);
+}
+.pd-selected-color {
+    font-size: 11px; font-weight: 600; color: rgba(207,255,220,0.6);
+    text-transform: capitalize; letter-spacing: 0.5px;
+}
+
+/* Stock info */
+.pd-stock-info { display: flex; align-items: center; gap: 12px; }
+.pd-in-stock { font-size: 13px; font-weight: 800; color: #4caf50; }
+.pd-out-of-stock { font-size: 13px; font-weight: 800; color: #e63946; }
+.pd-stock-count { font-size: 12px; color: rgba(207,255,220,0.5); }
+
+/* Action buttons */
+.pd-action-row { display: flex; gap: 14px; flex-wrap: wrap; }
+.pd-cart-btn, .pd-buy-btn {
+    flex: 1; min-width: 140px;
+    padding: 16px 24px;
+    border: none; border-radius: 16px;
+    font-size: 14px; font-weight: 800;
+    letter-spacing: 1.5px; text-transform: uppercase;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.pd-cart-btn {
+    background: #000; color: #cfffdc;
+    border: 2px solid #cfffdc;
+}
+.pd-cart-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0 16px rgba(207,255,220,0.4);
+}
+.pd-buy-btn {
+    background: #cfffdc; color: #000;
+}
+.pd-buy-btn:hover {
+    background: #a8ffc4;
+    transform: translateY(-3px);
+    box-shadow: 0 0 16px rgba(207,255,220,0.4);
+}
+
+/* Vendor card */
+.pd-vendor-card {
+    background: #000;
+    border: 2px solid #333;
+    border-radius: 18px;
+    padding: 18px 20px;
+    box-shadow: inset 0 0 0 1px rgba(207,255,220,0.1);
+}
+.pd-vendor-card-header { display: flex; align-items: center; gap: 16px; }
+.pd-vendor-avatar {
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    border: 2px solid #cfffdc;
+    overflow: hidden; flex-shrink: 0;
+    background: #cfffdc;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem; font-weight: 900; color: #000;
+}
+.pd-vendor-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.pd-vendor-shop { font-size: 15px; font-weight: 900; color: #cfffdc; letter-spacing: 0.5px; }
+.pd-vendor-owner { font-size: 12px; color: rgba(207,255,220,0.5); margin-top: 2px; }
+.pd-vendor-since { font-size: 10px; color: rgba(207,255,220,0.35); margin-top: 3px; letter-spacing: 0.5px; }
+
+/* ══ DESCRIPTION ══ */
+.pd-desc-body { padding: 8px 4px 4px; }
+.pd-desc-text {
+    font-size: 14px; color: #000;
+    line-height: 1.9; font-weight: 400;
+    margin-bottom: 24px;
+}
+.pd-desc-placeholder { opacity: 0.5; font-style: italic; }
+
+.pd-specs-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+.pd-spec-item {
+    background: rgba(0,0,0,0.08);
+    border: 1.5px solid rgba(0,0,0,0.1);
+    border-radius: 12px;
+    padding: 12px 16px;
+    display: flex; flex-direction: column; gap: 4px;
+}
+.pd-spec-label { font-size: 9px; font-weight: 800; color: rgba(0,0,0,0.45); text-transform: uppercase; letter-spacing: 1.5px; }
+.pd-spec-value { font-size: 13px; font-weight: 700; color: #000; }
+
+/* ══ REVIEWS ══ */
+.pd-review-body { padding: 8px 4px; display: flex; flex-direction: column; gap: 28px; }
+
+.pd-reviews-list { display: flex; flex-direction: column; gap: 14px; }
+.pd-review-card {
+    background: rgba(0,0,0,0.08);
+    border: 1.5px solid rgba(0,0,0,0.1);
+    border-radius: 16px;
+    padding: 16px 18px;
+}
+.pd-review-header { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.pd-review-avatar {
+    width: 38px; height: 38px;
+    border-radius: 50%; background: #000; color: #cfffdc;
+    font-size: 14px; font-weight: 900;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+}
+.pd-review-author { font-size: 13px; font-weight: 700; color: #000; }
+.pd-stars { display: flex; gap: 2px; margin-top: 3px; }
+.pd-star { font-size: 14px; color: #ddd; }
+.pd-star-filled { color: #f4c430; }
+.pd-review-text { font-size: 13px; color: rgba(0,0,0,0.7); line-height: 1.7; }
+
+.pd-no-reviews {
+    display: flex; flex-direction: column; align-items: center;
+    padding: 30px; gap: 8px; text-align: center;
+    background: rgba(0,0,0,0.05); border-radius: 16px;
+}
+.pd-no-reviews span { font-size: 2rem; }
+.pd-no-reviews p { font-size: 13px; color: rgba(0,0,0,0.5); }
+
+/* Write review form */
+.pd-write-review {
+    background: rgba(0,0,0,0.06);
+    border: 2px solid rgba(0,0,0,0.1);
+    border-radius: 20px;
+    padding: 24px;
+}
+.pd-write-title {
+    font-size: 1rem; font-weight: 900; color: #000;
+    letter-spacing: 2px; text-transform: uppercase;
+    margin-bottom: 20px;
+}
+.pd-review-form { display: flex; flex-direction: column; gap: 18px; }
+.pd-form-group { display: flex; flex-direction: column; gap: 8px; }
+.pd-form-label {
+    font-size: 10px; font-weight: 800; color: rgba(0,0,0,0.55);
+    text-transform: uppercase; letter-spacing: 2px;
+}
+
+/* Star picker */
+.pd-star-picker { display: flex; gap: 6px; }
+.pd-pick-star {
+    font-size: 2rem; color: #ddd; cursor: pointer;
+    transition: color 0.15s, transform 0.15s;
+    user-select: none;
+}
+.pd-pick-star:hover { transform: scale(1.2); }
+.pd-pick-star.active { color: #f4c430; }
+.pd-rating-label { font-size: 11px; color: rgba(0,0,0,0.45); font-weight: 500; }
+
+/* Textarea */
+.pd-textarea {
+    background: #fff; border: 2px solid rgba(0,0,0,0.15);
+    border-radius: 12px; padding: 12px 16px;
+    font-size: 13px; font-family: Arial, sans-serif;
+    resize: vertical; outline: none; color: #000;
+    transition: border-color 0.2s;
+}
+.pd-textarea:focus { border-color: #000; }
+.pd-textarea::placeholder { color: #bbb; }
+
+/* Upload area */
+.pd-upload-area {
+    background: #fff; border: 2px dashed rgba(0,0,0,0.2);
+    border-radius: 12px; padding: 20px;
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; gap: 6px; cursor: pointer;
+    transition: border-color 0.2s, background 0.2s; color: rgba(0,0,0,0.4);
+    font-size: 13px; font-weight: 600;
+}
+.pd-upload-area:hover { border-color: #000; background: #f9f9f9; }
+.pd-upload-sub { font-size: 10px; font-weight: 400; color: rgba(0,0,0,0.3); }
+
+/* Image preview */
+.pd-img-preview {
+    position: relative; width: 100px; height: 100px;
+    border: 2px solid #000; border-radius: 12px; overflow: hidden;
+}
+.pd-img-preview img { width: 100%; height: 100%; object-fit: cover; }
+.pd-remove-img {
+    position: absolute; top: 4px; right: 4px;
+    background: #000; color: #fff;
+    border: none; width: 22px; height: 22px;
+    border-radius: 50%; cursor: pointer; font-size: 10px;
+    display: flex; align-items: center; justify-content: center;
+}
+
+/* Submit button */
+.pd-submit-btn {
+    background: #000; color: #cfffdc;
+    border: none; border-radius: 16px;
+    padding: 14px 32px; font-size: 13px;
+    font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase;
+    cursor: pointer;
+    display: inline-flex; align-items: center; gap: 10px;
+    align-self: flex-start;
+    transition: background 0.2s, box-shadow 0.2s;
+}
+.pd-submit-btn:hover {
+    background: #1a1a1a;
+    box-shadow: 0 0 16px rgba(207,255,220,0.3);
+}
+
+/* ══ RESPONSIVE ══ */
+@media (max-width: 900px) {
+    .pd-top { grid-template-columns: 1fr; }
+    .pd-main-img-wrap { aspect-ratio: 1/1; }
+    .pd-product-name { font-size: 1.5rem; }
+    .pd-specs-grid { grid-template-columns: repeat(2,1fr); }
+}
+@media (max-width: 580px) {
+    .pd-page { width: 96%; margin: 16px auto 60px; }
+    .pd-action-row { flex-direction: column; }
+    .pd-specs-grid { grid-template-columns: 1fr 1fr; }
+}
+</style>
+
+<script>
+// ══ VARIANT DATA from Django ══
+// Each variant: {color, size, image_url, stock}
+// We pass this as JSON so JS can deduplicate colors and switch images smartly
+
+const variantData = [
+    {% for variant in product.variants.all %}
+    {
+        color:     "{{ variant.color.name|default:'' }}",
+        size:      "{{ variant.size.name|default:'' }}",
+        image_url: "{% if variant.image %}{{ variant.image.url }}{% endif %}",
+        stock:     {{ variant.variant_stock|default:0 }}
+    }{% if not forloop.last %},{% endif %}
+    {% endfor %}
+];
+
+const mainImageUrl = "{% if product.product_image %}{{ product.product_image.url }}{% endif %}";
+
+// ══ BUILD UNIQUE COLORS ══
+// For each unique color, keep only the FIRST image found for that color
+const colorMap = {};  // { colorName: { image_url, sizes[] } }
+variantData.forEach(function(v) {
+    if (!v.color) return;
+    const key = v.color.toLowerCase();
+    if (!colorMap[key]) {
+        colorMap[key] = { name: v.color, image_url: v.image_url || mainImageUrl, sizes: [] };
+    }
+    if (v.size) colorMap[key].sizes.push(v.size);
+});
+
+// ══ RENDER COLOR BUTTONS ══
+const colorRow = document.getElementById('colorButtons');
+if (colorRow) {
+    Object.values(colorMap).forEach(function(c, i) {
+        const btn = document.createElement('button');
+        btn.className = 'pd-color-btn';
+        btn.title = c.name;
+        btn.setAttribute('data-color', c.name);
+        btn.setAttribute('data-image', c.image_url);
+        btn.style.backgroundColor = c.name.toLowerCase();
+        btn.onclick = function() { selectColor(this, c.name, c.image_url); };
+        if (i === 0) btn.classList.add('selected');
+        colorRow.appendChild(btn);
+    });
+    // Auto-select first color
+    const firstColor = Object.values(colorMap)[0];
+    if (firstColor) {
+        document.getElementById('selectedColorLabel').textContent = firstColor.name;
+        if (firstColor.image_url) switchImage(firstColor.image_url, null);
+    }
+}
+
+// ══ RENDER COLOR THUMBNAILS ══
+const thumbWrap = document.getElementById('colorThumbnails');
+if (thumbWrap) {
+    // Add main image thumb first
+    if (mainImageUrl) {
+        const t = document.createElement('div');
+        t.className = 'pd-thumb active';
+        t.setAttribute('data-color', '__main__');
+        t.onclick = function() { switchImage(mainImageUrl, t); };
+        t.innerHTML = '<img src="' + mainImageUrl + '" alt="Main">';
+        thumbWrap.appendChild(t);
+    }
+    // Add one thumb per unique color
+    Object.values(colorMap).forEach(function(c) {
+        if (!c.image_url || c.image_url === mainImageUrl) return;
+        const t = document.createElement('div');
+        t.className = 'pd-thumb';
+        t.setAttribute('data-color', c.name);
+        t.onclick = function() { switchImage(c.image_url, t); };
+        t.innerHTML = '<img src="' + c.image_url + '" alt="' + c.name + '">';
+        thumbWrap.appendChild(t);
+    });
+}
+
+// ══ IMAGE SWITCHER ══
+function switchImage(url, el) {
+    if (!url) return;
+    const mainImg = document.getElementById('mainProductImg');
+    if (mainImg) mainImg.src = url;
+    document.querySelectorAll('.pd-thumb').forEach(t => t.classList.remove('active'));
+    if (el) el.classList.add('active');
+    else {
+        // Highlight thumb matching this color
+        document.querySelectorAll('.pd-thumb').forEach(function(t) {
+            if (t.querySelector('img') && t.querySelector('img').src.includes(url.split('/').pop())) {
+                t.classList.add('active');
+            }
+        });
+    }
+}
+
+// ══ COLOR SELECTION — switches main image ══
+function selectColor(btn, colorName, imageUrl) {
+    document.querySelectorAll('.pd-color-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    document.getElementById('selectedColorLabel').textContent = colorName;
+    // Switch main image to this color's image
+    if (imageUrl) switchImage(imageUrl, null);
+    // Highlight matching thumb
+    document.querySelectorAll('.pd-thumb').forEach(function(t) {
+        t.classList.toggle('active', t.getAttribute('data-color') === colorName);
+    });
+}
+
+// ══ SIZE SELECTION ══
+function selectSize(btn, sizeName) {
+    document.querySelectorAll('.pd-size-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+}
+
+// ══ STAR RATING ══
+function setRating(val) {
+    document.getElementById('ratingInput').value = val;
+    const labels = ['', 'Poor', 'Fair', 'Good', 'Very Good', 'Excellent'];
+    document.getElementById('ratingLabel').textContent = labels[val];
+    document.querySelectorAll('.pd-pick-star').forEach(function(s) {
+        s.classList.toggle('active', parseInt(s.getAttribute('data-val')) <= val);
+    });
+}
+document.querySelectorAll('.pd-pick-star').forEach(function(star) {
+    star.addEventListener('mouseover', function() {
+        const val = parseInt(this.getAttribute('data-val'));
+        document.querySelectorAll('.pd-pick-star').forEach(function(s) {
+            s.style.color = parseInt(s.getAttribute('data-val')) <= val ? '#f4c430' : '#ddd';
+        });
+    });
+    star.addEventListener('mouseout', function() {
+        document.querySelectorAll('.pd-pick-star').forEach(function(s) { s.style.color = ''; });
+    });
+});
+
+// ══ REVIEW IMAGE PREVIEW ══
+function previewReviewImg(input) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('reviewImgThumb').src = e.target.result;
+            document.getElementById('reviewImgPreview').style.display = 'block';
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+function removeReviewImg() {
+    document.getElementById('reviewImg').value = '';
+    document.getElementById('reviewImgPreview').style.display = 'none';
+}
+</script>
+
+{% endblock %}
