@@ -21,6 +21,7 @@ class Vendor(models.Model):
     vendor_logo = CloudinaryField('image', folder='Vendors/logos/', null=True, blank=True)
     shop_address = models.TextField(null=True, blank=True)
     shop_start_date = models.DateField(null=True, blank=True)
+    balance = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
 
     def __str__(self):
         return self.shopname if self.shopname else f"Vendor {self.user.email}"
@@ -70,10 +71,18 @@ class Product(models.Model):
     SUB_CATEGORY_CHOICES = [
         ('boys', 'Boys'),
         ('girls', 'Girls'),
+        ('jackets', 'Jackets'),
+        ('tshirts', 'T-shirts'),
+        ('shirts', 'Shirts'),
+        ('hoodies', 'Hoodies'),
+        ('menpants', 'Menpants'),
+        ('traditional', 'Traditional'),
         ('saree', 'Sarees'),
         ('kurti', 'Kurtis'),
+        ('womenpants', 'Womenpants'),
+        ('womentshirts', 'Womentshirts'),
         ('western', 'Western'),
-        ('traditional', 'Traditional'),
+        ('sweatshirts', 'Sweatshirts'),
         ('other', 'Other'),
     ]
 
@@ -96,7 +105,7 @@ class Product(models.Model):
         null=True, blank=True,
         help_text="Leave blank if no discount"
     )
-
+    
     is_active = models.BooleanField(default=True)
     is_new_arrival = models.BooleanField(default=True)
     created_at = models.DateTimeField(default=timezone.now)
@@ -146,9 +155,11 @@ class Cart(models.Model):
 
 class Order(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    product = models.ForeignKey('Product', on_delete=models.SET_NULL, null=True, blank=True)
     orderDate = models.DateField(auto_now_add=True)
     status = models.CharField(max_length=50, default="Pending")
     totalAmount = models.FloatField(validators=[MinValueValidator(0.01)])
+    delivery_address = models.TextField(null=True, blank=True)
 
     def __str__(self):
         return f"Order {self.id}"
@@ -173,3 +184,26 @@ class Review(models.Model):
 
     def __str__(self):
         return f"{self.product.name} - {self.rating}"
+
+
+class ContactMessage(models.Model):
+    SUBJECT_CHOICES = [
+        ('order', 'Order Issue'),
+        ('return', 'Return / Refund'),
+        ('product', 'Product Query'),
+        ('vendor', 'Become a Vendor'),
+        ('feedback', 'General Feedback'),
+        ('other', 'Other'),
+    ]
+
+    name = models.CharField(max_length=120)
+    email = models.EmailField()
+    subject = models.CharField(max_length=30, choices=SUBJECT_CHOICES, default='other')
+    message = models.TextField()
+    created_at = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.name} - {self.get_subject_display()}"

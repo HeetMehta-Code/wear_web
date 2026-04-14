@@ -44,7 +44,7 @@
                     <span>Total Amount</span>
                     <span>₹{{ total_price }}</span>
                 </div>
-                <button class="buy-all-btn">Proceed to Buy All</button>
+                <button class="buy-all-btn" onclick="location.href='{% url 'initiate_cart_payment' %}'">Proceed to Buy All</button>
             </div>
         </div>
     </div>

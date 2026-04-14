@@ -16,8 +16,20 @@
             </div>
             <div class="result-detail-row">
                 <span class="result-detail-label">Amount Paid</span>
-                <span class="result-detail-val">₹{{ order.totalAmount|floatformat:0 }}</span>
+                <span class="result-detail-val">₹{{ amount_paid|default:order.totalAmount|floatformat:0 }}</span>
             </div>
+            {% if orders and orders|length > 1 %}
+            <div class="result-detail-row">
+                <span class="result-detail-label">Orders Created</span>
+                <span class="result-detail-val">{{ orders|length }}</span>
+            </div>
+            {% endif %}
+            {% if order.product %}
+            <div class="result-detail-row">
+                <span class="result-detail-label">Product</span>
+                <span class="result-detail-val">{% if orders and orders|length > 1 %}Multiple Products{% else %}{{ order.product.name }}{% endif %}</span>
+            </div>
+            {% endif %}
             <div class="result-detail-row">
                 <span class="result-detail-label">Payment ID</span>
                 <span class="result-detail-val">{{ payment.razorpay_payment_id }}</span>

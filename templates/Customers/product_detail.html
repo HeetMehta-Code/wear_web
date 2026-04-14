@@ -55,36 +55,22 @@
             </div>
             <p class="pd-tax-note">Inclusive of all taxes · Free delivery on orders above ₹499</p>
 
-            <!-- Size Selection -->
+            <!-- Color + Size — both rendered by JS, sizes change per color -->
             {% if product.variants.all %}
             <div class="pd-section">
+                <div class="pd-section-label">Select Color</div>
+                <div class="pd-color-row" id="colorButtons"></div>
+                <span class="pd-selected-color" id="selectedColorLabel">Select a colour</span>
+            </div>
+
+            <div class="pd-section" id="sizeSection">
                 <div class="pd-section-label">
                     Select Size
                     <span class="pd-size-guide">Size Guide →</span>
                 </div>
-                <div class="pd-size-grid">
-                    {% for variant in product.variants.all %}
-                        {% if variant.size %}
-                        <button class="pd-size-btn {% if variant.variant_stock == 0 %}pd-size-out{% endif %}"
-                                onclick="selectSize(this, '{{ variant.size.name }}')"
-                                {% if variant.variant_stock == 0 %}disabled{% endif %}>
-                            {{ variant.size.name }}
-                            {% if variant.variant_stock == 0 %}<span class="pd-out-label">Out</span>{% endif %}
-                        </button>
-                        {% endif %}
-                    {% empty %}
-                        <span class="pd-no-variants">One size fits all</span>
-                    {% endfor %}
+                <div class="pd-size-grid" id="sizeButtons">
+                    <span class="pd-no-variants" id="sizePrompt">Select a colour first</span>
                 </div>
-            </div>
-
-            <!-- Color Selection — unique colors only, image switches on click -->
-            <div class="pd-section">
-                <div class="pd-section-label">Select Color</div>
-                <div class="pd-color-row" id="colorButtons">
-                    {# rendered by JS #}
-                </div>
-                <span class="pd-selected-color" id="selectedColorLabel">Select a colour</span>
             </div>
             {% else %}
             <!-- No variants — show stock only -->
@@ -181,6 +167,14 @@
     <div class="pd-review-section section-container">
         <h2 class="section-title">Customer Reviews</h2>
         <div class="pd-review-body">
+
+            {% if messages %}
+                {% for message in messages %}
+                <div class="pd-review-message pd-review-message-{{ message.tags }}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            {% endif %}
 
             <!-- Existing Reviews -->
             {% if product.review_set.all %}
@@ -521,6 +515,22 @@
 
 /* ══ REVIEWS ══ */
 .pd-review-body { padding: 8px 4px; display: flex; flex-direction: column; gap: 28px; }
+.pd-review-message {
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 600;
+}
+.pd-review-message-success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+.pd-review-message-error {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
 
 .pd-reviews-list { display: flex; flex-direction: column; gap: 14px; }
 .pd-review-card {
@@ -649,10 +659,7 @@
 </style>
 
 <script>
-// ══ VARIANT DATA from Django ══
-// Each variant: {color, size, image_url, stock}
-// We pass this as JSON so JS can deduplicate colors and switch images smartly
-
+// ══ ALL VARIANT DATA ══
 const variantData = [
     {% for variant in product.variants.all %}
     {
@@ -666,16 +673,72 @@ const variantData = [
 
 const mainImageUrl = "{% if product.product_image %}{{ product.product_image.url }}{% endif %}";
 
-// ══ BUILD UNIQUE COLORS ══
-// For each unique color, keep only the FIRST image found for that color
-const colorMap = {};  // { colorName: { image_url, sizes[] } }
+// ══ COLOR NAME → CSS COLOR MAP ══
+// Handles names CSS doesn't know natively
+const colorNameMap = {
+    'camel':       '#C19A6B',
+    'chocolate':   '#7B3F00',
+    'rust':        '#B7410E',
+    'mustard':     '#FFDB58',
+    'olive':       '#808000',
+    'burgundy':    '#800020',
+    'maroon':      '#800000',
+    'cream':       '#FFFDD0',
+    'ivory':       '#FFFFF0',
+    'beige':       '#F5F5DC',
+    'off white':   '#FAF9F6',
+    'offwhite':    '#FAF9F6',
+    'off-white':   '#FAF9F6',
+    'charcoal':    '#36454F',
+    'slate':       '#708090',
+    'coral':       '#FF6B6B',
+    'peach':       '#FFCBA4',
+    'mint':        '#98FF98',
+    'turquoise':   '#40E0D0',
+    'lavender':    '#E6E6FA',
+    'lilac':       '#C8A2C8',
+    'mauve':       '#E0B0FF',
+    'rose':        '#FF007F',
+    'blush':       '#FFB6C1',
+    'wine':        '#722F37',
+    'emerald':     '#50C878',
+    'forest':      '#228B22',
+    'cobalt':      '#0047AB',
+    'indigo':      '#4B0082',
+    'nude':        '#E3BC9A',
+    'tan':         '#D2B48C',
+    'khaki':       '#C3B091',
+    'denim':       '#1560BD',
+};
+
+function resolveColor(name) {
+    const key = name.toLowerCase().trim();
+    if (colorNameMap[key]) return colorNameMap[key];
+    // Try CSS directly — if browser accepts it, use it
+    const test = document.createElement('div');
+    test.style.backgroundColor = key;
+    if (test.style.backgroundColor) return key;
+    // Fallback: dark circle with text
+    return null;
+}
+
+// ══ BUILD colorMap — one entry per unique color ══
+// Stores: { name, cssColor, image_url, sizes: [{size, stock}] }
+const colorMap = {};
 variantData.forEach(function(v) {
     if (!v.color) return;
-    const key = v.color.toLowerCase();
+    const key = v.color.toLowerCase().trim();
     if (!colorMap[key]) {
-        colorMap[key] = { name: v.color, image_url: v.image_url || mainImageUrl, sizes: [] };
+        colorMap[key] = {
+            name:      v.color,
+            cssColor:  resolveColor(v.color),
+            image_url: v.image_url || mainImageUrl,
+            sizes:     []
+        };
     }
-    if (v.size) colorMap[key].sizes.push(v.size);
+    if (v.size) {
+        colorMap[key].sizes.push({ size: v.size, stock: v.stock });
+    }
 });
 
 // ══ RENDER COLOR BUTTONS ══
@@ -686,24 +749,34 @@ if (colorRow) {
         btn.className = 'pd-color-btn';
         btn.title = c.name;
         btn.setAttribute('data-color', c.name);
-        btn.setAttribute('data-image', c.image_url);
-        btn.style.backgroundColor = c.name.toLowerCase();
-        btn.onclick = function() { selectColor(this, c.name, c.image_url); };
-        if (i === 0) btn.classList.add('selected');
+
+        if (c.cssColor) {
+            // Known color — show as filled circle
+            btn.style.backgroundColor = c.cssColor;
+        } else {
+            // Unknown color — show dark circle with initial letter
+            btn.style.backgroundColor = '#222';
+            btn.style.color = '#cfffdc';
+            btn.style.fontSize = '10px';
+            btn.style.fontWeight = '900';
+            btn.textContent = c.name[0].toUpperCase();
+        }
+
+        btn.onclick = function() { selectColor(this, c.name, c.image_url, c.sizes); };
+        if (i === 0) {
+            btn.classList.add('selected');
+            // Auto-render sizes for first color
+            setTimeout(function() {
+                selectColor(btn, c.name, c.image_url, c.sizes);
+            }, 0);
+        }
         colorRow.appendChild(btn);
     });
-    // Auto-select first color
-    const firstColor = Object.values(colorMap)[0];
-    if (firstColor) {
-        document.getElementById('selectedColorLabel').textContent = firstColor.name;
-        if (firstColor.image_url) switchImage(firstColor.image_url, null);
-    }
 }
 
-// ══ RENDER COLOR THUMBNAILS ══
+// ══ RENDER THUMBNAILS ══
 const thumbWrap = document.getElementById('colorThumbnails');
 if (thumbWrap) {
-    // Add main image thumb first
     if (mainImageUrl) {
         const t = document.createElement('div');
         t.className = 'pd-thumb active';
@@ -712,7 +785,6 @@ if (thumbWrap) {
         t.innerHTML = '<img src="' + mainImageUrl + '" alt="Main">';
         thumbWrap.appendChild(t);
     }
-    // Add one thumb per unique color
     Object.values(colorMap).forEach(function(c) {
         if (!c.image_url || c.image_url === mainImageUrl) return;
         const t = document.createElement('div');
@@ -732,25 +804,45 @@ function switchImage(url, el) {
     document.querySelectorAll('.pd-thumb').forEach(t => t.classList.remove('active'));
     if (el) el.classList.add('active');
     else {
-        // Highlight thumb matching this color
         document.querySelectorAll('.pd-thumb').forEach(function(t) {
-            if (t.querySelector('img') && t.querySelector('img').src.includes(url.split('/').pop())) {
+            if (t.getAttribute('data-color') &&
+                t.querySelector('img') &&
+                t.querySelector('img').src === url) {
                 t.classList.add('active');
             }
         });
     }
 }
 
-// ══ COLOR SELECTION — switches main image ══
-function selectColor(btn, colorName, imageUrl) {
+// ══ COLOR SELECTION — switches image AND renders correct sizes ══
+function selectColor(btn, colorName, imageUrl, sizes) {
     document.querySelectorAll('.pd-color-btn').forEach(b => b.classList.remove('selected'));
     btn.classList.add('selected');
     document.getElementById('selectedColorLabel').textContent = colorName;
-    // Switch main image to this color's image
     if (imageUrl) switchImage(imageUrl, null);
     // Highlight matching thumb
     document.querySelectorAll('.pd-thumb').forEach(function(t) {
         t.classList.toggle('active', t.getAttribute('data-color') === colorName);
+    });
+    // ── Render sizes for THIS color only ──
+    renderSizes(sizes || []);
+}
+
+function renderSizes(sizes) {
+    const grid = document.getElementById('sizeButtons');
+    if (!grid) return;
+    grid.innerHTML = '';
+    if (!sizes || sizes.length === 0) {
+        grid.innerHTML = '<span class="pd-no-variants">One size fits all</span>';
+        return;
+    }
+    sizes.forEach(function(sv) {
+        const btn = document.createElement('button');
+        btn.className = 'pd-size-btn' + (sv.stock === 0 ? ' pd-size-out' : '');
+        btn.disabled  = sv.stock === 0;
+        btn.onclick   = function() { selectSize(this, sv.size); };
+        btn.innerHTML = sv.size + (sv.stock === 0 ? '<span class="pd-out-label">Out</span>' : '');
+        grid.appendChild(btn);
     });
 }
 

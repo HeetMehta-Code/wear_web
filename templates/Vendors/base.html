@@ -44,8 +44,8 @@
                 
                 {% if user.is_authenticated %}
                     <a href="{% url 'vendor_profile_view' %}" class="header-profile" title="Shop Profile">
-                        {% if user.vendor_profile.vendor_logo %}
-                            <img src="{{ user.vendor_profile_view.vendor_logo.url }}" alt="Shop Logo" class="profile-img">
+                        {% if user.vendor.vendor_logo %}
+                            <img src="{{ user.vendor.vendor_logo.url }}" alt="Shop Logo" class="profile-img">
                         {% else %}
                             <span class="profile-initial" style="background: #cfffdc; color: #000;">{{ user.email|first|upper }}</span>
                         {% endif %}

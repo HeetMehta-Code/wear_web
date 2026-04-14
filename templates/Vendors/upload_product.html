@@ -124,7 +124,7 @@
     }
     .color-header-fields {
         display: grid;
-        grid-template-columns: 1fr 1fr auto;
+        grid-template-columns: 1fr 1fr 1fr auto;
         gap: 16px;
         flex: 1;
         align-items: end;
@@ -154,6 +154,35 @@
         width: fit-content;
     }
     .add-size-btn:hover { border-color: #78b388; color: #cfffdc; }
+    .color-picker-wrap {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 20px;
+    }
+    .color-picker-btn {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        border: 2px solid #78b388;
+        cursor: pointer;
+        padding: 0;
+        background: transparent;
+    }
+    .color-picker-input {
+        position: absolute;
+        opacity: 0;
+        width: 1px;
+        height: 1px;
+        pointer-events: none;
+    }
+    .color-code-label {
+        color: #78b388;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
 
     /* 6. Submit Button */
     .btn-publish { 
@@ -253,9 +282,10 @@
 <script>
     // ── Subcategory data ──
     const subData = {
-        'mens':   ['Jacket', 'T-Shirt', 'Shirt', 'Hoodie', 'Pants', 'Traditional'],
-        'womens': ['Saree', 'Kurti', 'Pant', 'T-Shirt', 'Western', 'Sweatshirt'],
-        'kids':   ['Boys', 'Girls']
+    // Left side MUST match the first part of your model choices
+    'mens':   ['jackets', 'tshirts', 'shirts', 'hoodies', 'menpants', 'traditional'],
+    'womens': ['saree', 'kurti', 'womenpants', 'womentshirts', 'western', 'sweatshirts'],
+    'kids':   ['boys', 'girls'],
     };
 
     function updateSubCategories() {
@@ -283,14 +313,20 @@
                 <div class="color-header-fields">
                     <div>
                         <label style="color:#cfffdc;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;">Colour Name</label>
-                        <input type="text" name="variant_color[]" placeholder="e.g. Red, Navy Blue" class="color-name-input" oninput="updateColorPreview(this)" required>
+                        <input type="hidden" name="variant_color_group[]" value="${colorId}">
+                        <input type="text" name="variant_color_name[]" placeholder="e.g. Red, Navy Blue" class="color-name-input" required>
+                    </div>
+                    <div>
+                        <label style="color:#cfffdc;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;">Custom Colour</label>
+                        <input type="color" name="variant_color_code[]" value="#333333" id="picker-${colorId}" class="color-picker-input" onchange="updateColorPreview(this)">
                     </div>
                     <div>
                         <label style="color:#cfffdc;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;">Colour Image</label>
                         <input type="file" name="variant_image[]" accept="image/*" onchange="previewColorImg(this)" required>
                     </div>
-                    <div style="display:flex;align-items:center;gap:10px;margin-top:20px;">
-                        <div class="color-preview-dot" id="dot-${colorId}" style="width:32px;height:32px;border-radius:50%;border:2px solid #333;background:#333;flex-shrink:0;"></div>
+                    <div class="color-picker-wrap">
+                        <label class="color-picker-btn" for="picker-${colorId}" id="dot-${colorId}" style="background:#333333;"></label>
+                        <span class="color-code-label" id="code-${colorId}">#333333</span>
                         <img id="imgPreview-${colorId}" src="" style="display:none;width:50px;height:50px;object-fit:cover;border-radius:8px;border:2px solid #78b388;">
                     </div>
                 </div>
@@ -299,6 +335,7 @@
 
             <div class="size-rows-container" id="sizes-${colorId}">
                 <div class="size-row">
+                    <input type="hidden" name="variant_group[]" value="${colorId}">
                     <input type="text" name="variant_size[]" placeholder="Size (e.g. S, M, XL, 42)">
                     <input type="number" name="variant_qty[]" placeholder="Stock qty" min="0" required>
                     <button type="button" class="remove-btn" style="width:45px;height:45px;" onclick="this.parentElement.remove()">×</button>
@@ -308,16 +345,15 @@
             <button type="button" class="add-size-btn" onclick="addSizeRow('sizes-${colorId}', '${colorId}')">+ Add Size</button>
         `;
         container.appendChild(block);
+        updateColorPreview(block.querySelector('.color-picker-input'));
     }
 
     function addSizeRow(containerId, colorId) {
         const container = document.getElementById(containerId);
-        // Get the color name from this block
-        const block = document.getElementById('color-' + colorId);
-        const colorName = block.querySelector('.color-name-input').value;
         const row = document.createElement('div');
         row.className = 'size-row';
         row.innerHTML = `
+            <input type="hidden" name="variant_group[]" value="${colorId}">
             <input type="text" name="variant_size[]" placeholder="Size (e.g. S, M, XL, 42)">
             <input type="number" name="variant_qty[]" placeholder="Stock qty" min="0" required>
             <button type="button" class="remove-btn" style="width:45px;height:45px;" onclick="this.parentElement.remove()">×</button>
@@ -329,8 +365,16 @@
         const block = input.closest('.color-block');
         const colorId = block.id.replace('color-', '');
         const dot = document.getElementById('dot-' + colorId);
+        const codeLabel = document.getElementById('code-' + colorId);
+        const colorInput = block.querySelector('.color-picker-input');
+        const colorValue = colorInput ? colorInput.value : '#333333';
+
         if (dot) {
-            dot.style.backgroundColor = input.value.toLowerCase() || '#333';
+            dot.style.backgroundColor = colorValue;
+            dot.style.boxShadow = `0 0 12px ${colorValue}`;
+        }
+        if (codeLabel) {
+            codeLabel.textContent = colorValue.toUpperCase();
         }
     }
 

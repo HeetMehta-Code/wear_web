@@ -1,0 +1,92 @@
+{% extends "Admin/base_admin.html" %}
+{% block title %}Products{% endblock %}
+{% block nav_products %}active{% endblock %}
+
+{% block content %}
+<div class="adm-card">
+    <div class="adm-card-header">
+        <span class="nav-icon">👕</span> All Products
+        <form method="GET" class="adm-search" style="margin-left:auto;gap:8px;">
+            <input type="text" name="q" value="{{ query }}" placeholder="Search products..." class="adm-search-input">
+            <select name="cat" style="background:#111;border:2px solid #333;color:#cfffdc;padding:7px 12px;border-radius:10px;font-size:11px;outline:none;">
+                <option value="">All Categories</option>
+                {% for val, label in category_choices %}
+                <option value="{{ val }}" {% if selected_cat == val %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="adm-btn adm-btn-black">Filter</button>
+            {% if query or selected_cat %}<a href="{% url 'admin_products' %}" class="adm-btn adm-btn-mint">Clear</a>{% endif %}
+        </form>
+    </div>
+    <div style="overflow-x:auto;">
+        <table class="adm-table">
+            <thead>
+                <tr><th>#</th><th>Image</th><th>Name</th><th>Vendor</th><th>Category</th><th>Price</th><th>Stock</th><th>Views</th><th>Status</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+                {% for product in products %}
+                <tr id="prod-row-{{ product.id }}">
+                    <td style="font-weight:800;color:rgba(0,0,0,0.35);">{{ forloop.counter }}</td>
+                    <td>
+                        {% if product.product_image %}
+                            <img src="{{ product.product_image.url }}" style="width:38px;height:38px;border-radius:8px;object-fit:cover;border:2px solid rgba(0,0,0,0.1);">
+                        {% else %}
+                            <div style="width:38px;height:38px;border-radius:8px;background:#ddd;display:flex;align-items:center;justify-content:center;font-size:10px;color:#aaa;">No img</div>
+                        {% endif %}
+                    </td>
+                    <td style="font-weight:700;max-width:150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ product.name }}</td>
+                    <td style="font-size:11px;">{{ product.vendor.shopname }}</td>
+                    <td><span style="background:rgba(0,0,0,0.1);font-size:9px;font-weight:700;padding:2px 7px;border-radius:6px;text-transform:uppercase;letter-spacing:1px;">{{ product.get_category_display }}</span></td>
+                    <td style="font-weight:800;">₹{{ product.price }}</td>
+                    <td style="font-weight:800;{% if product.stock == 0 %}color:#c0392b;{% elif product.stock < 5 %}color:#e67e22;{% endif %}">{{ product.stock }}</td>
+                    <td style="font-size:11px;">{{ product.view_count }}</td>
+                    <td id="prod-status-{{ product.id }}">
+                        {% if product.is_active %}
+                            <span class="badge badge-active">Active</span>
+                        {% else %}
+                            <span class="badge badge-blocked">Hidden</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div style="display:flex;gap:5px;">
+                            <button class="adm-btn {% if product.is_active %}adm-btn-red{% else %}adm-btn-green{% endif %}"
+                                    id="prod-btn-{{ product.id }}"
+                                    onclick="toggleProd({{ product.id }})">
+                                {% if product.is_active %}Hide{% else %}Show{% endif %}
+                            </button>
+                            <form method="POST" action="{% url 'admin_delete_product' product.pk %}" onsubmit="return confirm('Delete this product permanently?')">
+                                {% csrf_token %}
+                                <button type="submit" class="adm-btn adm-btn-red">Delete</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="10" style="text-align:center;padding:40px;color:rgba(0,0,0,0.4);">No products found</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+function toggleProd(id) {
+    fetch('/admin-panel/products/toggle/' + id + '/', {
+        method: 'POST',
+        headers: { 'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/json' }
+    }).then(r => r.json()).then(data => {
+        const btn    = document.getElementById('prod-btn-' + id);
+        const status = document.getElementById('prod-status-' + id);
+        if (data.is_active) {
+            btn.textContent = 'Hide';
+            btn.className   = 'adm-btn adm-btn-red';
+            status.innerHTML = '<span class="badge badge-active">Active</span>';
+        } else {
+            btn.textContent = 'Show';
+            btn.className   = 'adm-btn adm-btn-green';
+            status.innerHTML = '<span class="badge badge-blocked">Hidden</span>';
+        }
+    });
+}
+</script>
+{% endblock %}

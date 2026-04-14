@@ -1,0 +1,73 @@
+{% extends "Admin/base_admin.html" %}
+{% block title %}Vendors{% endblock %}
+{% block nav_vendors %}active{% endblock %}
+
+{% block content %}
+<div class="adm-card">
+    <div class="adm-card-header">
+        <span class="nav-icon">🏪</span> All Vendors
+        <form method="GET" class="adm-search" style="margin-left:auto;">
+            <input type="text" name="q" value="{{ query }}" placeholder="Search by shop or email..." class="adm-search-input">
+            <button type="submit" class="adm-btn adm-btn-black">Search</button>
+            {% if query %}<a href="{% url 'admin_vendors' %}" class="adm-btn adm-btn-mint">Clear</a>{% endif %}
+        </form>
+    </div>
+    <div style="overflow-x:auto;">
+        <table class="adm-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Logo</th>
+                    <th>Shop Name</th>
+                    <th>Email</th>
+                    <th>Products</th>
+                    <th>Joined</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for vendor in vendors %}
+                <tr>
+                    <td style="font-weight:800;color:rgba(0,0,0,0.35);">{{ forloop.counter }}</td>
+                    <td>
+                        {% if vendor.vendor_logo %}
+                            <img src="{{ vendor.vendor_logo.url }}" style="width:36px;height:36px;border-radius:8px;object-fit:cover;border:2px solid rgba(0,0,0,0.1);">
+                        {% else %}
+                            <div style="width:36px;height:36px;border-radius:8px;background:#cfffdc;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;color:#000;">{{ vendor.shopname|first|upper }}</div>
+                        {% endif %}
+                    </td>
+                    <td style="font-weight:800;">{{ vendor.shopname|default:"—" }}</td>
+                    <td style="font-size:11px;color:rgba(0,0,0,0.6);">{{ vendor.user.email }}</td>
+                    <td style="font-weight:700;">{{ vendor.product_count }}</td>
+                    <td style="font-size:11px;color:rgba(0,0,0,0.5);">{{ vendor.user.date_joined|date:"d M Y" }}</td>
+                    <td>
+                        {% if vendor.user.is_active %}
+                            <span class="badge badge-active">Active</span>
+                        {% else %}
+                            <span class="badge badge-blocked">Blocked</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div style="display:flex;gap:6px;">
+                            <form method="POST" action="{% url 'admin_toggle_vendor' vendor.pk %}">
+                                {% csrf_token %}
+                                <button type="submit" class="adm-btn {% if vendor.user.is_active %}adm-btn-red{% else %}adm-btn-green{% endif %}">
+                                    {% if vendor.user.is_active %}Block{% else %}Activate{% endif %}
+                                </button>
+                            </form>
+                            <form method="POST" action="{% url 'admin_delete_vendor' vendor.pk %}" onsubmit="return confirm('Permanently delete this vendor and all their products?')">
+                                {% csrf_token %}
+                                <button type="submit" class="adm-btn adm-btn-red">Delete</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="8" style="text-align:center;padding:40px;color:rgba(0,0,0,0.4);">No vendors found</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

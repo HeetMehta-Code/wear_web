@@ -88,6 +88,23 @@
                     {% endif %}
                 </div>
 
+                <div class="order-product-row">
+                    <div>
+                        <div class="order-product-label">Product</div>
+                        {% if order.product %}
+                            <a href="{% url 'product_detail' order.product.id %}" class="order-product-link">{{ order.product.name }}</a>
+                        {% else %}
+                            <span class="order-product-missing">Product unavailable</span>
+                        {% endif %}
+                    </div>
+                    {% if order.status == 'Pending' or order.status == 'Confirmed' %}
+                    <form method="POST" action="{% url 'cancel_order' order.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="order-cancel-btn">Cancel Order</button>
+                    </form>
+                    {% endif %}
+                </div>
+
             </div>
             {% endfor %}
         </div>
@@ -215,6 +232,44 @@
 }
 .order-eta svg { color: #000; flex-shrink: 0; }
 .order-eta strong { color: #000; }
+
+.order-product-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 0 28px 24px;
+}
+.order-product-label {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: rgba(0,0,0,0.45);
+    margin-bottom: 4px;
+}
+.order-product-link {
+    color: #000;
+    font-weight: 800;
+    text-decoration: none;
+}
+.order-product-missing {
+    color: rgba(0,0,0,0.5);
+    font-weight: 600;
+}
+.order-cancel-btn {
+    background: #2d0a0a;
+    color: #ffb3b3;
+    border: none;
+    border-radius: 18px;
+    padding: 10px 16px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+}
+.order-cancel-btn:hover { background: #4a1212; }
 
 /* Empty state */
 .orders-empty {

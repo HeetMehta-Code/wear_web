@@ -1,0 +1,53 @@
+{% extends "Admin/base_admin.html" %}
+{% block title %}Finance{% endblock %}
+{% block nav_finance %}active{% endblock %}
+{% block header_title %}Finance{% endblock %}
+
+{% block content %}
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;">
+    <div class="adm-stat" style="background:#d4edda;">
+        <span class="adm-stat-icon">💵</span>
+        <div><span class="adm-stat-num">₹{{ gross_sales|floatformat:0 }}</span><span class="adm-stat-label">Gross Sales</span></div>
+    </div>
+    <div class="adm-stat" style="background:#fff3cd;">
+        <span class="adm-stat-icon">🏦</span>
+        <div><span class="adm-stat-num">₹{{ vendor_payout_total|floatformat:0 }}</span><span class="adm-stat-label">Vendor Payouts</span></div>
+    </div>
+    <div class="adm-stat" style="background:#cce5ff;">
+        <span class="adm-stat-icon">📈</span>
+        <div><span class="adm-stat-num">₹{{ ramya_revenue|floatformat:0 }}</span><span class="adm-stat-label">RAMYA Revenue</span></div>
+    </div>
+    <div class="adm-stat" style="background:#f8d7da;">
+        <span class="adm-stat-icon">💳</span>
+        <div><span class="adm-stat-num">{{ completed_transactions }}</span><span class="adm-stat-label">Completed Transactions</span></div>
+    </div>
+</div>
+
+<div class="adm-card">
+    <div class="adm-card-header">Revenue Ledger</div>
+    <div style="overflow-x:auto;">
+        <table class="adm-table" style="min-width:980px;">
+            <thead>
+                <tr><th>#</th><th>Order</th><th>Vendor</th><th>Product</th><th>Gross</th><th>Commission</th><th>Vendor Net</th><th>Method</th><th>Date</th></tr>
+            </thead>
+            <tbody>
+                {% for row in finance_rows %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>#{{ row.payment.order.id }}</td>
+                    <td>{{ row.payment.order.product.vendor.shopname|default:"—" }}</td>
+                    <td>{{ row.payment.order.product.name|default:"—" }}</td>
+                    <td>₹{{ row.gross_amount|floatformat:0 }}</td>
+                    <td>₹{{ row.commission|floatformat:0 }}</td>
+                    <td>₹{{ row.net_amount|floatformat:0 }}</td>
+                    <td>{{ row.payment.paymentType|title }}</td>
+                    <td>{{ row.payment.order.orderDate|date:"d M Y" }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="9" style="text-align:center;padding:30px;color:rgba(0,0,0,0.4);">No finance records yet</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

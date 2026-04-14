@@ -5,7 +5,10 @@ from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from django.contrib import messages
 from .forms import SignupForm, LoginForm
-
+import random
+from django.core.mail import send_mail
+from django.conf import settings
+from django.contrib.auth import get_user_model
 from efashion.models import Vendor, Customer, Product, Order
 from efashion.forms import VendorProfileForm, CustomerProfileForm
 

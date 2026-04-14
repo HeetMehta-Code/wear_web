@@ -4,11 +4,23 @@
 {% block content %}
 <div class="pay-page">
 
+    {% if messages %}
+        <div class="pay-messages">
+            {% for message in messages %}
+            <div class="pay-message pay-message-{{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
     <!-- Breadcrumb -->
     <div class="pay-breadcrumb">
         <a href="{% url 'customer_dashboard' %}">Home</a>
         <span>›</span>
-        <a href="{% url 'product_detail' product.id %}">{{ product.name }}</a>
+        {% if is_cart_checkout %}
+            <a href="{% url 'view_cart' %}">Cart</a>
+        {% else %}
+            <a href="{% url 'product_detail' product.id %}">{{ product.name }}</a>
+        {% endif %}
         <span>›</span>
         <strong>Checkout</strong>
     </div>
@@ -22,18 +34,36 @@
                 <div class="pay-summary-body">
 
                     <!-- Product -->
-                    <div class="pay-product-row">
-                        {% if product.product_image %}
-                            <img src="{{ product.product_image.url }}" alt="{{ product.name }}" class="pay-product-img">
-                        {% else %}
-                            <div class="pay-product-no-img">No Image</div>
-                        {% endif %}
-                        <div class="pay-product-info">
-                            <div class="pay-product-brand">{{ product.vendor.shopname }}</div>
-                            <div class="pay-product-name">{{ product.name }}</div>
-                            <div class="pay-product-cat">{{ product.get_category_display }}</div>
+                    {% if is_cart_checkout %}
+                        {% for item in cart_items %}
+                        <div class="pay-product-row">
+                            {% if item.product.product_image %}
+                                <img src="{{ item.product.product_image.url }}" alt="{{ item.product.name }}" class="pay-product-img">
+                            {% else %}
+                                <div class="pay-product-no-img">No Image</div>
+                            {% endif %}
+                            <div class="pay-product-info">
+                                <div class="pay-product-brand">{{ item.product.vendor.shopname }}</div>
+                                <div class="pay-product-name">{{ item.product.name }}</div>
+                                <div class="pay-product-cat">Qty: {{ item.quantity }} • {{ item.product.get_category_display }}</div>
+                            </div>
                         </div>
-                    </div>
+                        {% if not forloop.last %}<div class="pay-divider"></div>{% endif %}
+                        {% endfor %}
+                    {% else %}
+                        <div class="pay-product-row">
+                            {% if product.product_image %}
+                                <img src="{{ product.product_image.url }}" alt="{{ product.name }}" class="pay-product-img">
+                            {% else %}
+                                <div class="pay-product-no-img">No Image</div>
+                            {% endif %}
+                            <div class="pay-product-info">
+                                <div class="pay-product-brand">{{ product.vendor.shopname }}</div>
+                                <div class="pay-product-name">{{ product.name }}</div>
+                                <div class="pay-product-cat">{{ product.get_category_display }}</div>
+                            </div>
+                        </div>
+                    {% endif %}
 
                     <div class="pay-divider"></div>
 
@@ -46,7 +76,7 @@
                         <span>Delivery</span>
                         <span class="pay-free">FREE</span>
                     </div>
-                    {% if product.original_price %}
+                    {% if product and product.original_price %}
                     <div class="pay-price-row pay-saving">
                         <span>You Save</span>
                         <span>₹{{ product.original_price|floatformat:0 }}</span>
@@ -68,9 +98,15 @@
             </div>
 
             <!-- Order ID info -->
-            <div class="pay-order-info">
-                <span class="pay-order-label">Order ID</span>
-                <span class="pay-order-val">#{{ order.id }}</span>
+                <div class="pay-order-info">
+                <span class="pay-order-label">{% if is_cart_checkout %}Checkout{% else %}Order ID{% endif %}</span>
+                <span class="pay-order-val">
+                    {% if is_cart_checkout %}
+                        {{ checkout_reference|default:"Address Required" }}
+                    {% else %}
+                        {% if order %}#{{ order.id }}{% else %}Address Required{% endif %}
+                    {% endif %}
+                </span>
             </div>
         </div>
 
@@ -79,7 +115,23 @@
             <div class="section-container">
                 <h2 class="section-title">Payment</h2>
                 <div class="pay-action-body">
+                    <form method="POST" class="pay-address-form">
+                        {% csrf_token %}
+                        <label class="pay-address-label" for="deliveryAddress">Delivery Address</label>
+                        <textarea id="deliveryAddress" name="delivery_address" class="pay-address-input" rows="5" placeholder="Enter full house name/number, street, area, city, state and PIN code" data-current-address="{{ current_address|default:''|escape }}" required>{{ delivery_address|default:'' }}</textarea>
+                        {% if current_address %}
+                        <label class="pay-address-check">
+                            <input type="checkbox" id="useCurrentAddress" {% if use_current_address %}checked{% endif %}>
+                            <span>Same as my current address</span>
+                        </label>
+                        {% endif %}
+                        <input type="hidden" name="use_current_address" id="useCurrentAddressInput" value="{% if use_current_address %}1{% else %}0{% endif %}">
+                        <button type="submit" class="pay-address-btn">
+                            {% if ready_to_pay %}Update Address{% else %}Continue to Payment{% endif %}
+                        </button>
+                    </form>
 
+                    {% if ready_to_pay %}
                     <div class="pay-razorpay-logo">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="#072654"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
                         <span>Razorpay Secure Checkout</span>
@@ -104,24 +156,17 @@
                     </button>
 
                     <p class="pay-test-note">
-                        🧪 <strong>Test Mode:</strong> Use card <code>4111 1111 1111 1111</code>, any future expiry, CVV <code>111</code>
+                        🧪 <strong>Test Mode:</strong> Use card <code>4111 1111 1111 1111</code>, any future expiry, CVV <code>111</code>, then complete the Razorpay test success step. No real money is charged in test mode.
                     </p>
-
+                    {% endif %}
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Hidden form to POST payment data back after success -->
-<form id="payment-form" method="POST" action="{% url 'payment_success' %}" style="display:none;">
-    {% csrf_token %}
-    <input type="hidden" name="razorpay_payment_id" id="razorpay_payment_id">
-    <input type="hidden" name="razorpay_order_id"   id="razorpay_order_id">
-    <input type="hidden" name="razorpay_signature"  id="razorpay_signature">
-</form>
-
 <!-- Razorpay JS SDK -->
+{% if ready_to_pay %}
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
 <script>
@@ -130,8 +175,10 @@ var options = {
     amount:      "{{ amount }}",          // in paise
     currency:    "INR",
     name:        "RAMYA Fashion",
-    description: "{{ product.name }}",
+    description: "{% if is_cart_checkout %}{{ checkout_title }}{% else %}{{ product.name }}{% endif %}",
     order_id:    "{{ razorpay_order_id }}",
+    callback_url: "{{ callback_url }}?order_id={{ order.id }}",
+    redirect: true,
     prefill: {
         name:  "{{ customer_name }}",
         email: "{{ customer_email }}",
@@ -139,26 +186,39 @@ var options = {
     theme: {
         color: "#000000"
     },
-    handler: function(response) {
-        // Payment succeeded — fill hidden form and submit
-        document.getElementById('razorpay_payment_id').value = response.razorpay_payment_id;
-        document.getElementById('razorpay_order_id').value   = response.razorpay_order_id;
-        document.getElementById('razorpay_signature').value  = response.razorpay_signature;
-        document.getElementById('payment-form').submit();
-    },
     modal: {
         ondismiss: function() {
-            // User closed the modal without paying
             alert('Payment cancelled. You can try again.');
         }
     }
 };
 
+var rzp = new Razorpay(options);
+
 document.getElementById('rzp-button').addEventListener('click', function(e) {
     e.preventDefault();
-    var rzp = new Razorpay(options);
     rzp.open();
 });
+</script>
+{% endif %}
+
+<script>
+var useCurrentAddress = document.getElementById('useCurrentAddress');
+if (useCurrentAddress) {
+    var deliveryAddress = document.getElementById('deliveryAddress');
+    var useCurrentAddressInput = document.getElementById('useCurrentAddressInput');
+    var currentAddress = deliveryAddress.dataset.currentAddress || '';
+
+    function syncCurrentAddressCheckbox() {
+        useCurrentAddressInput.value = useCurrentAddress.checked ? '1' : '0';
+        if (useCurrentAddress.checked) {
+            deliveryAddress.value = currentAddress;
+        }
+    }
+
+    useCurrentAddress.addEventListener('change', syncCurrentAddressCheckbox);
+    syncCurrentAddressCheckbox();
+}
 </script>
 
 <style>
@@ -167,6 +227,16 @@ document.getElementById('rzp-button').addEventListener('click', function(e) {
     margin: 28px auto 80px;
     display: flex; flex-direction: column; gap: 24px;
 }
+
+.pay-messages { display: flex; flex-direction: column; gap: 10px; }
+.pay-message {
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 600;
+}
+.pay-message-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+.pay-message-error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
 
 /* Breadcrumb */
 .pay-breadcrumb { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; }
@@ -212,6 +282,60 @@ document.getElementById('rzp-button').addEventListener('click', function(e) {
 /* Action col */
 .pay-action-body { padding: 8px 4px; display: flex; flex-direction: column; gap: 20px; }
 
+.pay-address-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 14px;
+    border-radius: 16px;
+    background: rgba(0,0,0,0.05);
+    border: 1px solid rgba(0,0,0,0.08);
+}
+.pay-address-label {
+    font-size: 11px;
+    font-weight: 800;
+    color: rgba(0,0,0,0.55);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+}
+.pay-address-input {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    min-height: 130px;
+    border: 2px solid rgba(0,0,0,0.12);
+    border-radius: 12px;
+    padding: 14px 16px;
+    font: inherit;
+    font-size: 13px;
+    color: #000;
+    background: #fff;
+    resize: vertical;
+    outline: none;
+    box-sizing: border-box;
+    line-height: 1.6;
+    overflow-wrap: break-word;
+}
+.pay-address-input:focus { border-color: #000; }
+.pay-address-check {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(0,0,0,0.65);
+}
+.pay-address-btn {
+    background: #cfffdc;
+    color: #000;
+    border: none;
+    border-radius: 12px;
+    padding: 14px 18px;
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
 .pay-razorpay-logo {
     display: flex; align-items: center; gap: 10px;
     font-size: 13px; font-weight: 700; color: #000;
@@ -247,6 +371,23 @@ document.getElementById('rzp-button').addEventListener('click', function(e) {
 
 @media (max-width: 860px) {
     .pay-layout { grid-template-columns: 1fr; }
+}
+
+.pay-demo-divider {
+    text-align: center; font-size: 11px; font-weight: 700;
+    color: rgba(0,0,0,0.3); letter-spacing: 2px;
+}
+.pay-demo-btn {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    background: #142c1e; color: #cfffdc; text-decoration: none;
+    border: 2px dashed #78b388; border-radius: 14px;
+    padding: 14px 24px; font-size: 13px; font-weight: 800;
+    letter-spacing: 1px; text-transform: uppercase;
+    width: 100%; transition: background 0.2s, box-shadow 0.2s;
+}
+.pay-demo-btn:hover {
+    background: #1e3d28;
+    box-shadow: 0 0 14px rgba(120,179,136,0.4);
 }
 </style>
 

@@ -1,0 +1,157 @@
+{% extends "Admin/base_admin.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block nav_dash %}active{% endblock %}
+
+{% block content %}
+
+<!-- ══ STAT CARDS ══ -->
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;">
+    <div class="adm-stat" style="background:#d4edda;">
+        <span class="adm-stat-icon">💵</span>
+        <div><span class="adm-stat-num">₹{{ total_revenue|floatformat:0 }}</span><span class="adm-stat-label">Gross Sales</span></div>
+    </div>
+    <div class="adm-stat" style="background:#cce5ff;">
+        <span class="adm-stat-icon">🛍️</span>
+        <div><span class="adm-stat-num">{{ total_orders }}</span><span class="adm-stat-label">Total Orders</span></div>
+    </div>
+    <div class="adm-stat" style="background:#fff3cd;">
+        <span class="adm-stat-icon">⏳</span>
+        <div><span class="adm-stat-num">{{ pending_orders }}</span><span class="adm-stat-label">Pending Orders</span></div>
+    </div>
+    <div class="adm-stat" style="background:#f8d7da;">
+        <span class="adm-stat-icon">⚠️</span>
+        <div><span class="adm-stat-num">{{ low_stock }}</span><span class="adm-stat-label">Low Stock Items</span></div>
+    </div>
+</div>
+
+<div class="adm-card">
+    <div class="adm-card-header">Finance Overview</div>
+    <div class="adm-card-body" style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;">
+        <div class="adm-stat" style="background:#d4edda;">
+            <span class="adm-stat-icon">💵</span>
+            <div><span class="adm-stat-num">₹{{ total_revenue|floatformat:0 }}</span><span class="adm-stat-label">Gross Sales</span></div>
+        </div>
+        <div class="adm-stat" style="background:#fff3cd;">
+            <span class="adm-stat-icon">🏦</span>
+            <div><span class="adm-stat-num">₹{{ vendor_payout_total|floatformat:0 }}</span><span class="adm-stat-label">Vendor Payouts</span></div>
+        </div>
+        <div class="adm-stat" style="background:#cce5ff;">
+            <span class="adm-stat-icon">📈</span>
+            <div><span class="adm-stat-num">₹{{ ramya_revenue|floatformat:0 }}</span><span class="adm-stat-label">RAMYA Revenue</span></div>
+        </div>
+        <div class="adm-stat" style="background:#f8d7da;">
+            <span class="adm-stat-icon">💳</span>
+            <div><span class="adm-stat-num">{{ completed_transactions }}</span><span class="adm-stat-label">Completed Transactions</span></div>
+        </div>
+    </div>
+    <div class="adm-card-body" style="padding-top:0;">
+        <a href="{% url 'admin_finance' %}" class="adm-btn adm-btn-black">Open Revenue Section</a>
+    </div>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;">
+    <div class="adm-stat" style="background:#78b388;">
+        <span class="adm-stat-icon">🏪</span>
+        <div><span class="adm-stat-num">{{ total_vendors }}</span><span class="adm-stat-label">Total Vendors</span></div>
+    </div>
+    <div class="adm-stat" style="background:#78b388;">
+        <span class="adm-stat-icon">👥</span>
+        <div><span class="adm-stat-num">{{ total_customers }}</span><span class="adm-stat-label">Total Customers</span></div>
+    </div>
+    <div class="adm-stat" style="background:#78b388;">
+        <span class="adm-stat-icon">👕</span>
+        <div><span class="adm-stat-num">{{ total_products }}</span><span class="adm-stat-label">Total Products</span></div>
+    </div>
+    <div class="adm-stat" style="background:#78b388;">
+        <span class="adm-stat-icon">🆕</span>
+        <div><span class="adm-stat-num">{{ new_vendors }}</span><span class="adm-stat-label">New Vendors (7d)</span></div>
+    </div>
+</div>
+
+<!-- ══ BOTTOM ROW ══ -->
+<div style="display:grid;grid-template-columns:2fr 1fr;gap:20px;">
+
+    <!-- Recent Orders -->
+    <div class="adm-card">
+        <div class="adm-card-header">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg>
+            Recent Orders
+            <a href="{% url 'admin_orders' %}" class="adm-btn adm-btn-mint" style="margin-left:auto;">View All</a>
+        </div>
+        <div class="adm-scroll" style="overflow-x:auto; width:100%;">
+            <table class="adm-table" style="min-width:1100px; width:max-content;">
+                <thead><tr><th>#</th><th>Customer</th><th>Product</th><th>Amount</th><th>Delivery Address</th><th>Date</th><th>Status</th><th>Action</th></tr></thead>
+                <tbody>
+                    {% for order in recent_orders %}
+                    <tr>
+                        <td style="font-weight:800;">#{{ order.id }}</td>
+                        <td>{{ order.customer.user.email }}</td>
+                        <td style="font-size:11px;font-weight:700;">{{ order.product.name|default:"—" }}</td>
+                        <td style="font-weight:800;">₹{{ order.totalAmount|floatformat:0 }}</td>
+                        <td style="font-size:11px;max-width:260px;white-space:normal;">{{ order.delivery_address|default:"—" }}</td>
+                        <td style="font-size:11px;color:rgba(0,0,0,0.5);">{{ order.orderDate|date:"d M Y" }}</td>
+                        <td><span class="badge badge-{{ order.status|lower }}">{{ order.status }}</span></td>
+                        <td>
+                            {% if order.status == 'Cancelled' %}
+                            <form method="POST" action="{% url 'admin_delete_order' order.id %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="next" value="{% url 'admin_dashboard' %}">
+                                <button type="submit" class="adm-btn adm-btn-red">Delete</button>
+                            </form>
+                            {% else %}
+                            <span style="font-size:10px;color:rgba(0,0,0,0.35);">—</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="8" style="text-align:center;padding:24px;color:rgba(0,0,0,0.4);">No orders yet</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Right column -->
+    <div style="display:flex;flex-direction:column;gap:18px;">
+
+        <!-- Top Products -->
+        <div class="adm-card">
+            <div class="adm-card-header">🔥 Top Products</div>
+            <div class="adm-card-body" style="padding:12px 16px;">
+                {% for p in top_products %}
+                <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(0,0,0,0.08);">
+                    {% if p.product_image %}
+                    <img src="{{ p.product_image.url }}" style="width:32px;height:32px;border-radius:6px;object-fit:cover;flex-shrink:0;">
+                    {% endif %}
+                    <div style="flex:1;min-width:0;">
+                        <div style="font-size:11px;font-weight:700;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ p.name }}</div>
+                        <div style="font-size:9px;color:rgba(0,0,0,0.45);">{{ p.vendor.shopname }}</div>
+                    </div>
+                    <span style="background:#000;color:#cfffdc;font-size:9px;font-weight:800;padding:2px 7px;border-radius:8px;">{{ p.view_count }}👁</span>
+                </div>
+                {% empty %}
+                <p style="font-size:12px;color:rgba(0,0,0,0.4);text-align:center;padding:16px;">No products yet</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Payment Methods -->
+        <div class="adm-card">
+            <div class="adm-card-header">💳 Payment Methods</div>
+            <div class="adm-card-body" style="padding:12px 16px;">
+                {% for pm in pay_methods %}
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(0,0,0,0.08);">
+                    <span style="font-size:12px;font-weight:700;color:#000;">
+                        {% if pm.paymentType == 'razorpay' %}💳 Razorpay{% else %}💰 {{ pm.paymentType|title }}{% endif %}
+                    </span>
+                    <span style="background:#000;color:#cfffdc;font-size:9px;font-weight:800;padding:2px 8px;border-radius:8px;">{{ pm.count }}</span>
+                </div>
+                {% empty %}
+                <p style="font-size:12px;color:rgba(0,0,0,0.4);text-align:center;padding:16px;">No payments yet</p>
+                {% endfor %}
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

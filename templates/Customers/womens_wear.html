@@ -14,7 +14,7 @@
         <h2 class="section-title">Explore Categories</h2>
         <div class="subcat-grid">
 
-            <a href="{% url 'sub_category_view' 'womens' 'saree' %}" class="subcat-card subcat-card-visual">
+            <a href="{% url 'category_view' 'womens' 'saree' %}" class="subcat-card subcat-card-visual">
                 <div class="visual-container">
                     <img src="{% static 'images/saree.png' %}" class="card-img" alt="Sarees">
                 </div>
@@ -29,7 +29,7 @@
                 </div>
             </a>
 
-            <a href="{% url 'sub_category_view' 'womens' 'kurti' %}" class="subcat-card subcat-card-visual">
+            <a href="{% url 'category_view' 'womens' 'kurti' %}" class="subcat-card subcat-card-visual">
                 <div class="visual-container">
                     <img src="{% static 'images/kurti.png' %}" class="card-img" alt="Kurtis">
                 </div>
@@ -44,7 +44,7 @@
                 </div>
             </a>
 
-            <a href="{% url 'sub_category_view' 'womens' 'pant' %}" class="subcat-card subcat-card-visual">
+            <a href="{% url 'category_view' 'womens' 'womenpants' %}" class="subcat-card subcat-card-visual">
                 <div class="visual-container">
                     <img src="{% static 'images/wpent.png' %}" class="card-img" alt="Pants">
                 </div>
@@ -59,7 +59,7 @@
                 </div>
             </a>
 
-            <a href="{% url 'sub_category_view' 'womens' 'tshirt' %}" class="subcat-card subcat-card-visual">
+            <a href="{% url 'category_view' 'womens' 'womentshirts' %}" class="subcat-card subcat-card-visual">
                 <div class="visual-container">
                     <img src="{% static 'images/wtshirt.png' %}" class="card-img" alt="T-Shirt">
                 </div>
@@ -74,7 +74,7 @@
                 </div>
             </a>
 
-            <a href="{% url 'sub_category_view' 'womens' 'western' %}" class="subcat-card subcat-card-visual">
+            <a href="{% url 'category_view' 'womens' 'western' %}" class="subcat-card subcat-card-visual">
                 <div class="visual-container">
                     <img src="{% static 'images/froak.png' %}" class="card-img" alt="Western">
                 </div>
@@ -89,7 +89,7 @@
                 </div>
             </a>
 
-            <a href="{% url 'sub_category_view' 'womens' 'sweatshirt' %}" class="subcat-card subcat-card-visual">
+            <a href="{% url 'category_view' 'womens' 'sweatshirts' %}" class="subcat-card subcat-card-visual">
                 <div class="visual-container">
                     <img src="{% static 'images/ss.png' %}" class="card-img" alt="Sweatshirts">
                 </div>
@@ -117,6 +117,7 @@
     display: flex;
     flex-direction: column;
     gap: 28px;
+    padding-left: 80px;
 }
 
 .breadcrumb {

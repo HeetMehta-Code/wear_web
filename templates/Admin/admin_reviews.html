@@ -1,0 +1,42 @@
+{% extends "Admin/base_admin.html" %}
+{% block title %}Reviews{% endblock %}
+{% block nav_reviews %}active{% endblock %}
+
+{% block content %}
+<div class="adm-card">
+    <div class="adm-card-header"><span class="nav-icon">⭐</span> All Customer Reviews</div>
+    <div style="overflow-x:auto;">
+        <table class="adm-table">
+            <thead>
+                <tr><th>#</th><th>Product</th><th>Customer</th><th>Rating</th><th>Comment</th><th>Action</th></tr>
+            </thead>
+            <tbody>
+                {% for review in reviews %}
+                <tr>
+                    <td style="font-weight:800;color:rgba(0,0,0,0.35);">{{ forloop.counter }}</td>
+                    <td style="font-weight:700;font-size:12px;">{{ review.product.name }}</td>
+                    <td style="font-size:11px;color:rgba(0,0,0,0.6);">{{ review.customer.user.email }}</td>
+                    <td>
+                        <span style="color:#f4c430;font-size:14px;">
+                            {% for i in "12345" %}{% if forloop.counter <= review.rating %}★{% else %}☆{% endif %}{% endfor %}
+                        </span>
+                        <span style="font-size:11px;font-weight:700;color:#000;margin-left:4px;">{{ review.rating }}/5</span>
+                    </td>
+                    <td style="font-size:12px;color:rgba(0,0,0,0.7);max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                        {{ review.comment|default:"—" }}
+                    </td>
+                    <td>
+                        <form method="POST" action="{% url 'admin_delete_review' review.pk %}" onsubmit="return confirm('Delete this review?')">
+                            {% csrf_token %}
+                            <button type="submit" class="adm-btn adm-btn-red">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="6" style="text-align:center;padding:40px;color:rgba(0,0,0,0.4);">No reviews yet</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

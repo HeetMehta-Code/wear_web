@@ -7,6 +7,14 @@ User = get_user_model()
 # --- AUTH FORMS (Needed for signup_view and login_view) ---
 
 class SignupForm(forms.ModelForm):
+    role = forms.ChoiceField(
+        choices=(
+            ('vendor', 'Vendor'),
+            ('customer', 'Customer'),
+        ),
+        widget=forms.Select(attrs={'class': 'form-control'}),
+    )
+
     password = forms.CharField(widget=forms.PasswordInput(attrs={
         'class': 'form-control',
         'placeholder': 'Create a password'
@@ -17,7 +25,6 @@ class SignupForm(forms.ModelForm):
         fields = ['email', 'password', 'role']
         widgets = {
             'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Email address'}),
-            'role': forms.Select(attrs={'class': 'form-control'}),
         }
 
 class LoginForm(forms.Form):

@@ -1,0 +1,72 @@
+{% extends "Admin/base_admin.html" %}
+{% block title %}Orders{% endblock %}
+{% block nav_orders %}active{% endblock %}
+
+{% block content %}
+<div class="adm-card">
+    <div class="adm-card-header">
+        <span class="nav-icon">🛍️</span> All Orders
+        <form method="GET" style="margin-left:auto;display:flex;gap:8px;align-items:center;">
+            <select name="status" style="background:#111;border:2px solid #333;color:#cfffdc;padding:7px 12px;border-radius:10px;font-size:11px;outline:none;">
+                <option value="">All Statuses</option>
+                {% for s in status_choices %}
+                <option value="{{ s }}" {% if status_filter == s %}selected{% endif %}>{{ s }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="adm-btn adm-btn-black">Filter</button>
+            {% if status_filter %}<a href="{% url 'admin_orders' %}" class="adm-btn adm-btn-mint">Clear</a>{% endif %}
+        </form>
+    </div>
+    <div style="overflow-x:auto;">
+        <table class="adm-table">
+            <thead>
+                <tr><th>#</th><th>Order ID</th><th>Customer</th><th>Product</th><th>Amount</th><th>Delivery Address</th><th>Date</th><th>Payment</th><th>Status</th><th>Update Status</th><th>Delete</th></tr>
+            </thead>
+            <tbody>
+                {% for order in orders %}
+                <tr>
+                    <td style="font-weight:800;color:rgba(0,0,0,0.35);">{{ forloop.counter }}</td>
+                    <td style="font-weight:900;">#{{ order.id }}</td>
+                    <td style="font-size:11px;">{{ order.customer.user.email }}</td>
+                    <td style="font-size:11px;font-weight:700;">{{ order.product.name|default:"—" }}</td>
+                    <td style="font-weight:900;">₹{{ order.totalAmount|floatformat:0 }}</td>
+                    <td style="font-size:11px;max-width:220px;white-space:normal;">{{ order.delivery_address|default:"—" }}</td>
+                    <td style="font-size:11px;color:rgba(0,0,0,0.5);">{{ order.orderDate|date:"d M Y" }}</td>
+                    <td>
+                        {% with pay=order.payment_set.first %}
+                            {% if pay %}
+                                <span style="font-size:10px;font-weight:700;">{% if pay.paymentType == 'razorpay' %}💳 Razorpay{% else %}💰 {{ pay.paymentType|title }}{% endif %}</span>
+                                <span class="badge {% if pay.paymentStatus == 'Completed' %}badge-delivered{% elif pay.paymentStatus == 'Failed' or pay.paymentStatus == 'Cancelled' %}badge-cancelled{% else %}badge-pending{% endif %}" style="margin-left:4px;">{{ pay.paymentStatus }}</span>
+                            {% else %}<span style="font-size:10px;color:rgba(0,0,0,0.35);">—</span>{% endif %}
+                        {% endwith %}
+                    </td>
+                    <td><span class="badge badge-{{ order.status|lower }}">{{ order.status }}</span></td>
+                    <td>
+                        <form method="POST" action="{% url 'admin_update_order_status' order.pk %}" style="display:flex;gap:6px;align-items:center;">
+                            {% csrf_token %}
+                            <select name="status" style="background:#000;border:1.5px solid #333;color:#cfffdc;padding:5px 8px;border-radius:8px;font-size:10px;outline:none;">
+                                {% for s in status_choices %}<option value="{{ s }}" {% if order.status == s %}selected{% endif %}>{{ s }}</option>{% endfor %}
+                            </select>
+                            <button type="submit" class="adm-btn adm-btn-mint">Update</button>
+                        </form>
+                    </td>
+                    <td>
+                        {% if order.status == 'Cancelled' %}
+                        <form method="POST" action="{% url 'admin_delete_order' order.pk %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="next" value="{% url 'admin_orders' %}">
+                            <button type="submit" class="adm-btn adm-btn-red">Delete</button>
+                        </form>
+                        {% else %}
+                        <span style="font-size:10px;color:rgba(0,0,0,0.35);">—</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="11" style="text-align:center;padding:40px;color:rgba(0,0,0,0.4);">No orders found</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

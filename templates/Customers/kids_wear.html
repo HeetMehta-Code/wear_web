@@ -14,7 +14,7 @@
         <h2 class="section-title">Shop by Gender</h2>
         <div class="subcat-grid">
 
-            <a href="{% url 'sub_category_view' 'kids' 'boy' %}" class="subcat-card subcat-card-visual">
+            <a href="{% url 'category_view' 'kids' 'boys' %}" class="subcat-card subcat-card-visual">
                 <div class="visual-container">
                     <img src="{% static 'images/bk.png' %}" class="card-img" alt="Boys Wear">
                 </div>
@@ -29,7 +29,7 @@
                 </div>
             </a>
 
-            <a href="{% url 'sub_category_view' 'kids' 'girl' %}" class="subcat-card subcat-card-visual">
+            <a href="{% url 'category_view' 'kids' 'girls' %}" class="subcat-card subcat-card-visual">
                 <div class="visual-container">
                     <img src="{% static 'images/gk.png' %}" class="card-img" alt="Girls Wear">
                 </div>
@@ -57,6 +57,7 @@
     display: flex;
     flex-direction: column;
     gap: 28px;
+    padding-left: 80px;
 }
 
 .breadcrumb {

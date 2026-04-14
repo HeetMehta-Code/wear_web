@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from django.contrib import messages
@@ -8,14 +8,22 @@ from django.db.models import Sum
 from.models import Vendor, Customer, Product, Order, Color, Size, ProductVariant
 # Importing forms and models from your apps
 from .forms import SignupForm, LoginForm
-from efashion.models import Vendor, Customer, Product, Order, Color, Size, ProductVariant, Payment
+from efashion.models import Vendor, Customer, Product, Order, Color, Size, ProductVariant, Payment, Review, ContactMessage
 from efashion.forms import VendorProfileForm, CustomerProfileForm
-from django.db.models import Q, Sum
+from django.db.models import Q, Sum, Count
+from django.utils import timezone
+from datetime import timedelta
 import razorpay
 import hmac
 import hashlib
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
+from django.urls import reverse
+from django.contrib.auth import get_user_model
+from django.core.mail import send_mail
+import random
+
+PLATFORM_COMMISSION_RATE = 0.25
 # ═══════════════════════════════════════════════════════════════════
 # 1. AUTHENTICATION (Keep as is)
 # ═══════════════════════════════════════════════════════════════════
@@ -45,6 +53,9 @@ def login_view(request):
             user = authenticate(request, email=email, password=password)
             if user is not None:
                 login(request, user)
+
+                if user.is_superuser or user.role == "admin":
+                    return redirect("admin_dashboard")
                 if user.role == "vendor":
                     vendor, _ = Vendor.objects.get_or_create(user=user)
                     if not vendor.shopname:
@@ -60,6 +71,124 @@ def login_view(request):
     else:
         form = LoginForm()
     return render(request, "login.html", {"form": form})
+
+
+def forgot_password(request):
+    if request.method != "POST":
+        return redirect("login")
+
+    form = LoginForm()
+    user_model = get_user_model()
+    step = request.POST.get("step")
+
+    if step == "send_email":
+        email = request.POST.get("email", "").strip().lower()
+        user = user_model.objects.filter(email__iexact=email).first()
+
+        if not user:
+            messages.error(request, "No account was found with that email address.")
+            return render(request, "login.html", {"form": form})
+
+        otp = f"{random.randint(100000, 999999)}"
+        request.session["password_reset_email"] = user.email
+        request.session["password_reset_otp"] = otp
+        request.session["password_reset_verified"] = False
+
+        try:
+            send_mail(
+                "WearWeb Password Reset OTP",
+                f"Your OTP for resetting your password is {otp}.",
+                getattr(settings, "DEFAULT_FROM_EMAIL", settings.EMAIL_HOST_USER),
+                [user.email],
+                fail_silently=False,
+            )
+            messages.success(request, "We sent an OTP to your email address.")
+        except Exception:
+            messages.error(request, "We couldn't send the reset email right now. Please try again.")
+            return render(request, "login.html", {"form": form})
+
+        return render(
+            request,
+            "login.html",
+            {
+                "form": form,
+                "show_otp_step": True,
+                "otp_email": user.email,
+            },
+        )
+
+    if step == "verify_otp":
+        email = request.POST.get("email", "").strip().lower()
+        otp = request.POST.get("otp", "").strip()
+        session_email = request.session.get("password_reset_email", "").lower()
+        session_otp = request.session.get("password_reset_otp")
+
+        if email != session_email or otp != session_otp:
+            messages.error(request, "Invalid OTP. Please try again.")
+            return render(
+                request,
+                "login.html",
+                {
+                    "form": form,
+                    "show_otp_step": True,
+                    "otp_email": email or session_email,
+                },
+            )
+
+        request.session["password_reset_verified"] = True
+        messages.success(request, "OTP verified. You can set a new password now.")
+        return render(
+            request,
+            "login.html",
+            {
+                "form": form,
+                "show_new_password_step": True,
+                "reset_email": session_email,
+                "verified_otp": session_otp,
+            },
+        )
+
+    if step == "reset_password":
+        email = request.POST.get("email", "").strip().lower()
+        otp = request.POST.get("otp", "").strip()
+        new_password = request.POST.get("new_password", "")
+        confirm_password = request.POST.get("confirm_password", "")
+        session_email = request.session.get("password_reset_email", "").lower()
+        session_otp = request.session.get("password_reset_otp")
+        is_verified = request.session.get("password_reset_verified", False)
+
+        if email != session_email or otp != session_otp or not is_verified:
+            messages.error(request, "Password reset session expired. Please start again.")
+            return render(request, "login.html", {"form": form})
+
+        if new_password != confirm_password:
+            messages.error(request, "Passwords do not match.")
+            return render(
+                request,
+                "login.html",
+                {
+                    "form": form,
+                    "show_new_password_step": True,
+                    "reset_email": session_email,
+                    "verified_otp": session_otp,
+                },
+            )
+
+        user = user_model.objects.filter(email__iexact=session_email).first()
+        if not user:
+            messages.error(request, "No account was found for this reset request.")
+            return render(request, "login.html", {"form": form})
+
+        user.set_password(new_password)
+        user.save()
+        request.session.pop("password_reset_email", None)
+        request.session.pop("password_reset_otp", None)
+        request.session.pop("password_reset_verified", None)
+        messages.success(request, "Password reset successful. Please log in.")
+        return redirect("login")
+
+    messages.error(request, "Invalid password reset request.")
+    return redirect("login")
 
 def logout_view(request):
     logout(request)
@@ -101,7 +230,7 @@ def complete_profile(request):
 
 @login_required
 def customer_dashboard(request):
-    customer = get_object_or_404(Customer, user=request.user)
+    customer = Customer.objects.filter(user=request.user).first()
     new_arrivals = Product.objects.filter(is_active=True, is_new_arrival=True).order_by('-created_at')[:12]
     return render(request, "Customers/customers.html", {
         "customer": customer,
@@ -112,12 +241,53 @@ def customer_dashboard(request):
 def customer_profile(request):
     """ Displays stats and orders. Button here links to complete_profile for ccp.html """
     customer = get_object_or_404(Customer, user=request.user)
-    orders = Order.objects.filter(customer=customer).order_by('-orderDate')
+    orders = (
+        Order.objects
+        .filter(customer=customer)
+        .exclude(status='Cancelled')
+        .select_related('product')
+        .order_by('-orderDate', '-id')
+    )
     return render(request, 'Customers/customer_profile.html', {
         'customer': customer,
         'orders': orders,
         'order_count': orders.count(),
     })
+
+
+def build_shop_context(request, base_products, category_name="All Products", selected_category=None):
+    selected_colors = [color.strip() for color in request.GET.getlist('color') if color.strip()]
+    price_range = request.GET.get('p')
+
+    filtered_products = base_products
+    if selected_colors:
+        filtered_products = filtered_products.filter(variants__color__name__in=selected_colors).distinct()
+
+    if price_range == 'below-999':
+        filtered_products = filtered_products.filter(price__lt=999)
+    elif price_range == '1000-2000':
+        filtered_products = filtered_products.filter(price__gte=1000, price__lte=2000)
+    elif price_range == 'above-2000':
+        filtered_products = filtered_products.filter(price__gt=2000)
+
+    color_names = (
+        ProductVariant.objects
+        .filter(product__in=base_products, color__isnull=False)
+        .values_list('color__name', flat=True)
+        .distinct()
+        .order_by('color__name')
+    )
+
+    return {
+        'products': filtered_products.order_by('-id'),
+        'category_name': category_name,
+        'selected_colors': selected_colors,
+        'selected_price_range': price_range,
+        'selected_category': selected_category,
+        'available_colors': [{'name': color_name} for color_name in color_names],
+    }
+
+
 def search_view(request):
     query = request.GET.get('q', '').strip()
     results = Product.objects.none()
@@ -127,26 +297,70 @@ def search_view(request):
             Q(category__icontains=query) |
             Q(vendor__shopname__icontains=query)
         ).filter(is_active=True).select_related('vendor')
-    return render(request, 'Customers/shop_all.html', {
-        'products': results,
-        'query': query,
-        'category_name': f'Search: "{query}"' if query else 'All Products',
-    })
+    context = build_shop_context(
+        request,
+        results,
+        category_name=f'Search: "{query}"' if query else 'All Products',
+    )
+    context['query'] = query
+    return render(request, 'Customers/shop_all.html', context)
 
 @login_required
 def my_orders(request):
     customer = get_object_or_404(Customer, user=request.user)
-    orders = Order.objects.filter(customer=customer).order_by('-orderDate')
+    orders = (
+        Order.objects
+        .filter(customer=customer)
+        .exclude(status='Cancelled')
+        .select_related('product')
+        .order_by('-orderDate', '-id')
+    )
     return render(request, 'Customers/myorders.html', {
         'orders': orders,
     })
 
-def brand_product_view(request, brand_name):
+
+@login_required
+@require_POST
+def cancel_order(request, order_id):
+    customer = get_object_or_404(Customer, user=request.user)
+    order = get_object_or_404(Order, id=order_id, customer=customer)
+
+    if order.status in ['Pending', 'Confirmed']:
+        order.status = 'Cancelled'
+        order.save(update_fields=['status'])
+
+        payment = order.payment_set.first()
+        if payment:
+            payment.paymentStatus = 'Refund Pending' if payment.paymentStatus == 'Completed' else 'Cancelled'
+            payment.save(update_fields=['paymentStatus'])
+
+        adjust_order_stock(order, increase=True)
+        messages.success(request, f"Order #{order.id} has been cancelled.")
+    else:
+        messages.warning(request, "Only pending or confirmed orders can be cancelled.")
+
+    return redirect('my_orders')
+
+def brand_product_view(request, brand_name, cat_slug=None): # Use 'cat_slug' here
+    # 1. Base filter for the brand
     products = Product.objects.filter(brand_name__iexact=brand_name, is_active=True)
     
+    # 2. Check if the user wants 'both' or a specific category
+    if cat_slug == 'both':
+        # This shows both 'mens' and 'womens' clothing for that brand
+        products = products.filter(category__in=['mens', 'womens'])
+        display_title = f"{brand_name} (Men & Women)"
+    elif cat_slug:
+        # Standard filter for single category
+        products = products.filter(category__iexact=cat_slug)
+        display_title = f"{brand_name} {cat_slug.title()}"
+    else:
+        display_title = brand_name.title()
+
     return render(request, "Customers/brand_all.html", {
         "products": products,
-        "brand_name": brand_name,  # Changed from category_name to brand_name
+        "brand_name": display_title,
     })
 
 def feature_collection_view(request, feature_type):
@@ -164,6 +378,15 @@ def about_us(request):
     return render(request, 'Customers/about.html')
 
 def contact_us(request):
+    if request.method == 'POST':
+        ContactMessage.objects.create(
+            name=request.POST.get('name', '').strip(),
+            email=request.POST.get('email', '').strip(),
+            subject=request.POST.get('subject') or 'other',
+            message=request.POST.get('message', '').strip(),
+        )
+        messages.success(request, "Your message has been sent successfully.")
+        return redirect('contact_us')
     return render(request, 'Customers/contact.html')
 
 def view_cart(request):
@@ -186,6 +409,49 @@ def view_cart(request):
         'total_price': total_price
     })
 
+def category_view(request, cat_slug, sub_slug=None):
+    # 1. Start by filtering the main category (e.g., 'mens')
+    products = Product.objects.filter(category=cat_slug, is_active=True)
+    
+    # 2. Define the title map for the sidebar/heading
+    category_titles = {
+        'mens': "Men's Wear", 'womens': "Women's Wear", 'kids': "Kid's Wear",
+        'bags': "Bags", 'purses': "Purses", 'belts': "Belts",
+        'sunglasses': "Sun Glasses", 'makeup': "Makeup", 'footwear': "Footwear",
+    }
+    
+    display_name = category_titles.get(cat_slug, cat_slug.title())
+
+    # 3. If a circle button was clicked (e.g., 'jacket'), filter further
+    if sub_slug:
+        # This looks for the 'sub_category' field in your Product model
+        products = products.filter(sub_category__iexact=sub_slug)
+        display_name = f"{sub_slug.title()} ({display_name})"
+
+    context = build_shop_context(
+        request,
+        products,
+        category_name=display_name,
+        selected_category=cat_slug,
+    )
+    return render(request, "Customers/shop_all.html", context)
+
+def shop_all(request):
+    products = Product.objects.filter(is_active=True).prefetch_related('variants__color')
+
+    cat = request.GET.get('category')
+    if cat:
+        products = products.filter(category=cat)
+
+    category_labels = dict(Product.CATEGORY_CHOICES)
+    context = build_shop_context(
+        request,
+        products,
+        category_name=category_labels.get(cat, "All Products"),
+        selected_category=cat,
+    )
+    return render(request, 'Customers/shop_all.html', context)
+
 def add_to_cart(request, product_id):
     cart = request.session.get('cart', {})
     if str(product_id) in cart:
@@ -206,30 +472,6 @@ def remove_from_cart(request, product_id):
 from django.shortcuts import render
 from .models import Product
 
-# views.py
-def category_view(request, cat_slug, sub_slug=None):
-    # 1. Start by filtering the main category (e.g., 'mens')
-    products = Product.objects.filter(category=cat_slug, is_active=True)
-    
-    # 2. Define the title map for the sidebar/heading
-    category_titles = {
-        'mens': "Men's Wear", 'womens': "Women's Wear", 'kids': "Kid's Wear",
-        'bags': "Bags", 'purses': "Purses", 'belts': "Belts",
-        'sunglasses': "Sun Glasses", 'makeup': "Makeup", 'footwear': "Footwear",
-    }
-    
-    display_name = category_titles.get(cat_slug, cat_slug.title())
-
-    # 3. If a circle button was clicked (e.g., 'jacket'), filter further
-    if sub_slug:
-        # This looks for the 'sub_category' field in your Product model
-        products = products.filter(sub_category__iexact=sub_slug)
-        display_name = f"{sub_slug.title()} ({display_name})"
-
-    return render(request, "Customers/shop_all.html", {
-        "products": products,
-        "category_name": display_name,
-    })
 # ═══════════════════════════════════════════════════════════════════
 # 4. VENDOR VIEWS (profile.html & vendors.html)
 # ═══════════════════════════════════════════════════════════════════
@@ -268,25 +510,19 @@ def vendor_dashboard(request):
     chart_data = [p.view_count for p in top_products]
 
     # 6. Accounting — orders linked to this vendor's products
-    from efashion.models import Payment
     vendor_orders = Order.objects.filter(
-        payment__paymentStatus='Completed'
-    ).select_related('payment').prefetch_related('orderitem_set__product').distinct()
+        product__vendor=vendor
+    ).select_related('product', 'customer__user').prefetch_related('payment_set').order_by('-orderDate', '-id')
 
-    # Filter to only orders that contain this vendor's products
-    # Since Order doesn't have direct vendor FK, we use Payment which links to Order
-    # Get all completed payments for orders containing vendor products
     completed_payments = Payment.objects.filter(
         paymentStatus='Completed',
+        order__product__vendor=vendor,
         order__isnull=False
-    ).select_related('order')
+    ).select_related('order', 'order__product')
 
-    # Total revenue = sum of all completed order amounts for this vendor
-    # (Approximation: filter orders where customer bought vendor products)
-    total_revenue = sum(
-        p.order.totalAmount for p in completed_payments
-        if Product.objects.filter(vendor=vendor, price=p.order.totalAmount).exists()
-    )
+    total_revenue = sum(p.order.totalAmount for p in completed_payments)
+    ramya_commission = total_revenue * PLATFORM_COMMISSION_RATE
+    vendor_net_revenue = total_revenue - ramya_commission
 
     # Payment method breakdown
     payment_methods = {}
@@ -295,10 +531,14 @@ def vendor_dashboard(request):
         payment_methods[method] = payment_methods.get(method, 0) + 1
 
     # Total orders count for this vendor
-    total_orders = completed_payments.count()
+    total_orders = vendor_orders.exclude(status='Cancelled').count()
 
     # Recent transactions (last 10)
-    recent_transactions = completed_payments.order_by('-order__orderDate')[:10]
+    recent_transactions = vendor_orders[:10]
+
+    product_reviews = Review.objects.filter(
+        product__vendor=vendor
+    ).select_related('product', 'customer__user').order_by('-id')[:12]
 
     # Low stock products (stock < 5)
     low_stock_products = products.filter(stock__lt=5, stock__gt=0).order_by('stock')
@@ -315,11 +555,14 @@ def vendor_dashboard(request):
         "query": query,
         # Accounting data
         "total_revenue":       total_revenue,
+        "ramya_commission":    ramya_commission,
+        "vendor_net_revenue":  vendor_net_revenue,
         "total_orders":        total_orders,
         "payment_methods":     payment_methods,
         "recent_transactions": recent_transactions,
         "low_stock_products":  low_stock_products,
         "out_of_stock":        out_of_stock,
+        "product_reviews":     product_reviews,
     })
 
 @login_required
@@ -347,11 +590,35 @@ def vendor_edit_product(request, pk):
     product = get_object_or_404(Product, pk=pk, vendor__user=request.user)
     
     if request.method == "POST":
+        qtys = request.POST.getlist('variant_qty[]')
+        try:
+            total_stock = sum(int(q) for q in qtys if q not in [None, ''])
+        except ValueError:
+            total_stock = product.stock or 0
+
+        sub_category_value = request.POST.get('sub_category') or product.sub_category
+        sub_category_aliases = {
+            'jacket': 'jackets',
+            't-shirt': 'tshirts',
+            'shirt': 'shirts',
+            'hoodie': 'hoodies',
+            'pant': 'womenpants' if request.POST.get('category') == 'womens' else 'menpants',
+            'traditional': 'traditional',
+            'saree': 'saree',
+            'kurti': 'kurti',
+            'western': 'western',
+            'sweatshirt': 'sweatshirts',
+            'boys': 'boys',
+            'girls': 'girls',
+        }
+
         product.name = request.POST.get('name')
         product.brand_name = request.POST.get('brand')
         product.category = request.POST.get('category')
         product.price = request.POST.get('price')
-        product.stock = request.POST.get('stock')
+        product.sub_category = sub_category_aliases.get(sub_category_value, sub_category_value)
+        product.original_price = request.POST.get('original_price') or None
+        product.stock = total_stock
         product.description = request.POST.get('description')
         
         if request.FILES.get('product_image'):
@@ -403,7 +670,7 @@ def vendor_upload_product(request):
     vendor = get_object_or_404(Vendor, user=request.user)
 
     if request.method == "POST":
-        # 1. Collect Form Data
+        # 1. Collect Parent Product Form Data
         name = request.POST.get('name')
         category = request.POST.get('category')
         sub_category = request.POST.get('sub_category')
@@ -411,16 +678,34 @@ def vendor_upload_product(request):
         description = request.POST.get('description')
         brand = request.POST.get('brand', 'Generic')
 
-        # 2. Collect Variant Lists
-        colors = request.POST.getlist('variant_color[]')
+        # 2. Collect Variant Lists (from dynamic table rows)
+        color_names = request.POST.getlist('variant_color_name[]')
+        color_codes = request.POST.getlist('variant_color_code[]')
+        color_groups = request.POST.getlist('variant_color_group[]')
+        size_groups = request.POST.getlist('variant_group[]')
         sizes = request.POST.getlist('variant_size[]')
         qtys = request.POST.getlist('variant_qty[]')
         variant_photos = request.FILES.getlist('variant_image[]')
 
-        # 3. Calculate Total Stock and Identify Main Image
-        total_stock = sum(int(q) for q in qtys if q)
+        # 3. Validation & Prep
+        # Calculate total stock by summing all quantities provided
+        try:
+            total_stock = sum(int(q) for q in qtys if q)
+        except ValueError:
+            total_stock = 0
+            
         # Use the very first image uploaded in the variants as the primary photo
         main_product_photo = variant_photos[0] if variant_photos else None
+
+        color_map = {}
+        for index, group_id in enumerate(color_groups):
+            if not group_id:
+                continue
+            color_map[group_id] = {
+                'name': color_names[index].strip() if index < len(color_names) else '',
+                'code': color_codes[index].strip() if index < len(color_codes) else '',
+                'image': variant_photos[index] if index < len(variant_photos) else None,
+            }
 
         # 4. Create Parent Product
         product = Product.objects.create(
@@ -432,29 +717,51 @@ def vendor_upload_product(request):
             price=price,
             stock=total_stock,
             description=description,
-            product_image=main_product_photo, # Saved to Cloudinary automatically
+            product_image=main_product_photo,
             is_active=True
         )
 
-        # 5. Create Variants
-        for i in range(len(colors)):
-            if colors[i] or sizes[i] or (i < len(qtys) and qtys[i]):
-                # Handle Foreign Keys for Color/Size
-                c_obj, _ = Color.objects.get_or_create(name=colors[i].strip().title()) if colors[i] else (None, False)
-                s_obj, _ = Size.objects.get_or_create(name=sizes[i].strip().upper()) if sizes[i] else (None, False)
-                
-                # Get specific image for this row
-                v_photo = variant_photos[i] if i < len(variant_photos) else None
+        # 5. Create Variants (REPAIRED LOOP)
+        # We loop through 'sizes' because that represents the total number of rows.
+        for i in range(len(sizes)):
+            # Check if this row has at least a size or a quantity
+            if sizes[i] or (i < len(qtys) and qtys[i]):
+                current_group = size_groups[i] if i < len(size_groups) else None
+                current_color = color_map.get(current_group, {})
+                current_color_name = current_color.get('name')
+                current_color_code = current_color.get('code')
 
+                # Handle Foreign Keys (Get or Create)
+                c_obj = None
+                if current_color_name:
+                    c_obj, _ = Color.objects.get_or_create(
+                        name=current_color_name.strip().title(),
+                        defaults={'code': current_color_code or None}
+                    )
+                    if current_color_code and c_obj.code != current_color_code:
+                        c_obj.code = current_color_code
+                        c_obj.save(update_fields=['code'])
+                
+                s_obj = None
+                if sizes[i]:
+                    s_obj, _ = Size.objects.get_or_create(name=sizes[i].strip().upper())
+                
+                # Reuse the image uploaded for the current colour block
+                v_photo = current_color.get('image')
+                
+                # Get the quantity for this specific size
+                row_qty = int(qtys[i]) if (i < len(qtys) and qtys[i]) else 0
+
+                # Create the Variant entry in the database
                 ProductVariant.objects.create(
                     product=product,
                     color=c_obj,
                     size=s_obj,
-                    variant_stock=int(qtys[i]) if (i < len(qtys) and qtys[i]) else 0,
-                    image=v_photo # Saved to Cloudinary folder 'Products/Variants/'
+                    variant_stock=row_qty,
+                    image=v_photo
                 )
 
-        messages.success(request, f'Product "{name}" published with variants!')
+        messages.success(request, f'Product "{name}" published with all variants!')
         return redirect('vendor_dashboard')
 
     return render(request, "Vendors/upload_product.html")
@@ -480,6 +787,40 @@ def kids_wear(request):
 
 def product_detail(request, pk):
     product = get_object_or_404(Product, pk=pk)
+
+    if request.method == "POST":
+        if not request.user.is_authenticated:
+            messages.error(request, "Please log in to submit a review.")
+            return redirect("login")
+
+        customer = Customer.objects.filter(user=request.user).first()
+        if not customer:
+            messages.error(request, "Only customers can submit reviews.")
+            return redirect("product_detail", pk=pk)
+
+        try:
+            rating = int(request.POST.get("rating", "0"))
+        except (TypeError, ValueError):
+            rating = 0
+
+        comment = request.POST.get("comment", "").strip()
+
+        if rating < 1 or rating > 5:
+            messages.error(request, "Please choose a rating between 1 and 5.")
+            return redirect("product_detail", pk=pk)
+
+        Review.objects.update_or_create(
+            customer=customer,
+            product=product,
+            defaults={
+                "rating": rating,
+                "comment": comment,
+            },
+        )
+        messages.success(request, "Your review was submitted successfully.")
+        return redirect("product_detail", pk=pk)
+
+    product.increment_views()
     
     # 1. Create a list for unique gallery images
     unique_gallery = []
@@ -502,10 +843,130 @@ def product_detail(request, pk):
         "unique_gallery": unique_gallery, # This list now contains NO duplicates
     })
 
+
+def adjust_order_stock(order, increase=False):
+    product = order.product
+    if not product:
+        return
+
+    new_stock = product.stock + (1 if increase else -1)
+    product.stock = max(new_stock, 0)
+    product.save(update_fields=['stock'])
+
+
+def finalize_payment(payment, payment_id, signature, payment_type='razorpay'):
+    order = payment.order
+
+    if payment.paymentStatus != 'Completed':
+        payment.paymentStatus = 'Completed'
+        payment.paymentType = payment_type
+        payment.razorpay_payment_id = payment_id
+        payment.razorpay_signature = signature
+        payment.save()
+
+        order.status = 'Confirmed'
+        order.save(update_fields=['status'])
+        adjust_order_stock(order, increase=False)
+
+    return order
+
+# ════════════════════════════════════════════
+# RAZORPAY — Cart Checkout
+# ════════════════════════════════════════════
+@login_required
+def initiate_cart_payment(request):
+    cart = request.session.get('cart', {})
+    if not cart:
+        messages.warning(request, "Your cart is empty.")
+        return redirect('view_cart')
+
+    customer_profile = get_object_or_404(Customer, user=request.user)
+    cart_items = []
+    total_price = 0
+
+    for product_id, item_data in cart.items():
+        product = get_object_or_404(Product, id=product_id, is_active=True)
+        quantity = max(int(item_data.get('quantity', 1)), 1)
+        line_total = product.price * quantity
+        total_price += line_total
+        cart_items.append({
+            'product': product,
+            'quantity': quantity,
+            'line_total': line_total,
+        })
+
+    context = {
+        'cart_items': cart_items,
+        'is_cart_checkout': True,
+        'checkout_title': f'Cart Checkout ({sum(item["quantity"] for item in cart_items)} items)',
+        'amount_display': total_price,
+        'customer_name': getattr(customer_profile, 'name', 'Customer'),
+        'customer_email': getattr(request.user, 'email', ''),
+        'current_address': customer_profile.address or '',
+        'delivery_address': customer_profile.address or '',
+    }
+
+    if request.method == 'POST':
+        use_current_address = request.POST.get('use_current_address') == '1'
+        delivery_address = (customer_profile.address if use_current_address else request.POST.get('delivery_address', '')).strip()
+
+        if len(delivery_address) < 10:
+            messages.error(request, "Please enter the full delivery address.")
+            context['use_current_address'] = use_current_address
+            context['delivery_address'] = delivery_address
+            return render(request, 'Customers/payment.html', context)
+
+        amount_paise = int(total_price * 100)
+        client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+        razorpay_order = client.order.create(data={
+            "amount": amount_paise,
+            "currency": "INR",
+            "payment_capture": "1"
+        })
+
+        created_order_ids = []
+        created_orders = []
+        for item in cart_items:
+            for _ in range(item['quantity']):
+                order = Order.objects.create(
+                    customer=customer_profile,
+                    product=item['product'],
+                    status='Pending',
+                    totalAmount=item['product'].price,
+                    delivery_address=delivery_address,
+                )
+                Payment.objects.create(
+                    order=order,
+                    paymentType='razorpay',
+                    paymentStatus='Pending',
+                    razorpay_order_id=razorpay_order['id'],
+                )
+                created_order_ids.append(order.id)
+                created_orders.append(order)
+
+        request.session['pending_cart_checkout_razorpay_order_id'] = razorpay_order['id']
+        request.session['pending_cart_checkout_order_ids'] = created_order_ids
+
+        context.update({
+            'checkout_reference': f'CART-{razorpay_order["id"]}',
+            'razorpay_order_id': razorpay_order['id'],
+            'razorpay_key': settings.RAZORPAY_KEY_ID,
+            'callback_url': request.build_absolute_uri(reverse('payment_success')),
+            'amount': amount_paise,
+            'ready_to_pay': True,
+            'order': created_orders[0] if created_orders else None,
+            'delivery_address': delivery_address,
+            'use_current_address': use_current_address,
+        })
+        messages.success(request, "Delivery address saved. You can complete the payment now.")
+
+    return render(request, 'Customers/payment.html', context)
+
 # ════════════════════════════════════════════
 # RAZORPAY — Step 1: Create order & open checkout
 # Called when customer clicks "Buy Now"
 # ════════════════════════════════════════════
+@login_required
 def initiate_payment(request, pk):
     product = get_object_or_404(Product, pk=pk)
     
@@ -517,59 +978,93 @@ def initiate_payment(request, pk):
         # Fallback if the profile isn't found
         return render(request, 'Customers/error.html', {'message': 'Customer profile not found.'})
 
-    # 2. Razorpay Setup
-    amount_paise = int(product.price * 100)
-    client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
-
-    data = {
-        "amount": amount_paise,
-        "currency": "INR",
-        "payment_capture": "1"
-    }
-    razorpay_order = client.order.create(data=data)
-
-    # 3. Create Internal Order (Matching your exact Model names)
-    order = Order.objects.create(
-        customer    = customer_profile, # Uses 'customer' from your model
-        status      = 'Pending',
-        totalAmount = product.price     # Uses 'totalAmount' from your model
-    )
-
-    # 4. Create Payment Record
-    Payment.objects.create(
-        order             = order,
-        paymentType       = 'razorpay',
-        paymentStatus     = 'Pending',
-        razorpay_order_id = razorpay_order['id'],
-    )
-
-    # 5. UI Context
     context = {
-        'product':           product,
-        'order':             order,
-        'razorpay_order_id': razorpay_order['id'],
-        'razorpay_key':      settings.RAZORPAY_KEY_ID,
-        'amount':            amount_paise,
-        'amount_display':    product.price,
-        'customer_name':     getattr(customer_profile, 'name', 'Customer'), # Adjust based on Customer model
-        'customer_email':    getattr(request.user, 'email', ''),
+        'product': product,
+        'amount_display': product.price,
+        'customer_name': getattr(customer_profile, 'name', 'Customer'),
+        'customer_email': getattr(request.user, 'email', ''),
+        'current_address': customer_profile.address or '',
+        'delivery_address': customer_profile.address or '',
     }
- 
+
+    if request.method == 'POST':
+        use_current_address = request.POST.get('use_current_address') == '1'
+        delivery_address = (customer_profile.address if use_current_address else request.POST.get('delivery_address', '')).strip()
+
+        if len(delivery_address) < 10:
+            messages.error(request, "Please enter the full delivery address.")
+            context['use_current_address'] = use_current_address
+            context['delivery_address'] = delivery_address
+            return render(request, 'Customers/payment.html', context)
+
+        amount_paise = int(product.price * 100)
+        client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+        razorpay_order = client.order.create(data={
+            "amount": amount_paise,
+            "currency": "INR",
+            "payment_capture": "1"
+        })
+
+        order = Order.objects.create(
+            customer=customer_profile,
+            product=product,
+            status='Pending',
+            totalAmount=product.price,
+            delivery_address=delivery_address,
+        )
+
+        Payment.objects.create(
+            order=order,
+            paymentType='razorpay',
+            paymentStatus='Pending',
+            razorpay_order_id=razorpay_order['id'],
+        )
+
+        context.update({
+            'order': order,
+            'razorpay_order_id': razorpay_order['id'],
+            'razorpay_key': settings.RAZORPAY_KEY_ID,
+            'callback_url': request.build_absolute_uri(reverse('payment_success')),
+            'amount': amount_paise,
+            'ready_to_pay': True,
+            'delivery_address': delivery_address,
+            'use_current_address': use_current_address,
+        })
+        messages.success(request, "Delivery address saved. You can complete the payment now.")
+
     return render(request, 'Customers/payment.html', context)
 # ════════════════════════════════════════════
 # RAZORPAY — Step 2: Verify payment after success
 # Called by Razorpay after payment is completed
 # ════════════════════════════════════════════
 @csrf_exempt
-@login_required
 def payment_success(request):
-    if request.method == 'POST':
+    if request.method in ['POST', 'GET']:
         # 1. Get the data from Razorpay POST request
         params_dict = {
             'razorpay_order_id': request.POST.get('razorpay_order_id', ''),
             'razorpay_payment_id': request.POST.get('razorpay_payment_id', ''),
             'razorpay_signature': request.POST.get('razorpay_signature', '')
         }
+        if request.method == 'GET':
+            params_dict = {
+                'razorpay_order_id': request.GET.get('razorpay_order_id', ''),
+                'razorpay_payment_id': request.GET.get('razorpay_payment_id', ''),
+                'razorpay_signature': request.GET.get('razorpay_signature', '')
+            }
+
+        if not params_dict['razorpay_payment_id']:
+            failed_order_id = request.POST.get('order_id') or request.GET.get('order_id')
+            if failed_order_id:
+                failed_order = Order.objects.filter(id=failed_order_id).first()
+                if failed_order:
+                    failed_order.status = 'Failed'
+                    failed_order.save(update_fields=['status'])
+                    failed_payment = failed_order.payment_set.first()
+                    if failed_payment and failed_payment.paymentStatus != 'Completed':
+                        failed_payment.paymentStatus = 'Failed'
+                        failed_payment.save(update_fields=['paymentStatus'])
+            return render(request, 'Customers/payment_fail.html')
 
         client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
 
@@ -578,18 +1073,37 @@ def payment_success(request):
             client.utility.verify_payment_signature(params_dict)
             
             # 3. If verified, update your database
-            payment = Payment.objects.get(razorpay_order_id=params_dict['razorpay_order_id'])
-            order = payment.order
+            payments = list(Payment.objects.filter(
+                razorpay_order_id=params_dict['razorpay_order_id']
+            ).select_related('order', 'order__product'))
 
-            payment.razorpay_payment_id = params_dict['razorpay_payment_id']
-            payment.razorpay_signature = params_dict['razorpay_signature']
-            payment.paymentStatus = 'Completed'
-            payment.save()
+            if not payments:
+                raise Payment.DoesNotExist
 
-            order.status = 'Confirmed'
-            order.save()
+            completed_orders = []
+            for payment in payments:
+                completed_orders.append(
+                    finalize_payment(
+                        payment,
+                        params_dict['razorpay_payment_id'],
+                        params_dict['razorpay_signature'],
+                        payment_type='razorpay',
+                    )
+                )
 
-            return render(request, 'Customers/payment_success.html', {'order': order, 'payment': payment})
+            if request.session.get('pending_cart_checkout_razorpay_order_id') == params_dict['razorpay_order_id']:
+                request.session['cart'] = {}
+                request.session.pop('pending_cart_checkout_razorpay_order_id', None)
+                request.session.pop('pending_cart_checkout_order_ids', None)
+
+            primary_order = completed_orders[0]
+            primary_payment = payments[0]
+            return render(request, 'Customers/payment_success.html', {
+                'order': primary_order,
+                'orders': completed_orders,
+                'payment': primary_payment,
+                'amount_paid': sum(order.totalAmount for order in completed_orders),
+            })
 
         except (razorpay.errors.SignatureVerificationError, Payment.DoesNotExist):
             # 4. Handle failure/tampering
@@ -601,11 +1115,363 @@ def payment_success(request):
                     payment.order.status = 'Failed'
                     payment.order.save()
             
-            return render(request, 'Customers/payment_failed.html')
+            return render(request, 'Customers/payment_fail.html')
 
     return redirect('customer_dashboard')
 # ════════════════════════════════════════════
 # RAZORPAY — Step 3: Handle payment failure
 # ════════════════════════════════════════════
 def payment_failed(request):
-    return render(request, 'Customers/payment_failed.html', {'order': None})
+    return render(request, 'Customers/payment_fail.html', {'order': None})
+
+
+# ════════════════════════════════════════════
+# DUMMY PAYMENT — skips Razorpay, marks paid
+# For development/demo only
+# ════════════════════════════════════════════
+@login_required
+def dummy_payment(request, order_id):
+    import uuid
+    order = get_object_or_404(Order, id=order_id)
+
+    # Only the customer who placed this order can pay
+    if order.customer.user != request.user:
+        return redirect('customer_dashboard')
+
+    # Get or find the pending payment for this order
+    payment = Payment.objects.filter(order=order, paymentStatus='Pending').first()
+
+    if payment:
+        payment.razorpay_order_id   = payment.razorpay_order_id or ('DEMO_ORD_' + uuid.uuid4().hex[:12].upper())
+        order = finalize_payment(
+            payment,
+            'DEMO_PAY_' + uuid.uuid4().hex[:12].upper(),
+            'DEMO_SIG_' + uuid.uuid4().hex[:16].upper(),
+            payment_type='demo',
+        )
+
+        return render(request, 'Customers/payment_success.html', {
+            'order':   order,
+            'payment': payment,
+        })
+
+    # No pending payment found
+    return redirect('customer_dashboard')
+
+def is_admin(user):
+    return user.is_authenticated and (user.is_superuser or user.is_staff)
+ 
+admin_required = user_passes_test(is_admin, login_url='login')
+ 
+ 
+# ════════════════════════════════════════════════════
+# 1. ADMIN DASHBOARD — overview of everything
+# ════════════════════════════════════════════════════
+@login_required
+@admin_required
+def admin_dashboard(request):
+    # ── Counts ──
+    total_vendors   = Vendor.objects.count()
+    total_customers = Customer.objects.count()
+    total_products  = Product.objects.count()
+    total_orders    = Order.objects.count()
+ 
+    # ── Revenue ──
+    total_revenue = Payment.objects.filter(
+        paymentStatus='Completed'
+    ).aggregate(rev=Sum('order__totalAmount'))['rev'] or 0
+    ramya_revenue = total_revenue * PLATFORM_COMMISSION_RATE
+    vendor_payout_total = total_revenue - ramya_revenue
+    completed_transactions = Payment.objects.filter(paymentStatus='Completed').count()
+ 
+    pending_orders = Order.objects.filter(status='Pending').count()
+ 
+    # ── Recent orders (last 8) ──
+    recent_orders = Order.objects.select_related(
+        'customer__user'
+    ).prefetch_related('payment_set').order_by('-orderDate')[:8]
+ 
+    # ── New vendors (last 7 days) ──
+    week_ago = timezone.now() - timedelta(days=7)
+    new_vendors = Vendor.objects.filter(user__date_joined__gte=week_ago).count()
+    new_customers = Customer.objects.filter(user__date_joined__gte=week_ago).count()
+    new_vendors = Vendor.objects.filter(user__date_joined__gte=week_ago).count()
+    new_customers = Customer.objects.filter(user__date_joined__gte=week_ago).count()
+    # ── Top products by views ──
+    top_products = Product.objects.select_related('vendor').order_by('-view_count')[:5]
+ 
+    # ── Payment method breakdown ──
+    pay_methods = Payment.objects.filter(
+        paymentStatus='Completed'
+    ).values('paymentType').annotate(count=Count('id')).order_by('-count')
+ 
+    # ── Low stock ──
+    low_stock = Product.objects.filter(stock__lt=5, is_active=True).count()
+ 
+    return render(request, 'Admin/admin_dashboard.html', {
+        'total_vendors':   total_vendors,
+        'total_customers': total_customers,
+        'total_products':  total_products,
+        'total_orders':    total_orders,
+        'total_revenue':   total_revenue,
+        'ramya_revenue':   ramya_revenue,
+        'vendor_payout_total': vendor_payout_total,
+        'completed_transactions': completed_transactions,
+        'pending_orders':  pending_orders,
+        'recent_orders':   recent_orders,
+        'new_vendors':     new_vendors,
+        'new_customers':   new_customers,
+        'top_products':    top_products,
+        'pay_methods':     pay_methods,
+        'low_stock':       low_stock,
+    })
+
+
+@login_required
+@admin_required
+def admin_finance(request):
+    completed_payments = Payment.objects.filter(
+        paymentStatus='Completed'
+    ).select_related('order', 'order__product', 'order__product__vendor')
+
+    gross_sales = sum(payment.order.totalAmount for payment in completed_payments if payment.order)
+    ramya_revenue = gross_sales * PLATFORM_COMMISSION_RATE
+    vendor_payout_total = gross_sales - ramya_revenue
+
+    finance_rows = []
+    for payment in completed_payments.order_by('-order__orderDate', '-id')[:50]:
+        if not payment.order:
+            continue
+        gross_amount = payment.order.totalAmount
+        commission = gross_amount * PLATFORM_COMMISSION_RATE
+        net_amount = gross_amount - commission
+        finance_rows.append({
+            'payment': payment,
+            'gross_amount': gross_amount,
+            'commission': commission,
+            'net_amount': net_amount,
+        })
+
+    return render(request, 'Admin/admin_finance.html', {
+        'gross_sales': gross_sales,
+        'ramya_revenue': ramya_revenue,
+        'vendor_payout_total': vendor_payout_total,
+        'completed_transactions': completed_payments.count(),
+        'finance_rows': finance_rows,
+    })
+
+
+@login_required
+@admin_required
+def admin_messages(request):
+    contact_messages = ContactMessage.objects.all()
+    return render(request, 'Admin/admin_messages.html', {
+        'contact_messages': contact_messages,
+    })
+ 
+ 
+# ════════════════════════════════════════════════════
+# 2. VENDORS — list, approve, block
+# ════════════════════════════════════════════════════
+@login_required
+@admin_required
+def admin_vendors(request):
+    query   = request.GET.get('q', '').strip()
+    vendors = Vendor.objects.select_related('user').annotate(
+        product_count=Count('product')
+    ).order_by('-user__date_joined')
+ 
+    if query:
+        vendors = vendors.filter(
+            Q(shopname__icontains=query) |
+            Q(user__email__icontains=query)
+        )
+ 
+    return render(request, 'Admin/admin_vendors.html', {
+        'vendors': vendors,
+        'query':   query,
+    })
+ 
+ 
+@login_required
+@admin_required
+@require_POST
+def admin_toggle_vendor(request, pk):
+    vendor = get_object_or_404(Vendor, pk=pk)
+    vendor.user.is_active = not vendor.user.is_active
+    vendor.user.save()
+    status = 'activated' if vendor.user.is_active else 'blocked'
+    messages.success(request, f"Vendor '{vendor.shopname}' {status}.")
+    return redirect('admin_vendors')
+ 
+ 
+@login_required
+@admin_required
+@require_POST
+def admin_delete_vendor(request, pk):
+    vendor = get_object_or_404(Vendor, pk=pk)
+    name   = vendor.shopname
+    vendor.user.delete()   # cascades to Vendor
+    messages.warning(request, f"Vendor '{name}' deleted permanently.")
+    return redirect('admin_vendors')
+ 
+ 
+# ════════════════════════════════════════════════════
+# 3. CUSTOMERS — list, block
+# ════════════════════════════════════════════════════
+@login_required
+@admin_required
+def admin_customers(request):
+    query     = request.GET.get('q', '').strip()
+    customers = Customer.objects.select_related('user').annotate(
+        order_count=Count('order')
+    ).order_by('-user__date_joined')
+ 
+    if query:
+        customers = customers.filter(
+            Q(user__email__icontains=query) |
+            Q(address__icontains=query)
+        )
+ 
+    return render(request, 'Admin/admin_customers.html', {
+        'customers': customers,
+        'query':     query,
+    })
+ 
+ 
+@login_required
+@admin_required
+@require_POST
+def admin_toggle_customer(request, pk):
+    customer = get_object_or_404(Customer, pk=pk)
+    customer.user.is_active = not customer.user.is_active
+    customer.user.save()
+    status = 'activated' if customer.user.is_active else 'blocked'
+    messages.success(request, f"Customer {customer.user.email} {status}.")
+    return redirect('admin_customers')
+ 
+ 
+# ════════════════════════════════════════════════════
+# 4. PRODUCTS — list, approve, delete
+# ════════════════════════════════════════════════════
+@login_required
+@admin_required
+def admin_products(request):
+    query    = request.GET.get('q', '').strip()
+    category = request.GET.get('cat', '').strip()
+    products = Product.objects.select_related('vendor').order_by('-created_at')
+ 
+    if query:
+        products = products.filter(
+            Q(name__icontains=query) |
+            Q(vendor__shopname__icontains=query)
+        )
+    if category:
+        products = products.filter(category=category)
+ 
+    return render(request, 'Admin/admin_products.html', {
+        'products':         products,
+        'query':            query,
+        'selected_cat':     category,
+        'category_choices': Product.CATEGORY_CHOICES,
+    })
+ 
+ 
+@login_required
+@admin_required
+@require_POST
+def admin_toggle_product(request, pk):
+    product = get_object_or_404(Product, pk=pk)
+    product.is_active = not product.is_active
+    product.save()
+    return JsonResponse({'status': 'ok', 'is_active': product.is_active})
+ 
+ 
+@login_required
+@admin_required
+@require_POST
+def admin_delete_product(request, pk):
+    product = get_object_or_404(Product, pk=pk)
+    name    = product.name
+    product.delete()
+    messages.warning(request, f"Product '{name}' deleted.")
+    return redirect('admin_products')
+ 
+ 
+# ════════════════════════════════════════════════════
+# 5. ORDERS — list, update status
+# ════════════════════════════════════════════════════
+@login_required
+@admin_required
+def admin_orders(request):
+    status_filter = request.GET.get('status', '').strip()
+    orders = Order.objects.select_related(
+        'customer__user', 'product'
+    ).prefetch_related('payment_set').order_by('-orderDate')
+    if status_filter:
+        orders = orders.filter(status=status_filter)
+ 
+    STATUS_CHOICES = ['Pending', 'Confirmed', 'Shipped', 'Delivered', 'Cancelled', 'Failed']
+ 
+    return render(request, 'Admin/admin_orders.html', {
+        'orders':         orders,
+        'status_filter':  status_filter,
+        'status_choices': STATUS_CHOICES,
+    })
+
+
+@login_required
+@admin_required
+@require_POST
+def admin_delete_order(request, pk):
+    order = get_object_or_404(Order, pk=pk, status='Cancelled')
+    order.delete()
+    messages.warning(request, f"Cancelled order #{pk} deleted.")
+    return redirect(request.POST.get('next') or 'admin_orders')
+ 
+ 
+@login_required
+@admin_required
+@require_POST
+def admin_update_order_status(request, pk):
+    order      = get_object_or_404(Order, pk=pk)
+    new_status = request.POST.get('status')
+    STATUS_CHOICES = ['Pending', 'Confirmed', 'Shipped', 'Delivered', 'Cancelled', 'Failed']
+    if new_status in STATUS_CHOICES:
+        previous_status = order.status
+        order.status = new_status
+        order.save()
+
+        if previous_status != 'Cancelled' and new_status == 'Cancelled':
+            adjust_order_stock(order, increase=True)
+            payment = order.payment_set.first()
+            if payment:
+                payment.paymentStatus = 'Refund Pending' if payment.paymentStatus == 'Completed' else 'Cancelled'
+                payment.save(update_fields=['paymentStatus'])
+        elif previous_status == 'Cancelled' and new_status != 'Cancelled':
+            adjust_order_stock(order, increase=False)
+
+        messages.success(request, f"Order #{order.id} status updated to {new_status}.")
+    return redirect('admin_orders')
+ 
+ 
+# ════════════════════════════════════════════════════
+# 6. REVIEWS — list, delete spam
+# ════════════════════════════════════════════════════
+@login_required
+@admin_required
+def admin_reviews(request):
+    reviews = Review.objects.select_related(
+        'customer__user', 'product'
+    ).order_by('-id')
+    return render(request, 'Admin/admin_reviews.html', {'reviews': reviews})
+ 
+ 
+@login_required
+@admin_required
+@require_POST
+def admin_delete_review(request, pk):
+    review = get_object_or_404(Review, pk=pk)
+    review.delete()
+    messages.warning(request, "Review deleted.")
+    return redirect('admin_reviews')

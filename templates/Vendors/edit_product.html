@@ -2,242 +2,314 @@
 
 {% block content %}
 <style>
-    /* 1. Wrapper and Card */
-    .upload-box { 
-        display: flex; 
-        justify-content: center; 
-        padding: 40px 20px; 
-        background: #142c1e; 
-        min-height: 100vh; 
-    }
-    .card { 
-        background: #000; 
-        border: 3px solid #78b388; 
-        border-radius: 24px; 
-        width: 100%; 
-        max-width: 950px; 
-        padding: 40px; 
-        box-shadow: 0 0px 50px #cfffdc; 
-    }
-    
-    /* 2. Typography */
+    .upload-box { display: flex; justify-content: center; padding: 40px 20px; background: #142c1e; min-height: 100vh; }
+    .card { background: #000; border: 3px solid #78b388; border-radius: 24px; width: 100%; max-width: 950px; padding: 40px; box-shadow: 0 0px 50px #cfffdc; }
     .card h2 { color: #cfffdc; margin-top: 0; font-size: 24px; letter-spacing: 1px; }
-    .card h3 { color: #78b388; font-size: 16px; margin-bottom: 15px; }
-    .card label { 
-        display: block; 
-        color: #cfffdc; 
-        font-size: 15px; 
-        font-weight: 800; 
-        text-transform: uppercase; 
-        margin-bottom: 8px; 
-        margin-top: 15px; 
-    }
-    
-    /* 3. UNIFORM INPUTS (Matching Upload File) */
-    .card input[type="text"], 
-    .card input[type="number"], 
-    .card input[type="file"],
-    .card select, 
-    .card textarea { 
-        width: 100%; 
-        background: #111; 
-        border: 1px solid #222; 
-        padding: 12px; 
-        color: #fff; 
-        border-radius: 12px; 
-        transition: 0.3s; 
-        box-sizing: border-box; 
-        outline: none;
-        font-family: inherit;
-        font-size: 13px;
-        height: 45px; 
-    }
+    .card h3 { color: #78b388; font-size: 16px; margin-bottom: 10px; }
+    .card label { display: block; color: #cfffdc; font-size: 12px; font-weight: 800; text-transform: uppercase; margin-bottom: 6px; margin-top: 14px; letter-spacing: 1px; }
 
+    .card input[type="text"],
+    .card input[type="number"],
+    .card input[type="file"],
+    .card select,
+    .card textarea {
+        width: 100%; background: #111; border: 1px solid #222;
+        padding: 12px; color: #fff; border-radius: 12px;
+        transition: 0.3s; box-sizing: border-box; outline: none;
+        font-family: inherit; font-size: 13px; height: 45px;
+    }
     .card input[type="file"] { padding: 8px 12px; cursor: pointer; }
     .card textarea { height: auto; }
     .card input:focus, .card select:focus, .card textarea:focus { border-color: #78b388; background: #161616; }
 
-    /* 4. Variant Section - 4 Equal Columns + Action */
-    .variant-row { 
-        display: grid; 
-        grid-template-columns: 1fr 1fr 1fr 1fr 45px; 
-        gap: 12px; 
-        background: #0a0a0a; 
-        padding: 15px; 
-        border-radius: 15px; 
-        margin-bottom: 10px; 
-        border: 1px solid #1a1a1a;
-        align-items: center;
-    }
+    /* Colour block */
+    .color-block { background: #0a0a0a; border: 1px solid #222; border-radius: 16px; padding: 20px; margin-bottom: 16px; }
+    .color-block-header { display: flex; gap: 16px; align-items: flex-start; margin-bottom: 16px; }
+    .color-header-fields { display: grid; grid-template-columns: 1fr 1fr auto; gap: 16px; flex: 1; align-items: end; }
+    .size-rows-container { display: flex; flex-direction: column; gap: 10px; margin-bottom: 10px; }
+    .size-row { display: grid; grid-template-columns: 1fr 1fr 45px; gap: 12px; align-items: center; }
 
-    .variant-img-preview {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        color: #78b388;
-        font-size: 10px;
-    }
-
-    .variant-img-preview img {
-        width: 35px;
-        height: 35px;
-        border-radius: 5px;
-        object-fit: cover;
-        border: 1px solid #78b388;
-    }
-    
-    .add-variant-btn { 
-        background: transparent; color: #78b388; border: 2px dashed #333; 
-        padding: 12px; width: 100%; border-radius: 12px; cursor: pointer; 
-        font-weight: 700; transition: 0.3s; margin-bottom: 25px;
-    }
+    .add-size-btn { background: transparent; color: #78b388; border: 1px dashed #333; padding: 8px 16px; border-radius: 10px; cursor: pointer; font-size: 12px; font-weight: 700; transition: 0.2s; width: fit-content; }
+    .add-size-btn:hover { border-color: #78b388; color: #cfffdc; }
+    .add-variant-btn { background: transparent; color: #78b388; border: 2px dashed #333; padding: 12px; width: 100%; border-radius: 12px; cursor: pointer; font-weight: 700; transition: 0.3s; margin-bottom: 25px; }
     .add-variant-btn:hover { border-color: #78b388; background: #0a110c; color: #cfffdc; }
-    
-    .remove-btn { 
-        background: #221111; color: #ff5555; border: 1px solid #442222; 
-        border-radius: 10px; cursor: pointer; font-weight: 900; height: 45px;
-    }
+    .remove-btn { background: #221111; color: #ff5555; border: 1px solid #442222; border-radius: 10px; cursor: pointer; font-weight: 900; transition: 0.2s; height: 45px; width: 100%; }
+    .remove-btn:hover { background: #441111; }
 
-    /* 5. Action Buttons */
-    .btn-row {
-        display: grid;
-        grid-template-columns: 2fr 1fr;
-        gap: 15px;
-        margin-top: 20px;
-    }
-    .btn-publish { 
-        width: 100%; background: #cfffdc; color: #000; padding: 18px; 
-        border: none; border-radius: 15px; font-weight: 900; cursor: pointer; 
-        font-size: 16px; text-transform: uppercase; transition: 0.3s;
-    }
-    .btn-delete {
-        background: #221111; color: #ff5555; border: 1px solid #442222;
-        border-radius: 15px; font-weight: 900; display: flex; 
-        align-items: center; justify-content: center; text-decoration: none;
-    }
+    /* Current image preview */
+    .current-img-wrap { display: flex; align-items: center; gap: 12px; background: #0a0a0a; border: 1px solid #222; border-radius: 10px; padding: 10px 14px; margin-top: 8px; }
+    .current-img-wrap img { width: 48px; height: 48px; border-radius: 8px; object-fit: cover; border: 2px solid #78b388; }
+    .current-img-label { font-size: 10px; color: #78b388; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+
+    /* Action row */
+    .btn-row { display: grid; grid-template-columns: 2fr 1fr; gap: 15px; margin-top: 24px; }
+    .btn-publish { width: 100%; background: #cfffdc; color: #000; padding: 18px; border: none; border-radius: 15px; font-weight: 900; cursor: pointer; font-size: 16px; text-transform: uppercase; letter-spacing: 1px; transition: 0.3s; }
+    .btn-publish:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(207,255,220,0.4); }
+    .btn-delete { background: #221111; color: #ff5555; border: 1px solid #442222; border-radius: 15px; font-weight: 900; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 14px; transition: 0.2s; }
+    .btn-delete:hover { background: #441111; }
 </style>
 
 <div class="upload-box">
     <div class="card">
-        <h2>Edit Product: {{ product.name }}</h2>
+        <h2>✏️ Edit Product</h2>
+        <p style="color:#666;font-size:12px;margin-bottom:24px;">All fields are pre-filled. Change only what you want to update.</p>
+
         <form method="POST" enctype="multipart/form-data">
             {% csrf_token %}
-            
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+
+            <!-- ── Basic Info ── -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
                 <div>
                     <label>Product Name</label>
                     <input type="text" name="name" value="{{ product.name }}" required>
                 </div>
                 <div>
                     <label>Brand Name</label>
-                    <input type="text" name="brand" value="{{ product.brand_name }}">
+                    <input type="text" name="brand" value="{{ product.brand_name|default:'' }}">
                 </div>
             </div>
 
             <label>Description</label>
-            <textarea name="description" rows="3">{{ product.description }}</textarea>
+            <textarea name="description" rows="4">{{ product.description|default:'' }}</textarea>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
                 <div>
                     <label>Category</label>
                     <select name="category" id="id_category" required onchange="updateSubCategories()">
-                        <option value="mens" {% if product.category == 'mens' %}selected{% endif %}>Men's Wear</option>
-                        <option value="womens" {% if product.category == 'womens' %}selected{% endif %}>Women's Wear</option>
-                        <option value="kids" {% if product.category == 'kids' %}selected{% endif %}>Kid's Wear</option>
-                        <option value="bags" {% if product.category == 'bags' %}selected{% endif %}>Bags</option>
-                        <option value="footwear" {% if product.category == 'footwear' %}selected{% endif %}>Footwear</option>
-                        <option value="makeup" {% if product.category == 'makeup' %}selected{% endif %}>Makeup</option>
-                        <option value="sunglasses" {% if product.category == 'sunglasses' %}selected{% endif %}>Sunglasses</option>
-                        <option value="belts" {% if product.category == 'belts' %}selected{% endif %}>Belts</option>
-                        <option value="purses" {% if product.category == 'purses' %}selected{% endif %}>Purses</option>
+                        <option value="mens"        {% if product.category == 'mens' %}selected{% endif %}>Men's Wear</option>
+                        <option value="womens"       {% if product.category == 'womens' %}selected{% endif %}>Women's Wear</option>
+                        <option value="kids"         {% if product.category == 'kids' %}selected{% endif %}>Kid's Wear</option>
+                        <option value="bags"         {% if product.category == 'bags' %}selected{% endif %}>Bags</option>
+                        <option value="footwear"     {% if product.category == 'footwear' %}selected{% endif %}>Footwear</option>
+                        <option value="makeup"       {% if product.category == 'makeup' %}selected{% endif %}>Makeup</option>
+                        <option value="sunglasses"   {% if product.category == 'sunglasses' %}selected{% endif %}>Sunglasses</option>
+                        <option value="belts"        {% if product.category == 'belts' %}selected{% endif %}>Belts</option>
+                        <option value="purses"       {% if product.category == 'purses' %}selected{% endif %}>Purses</option>
+                        <option value="other"        {% if product.category == 'other' %}selected{% endif %}>Other</option>
                     </select>
                 </div>
                 <div>
                     <label>Sub-Category</label>
                     <select name="sub_category" id="id_sub_category">
-                        <option value="{{ product.sub_category }}">{{ product.sub_category|title }}</option>
+                        <option value="{{ product.sub_category|default:'other' }}">{{ product.sub_category|title|default:'Other' }}</option>
                     </select>
                 </div>
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
                 <div>
                     <label>Selling Price (₹)</label>
                     <input type="number" step="0.01" name="price" value="{{ product.price }}" required>
                 </div>
                 <div>
-                    <label>Original Price (₹)</label>
-                    <input type="number" step="0.01" name="original_price" value="{{ product.original_price }}">
+                    <label>Original Price (₹) — for discount display</label>
+                    <input type="number" step="0.01" name="original_price" value="{{ product.original_price|default:'' }}">
                 </div>
             </div>
 
-            <hr style="border: 0; border-top: 1px solid #222; margin: 30px 0;">
+            <!-- ── Main Product Image ── -->
+            <label>Main Product Image</label>
+            {% if product.product_image %}
+            <div class="current-img-wrap">
+                <img src="{{ product.product_image.url }}" alt="Current">
+                <span class="current-img-label">Current image — upload below to replace</span>
+            </div>
+            {% endif %}
+            <input type="file" name="product_image" accept="image/*" style="margin-top:8px;">
 
-            <h3>Product Variations</h3>
-            
-            <div id="variant-container">
-                {% for variant in product.variants.all %}
-                <div class="variant-row">
-                    <input type="text" name="variant_color[]" value="{{ variant.color }}" placeholder="Color" required>
-                    <input type="text" name="variant_size[]" value="{{ variant.size }}" placeholder="Size">
-                    <input type="number" name="variant_qty[]" value="{{ variant.stock }}" placeholder="Stock" required>
-                    <div class="variant-img-preview">
-                        <input type="file" name="variant_image[]" accept="image/*">
-                        {% if variant.image %}<img src="{{ variant.image.url }}">{% endif %}
+            <hr style="border:0;border-top:1px solid #222;margin:30px 0;">
+
+            <!-- ── Variants — Colour-first approach ── -->
+            <h3>Product Variants (Colour → Sizes)</h3>
+            <p style="color:#666;font-size:12px;margin-bottom:20px;">
+                Each colour has <strong style="color:#cfffdc;">one image</strong> and multiple sizes under it.
+                Existing variants are pre-filled — edit or add new ones.
+            </p>
+
+            <div id="color-container">
+                <!-- Pre-fill existing variants grouped by color -->
+                {% regroup product.variants.all by color as color_groups %}
+                {% for color_group in color_groups %}
+                {% with c=color_group.grouper %}
+                <div class="color-block" id="color-existing-{{ forloop.counter }}">
+                    <div class="color-block-header">
+                        <div class="color-header-fields">
+                            <div>
+                                <label style="font-size:11px;">Colour Name</label>
+                                <input type="text" name="variant_color[]"
+                                       value="{{ c.name|default:'' }}"
+                                       placeholder="e.g. Red, Navy Blue"
+                                       class="color-name-input"
+                                       oninput="updateColorPreview(this)" required>
+                            </div>
+                            <div>
+                                <label style="font-size:11px;">Colour Image — upload to replace</label>
+                                {% with first_v=color_group.list.0 %}
+                                {% if first_v.image %}
+                                <div class="current-img-wrap" style="margin-bottom:6px;">
+                                    <img src="{{ first_v.image.url }}" alt="{{ c.name }}">
+                                    <span class="current-img-label">Current</span>
+                                </div>
+                                {% endif %}
+                                {% endwith %}
+                                <input type="file" name="variant_image[]" accept="image/*">
+                            </div>
+                            <div style="display:flex;align-items:center;gap:10px;margin-top:20px;">
+                                <div class="color-preview-dot"
+                                     style="width:32px;height:32px;border-radius:50%;border:2px solid #333;background:{{ c.name|lower|default:'#333' }};flex-shrink:0;"></div>
+                            </div>
+                        </div>
+                        <button type="button" class="remove-btn" style="width:45px;height:45px;margin-top:20px;flex-shrink:0;"
+                                onclick="this.closest('.color-block').remove()">×</button>
                     </div>
-                    <button type="button" class="remove-btn" onclick="this.parentElement.remove()">×</button>
+
+                    <!-- Size rows for this color -->
+                    <div class="size-rows-container" id="sizes-existing-{{ forloop.counter }}">
+                        {% for variant in color_group.list %}
+                        <div class="size-row">
+                            <input type="text" name="variant_size[]"
+                                   value="{{ variant.size.name|default:'' }}"
+                                   placeholder="Size (e.g. S, M, XL, 42)">
+                            <input type="number" name="variant_qty[]"
+                                   value="{{ variant.variant_stock|default:0 }}"
+                                   placeholder="Stock qty" min="0" required>
+                            <button type="button" class="remove-btn" style="width:45px;height:45px;"
+                                    onclick="this.parentElement.remove()">×</button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <button type="button" class="add-size-btn"
+                            onclick="addSizeRowTo(this.previousElementSibling)">+ Add Size</button>
                 </div>
+                {% endwith %}
                 {% endfor %}
             </div>
 
-            <button type="button" class="add-variant-btn" onclick="addVariantRow()">+ Add Another Variation</button>
+            <button type="button" class="add-variant-btn" onclick="addColorBlock()">+ Add New Colour</button>
 
+            <!-- ── Action Buttons ── -->
             <div class="btn-row">
-                <button type="submit" class="btn-publish">Update Product</button>
-                <a href="{% url 'vendor_delete' product.id %}" class="btn-delete" onclick="return confirm('Delete this product permanently?')">Delete</a>
+                <button type="submit" class="btn-publish">💾 Save Changes</button>
+                <a href="{% url 'vendor_delete' product.id %}"
+                   class="btn-delete"
+                   onclick="return confirm('Permanently delete this product?')">🗑 Delete</a>
             </div>
         </form>
     </div>
 </div>
 
 <script>
-    const subData = {
-        'mens': ['Jacket', 'T-Shirt', 'Shirt', 'Hoodie', 'Pants', 'Traditional'],
-        'womens': ['Saree', 'Kurti', 'Pant', 'T-Shirt', 'Western', 'Sweateshirt'],
-        'kids': ['Boys', 'Girls']
-    };
+const subData = {
+    'mens': [
+        { value: 'jackets', label: 'Jackets' },
+        { value: 'tshirts', label: 'T-Shirts' },
+        { value: 'shirts', label: 'Shirts' },
+        { value: 'hoodies', label: 'Hoodies' },
+        { value: 'menpants', label: 'Men Pants' },
+        { value: 'traditional', label: 'Traditional' }
+    ],
+    'womens': [
+        { value: 'saree', label: 'Saree' },
+        { value: 'kurti', label: 'Kurti' },
+        { value: 'womenpants', label: 'Women Pants' },
+        { value: 'womentshirts', label: 'Women T-Shirts' },
+        { value: 'western', label: 'Western' },
+        { value: 'sweatshirts', label: 'Sweatshirts' }
+    ],
+    'kids': [
+        { value: 'boys', label: 'Boys' },
+        { value: 'girls', label: 'Girls' }
+    ]
+};
 
-    function updateSubCategories() {
-        const cat = document.getElementById('id_category').value;
-        const subSelect = document.getElementById('id_sub_category');
-        const currentSub = "{{ product.sub_category }}"; // To keep current selected
-        subSelect.innerHTML = '';
-        
-        const options = subData[cat] || ['Other'];
-        options.forEach(opt => {
-            const el = document.createElement('option');
-            el.value = opt.toLowerCase();
-            el.textContent = opt;
-            if(el.value === currentSub) el.selected = true;
-            subSelect.appendChild(el);
-        });
+function updateSubCategories() {
+    const cat = document.getElementById('id_category').value;
+    const subSelect = document.getElementById('id_sub_category');
+    const current = subSelect.value;
+    subSelect.innerHTML = '';
+    const options = subData[cat] || [{ value: 'other', label: 'Other' }];
+    options.forEach(opt => {
+        const el = document.createElement('option');
+        el.value = opt.value;
+        el.textContent = opt.label;
+        if (el.value === current) el.selected = true;
+        subSelect.appendChild(el);
+    });
+}
+
+function addColorBlock() {
+    const container = document.getElementById('color-container');
+    const colorId = 'new-' + Date.now();
+    const block = document.createElement('div');
+    block.className = 'color-block';
+    block.id = 'color-' + colorId;
+    block.innerHTML = `
+        <div class="color-block-header">
+            <div class="color-header-fields">
+                <div>
+                    <label style="color:#cfffdc;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;">Colour Name</label>
+                    <input type="text" name="variant_color[]" placeholder="e.g. Red, Navy Blue"
+                           class="color-name-input" oninput="updateColorPreview(this)" required>
+                </div>
+                <div>
+                    <label style="color:#cfffdc;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;">Colour Image</label>
+                    <input type="file" name="variant_image[]" accept="image/*"
+                           onchange="previewColorImg(this)" required>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px;margin-top:20px;">
+                    <div class="color-preview-dot" id="dot-${colorId}"
+                         style="width:32px;height:32px;border-radius:50%;border:2px solid #333;background:#333;flex-shrink:0;"></div>
+                    <img id="imgPreview-${colorId}" src=""
+                         style="display:none;width:50px;height:50px;object-fit:cover;border-radius:8px;border:2px solid #78b388;">
+                </div>
+            </div>
+            <button type="button" class="remove-btn" style="width:45px;height:45px;margin-top:20px;flex-shrink:0;"
+                    onclick="this.closest('.color-block').remove()">×</button>
+        </div>
+        <div class="size-rows-container" id="sizes-${colorId}">
+            <div class="size-row">
+                <input type="text" name="variant_size[]" placeholder="Size (e.g. S, M, XL, 42)">
+                <input type="number" name="variant_qty[]" placeholder="Stock qty" min="0" required>
+                <button type="button" class="remove-btn" style="width:45px;height:45px;"
+                        onclick="this.parentElement.remove()">×</button>
+            </div>
+        </div>
+        <button type="button" class="add-size-btn"
+                onclick="addSizeRowTo(this.previousElementSibling)">+ Add Size</button>
+    `;
+    container.appendChild(block);
+}
+
+function addSizeRowTo(container) {
+    const row = document.createElement('div');
+    row.className = 'size-row';
+    row.innerHTML = `
+        <input type="text" name="variant_size[]" placeholder="Size (e.g. S, M, XL, 42)">
+        <input type="number" name="variant_qty[]" placeholder="Stock qty" min="0" required>
+        <button type="button" class="remove-btn" style="width:45px;height:45px;"
+                onclick="this.parentElement.remove()">×</button>
+    `;
+    container.appendChild(row);
+}
+
+function updateColorPreview(input) {
+    const block = input.closest('.color-block');
+    const colorId = block.id.replace('color-', '');
+    const dot = document.getElementById('dot-' + colorId);
+    if (dot) dot.style.backgroundColor = input.value.toLowerCase() || '#333';
+}
+
+function previewColorImg(input) {
+    const block = input.closest('.color-block');
+    const colorId = block.id.replace('color-', '');
+    const preview = document.getElementById('imgPreview-' + colorId);
+    if (input.files && input.files[0] && preview) {
+        const reader = new FileReader();
+        reader.onload = e => { preview.src = e.target.result; preview.style.display = 'block'; };
+        reader.readAsDataURL(input.files[0]);
     }
+}
 
-    function addVariantRow() {
-        const container = document.getElementById('variant-container');
-        const div = document.createElement('div');
-        div.className = 'variant-row';
-        div.innerHTML = `
-            <input type="text" name="variant_color[]" placeholder="Color" required>
-            <input type="text" name="variant_size[]" placeholder="Size">
-            <input type="number" name="variant_qty[]" placeholder="Stock" required>
-            <input type="file" name="variant_image[]" accept="image/*">
-            <button type="button" class="remove-btn" onclick="this.parentElement.remove()">×</button>
-        `;
-        container.appendChild(div);
-    }
-
-    // Initialize sub-categories on load
-    updateSubCategories();
+updateSubCategories();
 </script>
 {% endblock %}

@@ -191,27 +191,57 @@
 
 <div class="shop-page-wrapper">
     <div class="shop-container">
-        <aside class="filter-sidebar">
+    <aside class="filter-sidebar">
+        <form method="GET" action="">
             <div class="filter-section">
                 <span class="filter-title">Current Category</span>
                 <label class="filter-label">
                     <input type="checkbox" checked disabled> {{ category_name }}
                 </label>
+                <label class="filter-label">
+                    <input type="radio" name="category" value="other" 
+                        {% if selected_category == 'other' %}checked{% endif %} 
+                        onchange="this.form.submit()"> Other Products
+                </label>
             </div>
 
             <div class="filter-section">
-                <span class="filter-title">Brand</span>
-                <label class="filter-label"><input type="checkbox"> Premium Choice</label>
-                <label class="filter-label"><input type="checkbox"> Exclusive</label>
+                <span class="filter-title">Color</span>
+                {% for color in available_colors %}
+                    <label class="filter-label">
+                        <input type="checkbox" name="color" value="{{ color.name }}" 
+                            {% if color.name in selected_colors %}checked{% endif %} 
+                            onchange="this.form.submit()"> {{ color.name }}
+                    </label>
+                {% empty %}
+                    <div style="font-size: 13px; color: #333;">No colors available</div>
+                {% endfor %}
             </div>
 
             <div class="filter-section">
                 <span class="filter-title">Price Range</span>
-                <label class="filter-label"><input type="radio" name="p"> Below Rs. 999</label>
-                <label class="filter-label"><input type="radio" name="p"> Rs. 1000 - 2000</label>
-                <label class="filter-label"><input type="radio" name="p"> Above Rs. 2000</label>
+                <label class="filter-label">
+                    <input type="radio" name="p" value="below-999" 
+                        {% if selected_price_range == 'below-999' %}checked{% endif %} 
+                        onchange="this.form.submit()"> Below Rs. 999
+                </label>
+                <label class="filter-label">
+                    <input type="radio" name="p" value="1000-2000" 
+                        {% if selected_price_range == '1000-2000' %}checked{% endif %} 
+                        onchange="this.form.submit()"> Rs. 1000 - 2000
+                </label>
+                <label class="filter-label">
+                    <input type="radio" name="p" value="above-2000" 
+                        {% if selected_price_range == 'above-2000' %}checked{% endif %} 
+                        onchange="this.form.submit()"> Above Rs. 2000
+                </label>
             </div>
-        </aside>
+
+            <a href="?" style="font-size: 11px; text-decoration: underline; color: black; font-weight: bold; display: block; margin-top: 10px;">
+                Reset All Filters
+            </a>
+        </form>
+    </aside>
 
         <main class="product-content">
             <div class="results-header">

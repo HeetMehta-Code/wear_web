@@ -117,6 +117,9 @@
                             <div class="order-item-left">
                                 <div class="order-id">#{{ order.id }}</div>
                                 <div class="order-date">{{ order.orderDate|date:"d M Y" }}</div>
+                                {% if order.product %}
+                                    <div class="order-date">{{ order.product.name }}</div>
+                                {% endif %}
                             </div>
                             <div class="order-item-center">
                                 <div class="order-amount">₹{{ order.totalAmount|floatformat:0 }}</div>

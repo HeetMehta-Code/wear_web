@@ -1,14 +1,12 @@
 from django.urls import path
-from django.contrib import admin
 from efashion import views as efashion_views 
 from . import views
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-
     # --- AUTH & REGISTRATION ---
     path("", efashion_views.signup_view, name="signup"),
     path("login/", efashion_views.login_view, name="login"),
+    path("forgot-password/", efashion_views.forgot_password, name="forgot_password"),
     path("logout/", efashion_views.logout_view, name="logout"),
     
     # This remains the path for ccp.html (Customer) and cvp.html (Vendor initial setup)
@@ -20,11 +18,14 @@ urlpatterns = [
     path("customer-profile/", efashion_views.customer_profile, name="customer_profile"),
     path('search/', efashion_views.search_view, name='search_products'),
     path('my-orders/', efashion_views.my_orders, name='my_orders'),
+    path('my-orders/cancel/<int:order_id>/', efashion_views.cancel_order, name='cancel_order'),
     path('brand/<str:brand_name>/', efashion_views.brand_product_view, name='brand_products'),
-    path('collection/<str:feature_type>/', efashion_views.feature_collection_view, name='feature_collection'),
+    path('brand/<str:brand_name>/<str:cat_slug>/', efashion_views.brand_product_view, name='brand_products_cat'),
     path('about/', efashion_views.about_us, name='about_us'),
     path('contact/', efashion_views.contact_us, name='contact_us'),
     path('category/<str:cat_slug>/', efashion_views.category_view, name='category_view'),
+    path('shop/<str:cat_slug>/<str:sub_slug>/', efashion_views.category_view, name='category_view'),
+    path('shop/', efashion_views.shop_all, name='shop_all'),
     path('cart/', efashion_views.view_cart, name='view_cart'),
     path('cart/add/<int:product_id>/', efashion_views.add_to_cart, name='add_to_cart'),
     path('cart/remove/<int:product_id>/', efashion_views.remove_from_cart, name='remove_from_cart'),
@@ -44,4 +45,5 @@ urlpatterns = [
 
     # --- API ---
     path("api/new-arrivals/", efashion_views.all_new_arrivals, name="all_new_arrivals"),
+
 ]

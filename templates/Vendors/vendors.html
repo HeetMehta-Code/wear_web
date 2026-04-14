@@ -85,20 +85,20 @@
             <div class="vendor-card-body table-card-body">
                 {% if products %}
                 <!-- Sticky header outside scroll area -->
-                <table class="vendor-table vendor-table-head">
+                <table class="vendor-table vendor-table-head vendor-performance-table">
                     <thead>
                         <tr>
-                            <th>No.</th>
-                            <th>Product</th>
-                            <th>Price</th>
-                            <th>Stock</th>
-                            <th>Action</th>
+                            <th style="width:52px;">No.</th>
+                            <th style="width:44%;">Product</th>
+                            <th style="width:110px;">Price</th>
+                            <th style="width:90px;">Stock</th>
+                            <th style="width:220px;">Action</th>
                         </tr>
                     </thead>
                 </table>
                 <!-- Scrollable tbody — shows 5 rows, scroll for more -->
-                <div class="table-scroll-body">
-                    <table class="vendor-table">
+                <div class="table-scroll-body performance-scroll-body">
+                    <table class="vendor-table vendor-performance-table">
                         <tbody>
                             {% for product in products %}
                             <tr id="row-{{ product.id }}">
@@ -191,32 +191,32 @@
                 <div class="acc-stat-icon">💵</div>
                 <div class="acc-stat-info">
                     <span class="acc-stat-num">₹{{ total_revenue|floatformat:0|default:"0" }}</span>
-                    <span class="acc-stat-label">Total Revenue</span>
-                    <span class="acc-stat-sub">From completed orders</span>
+                    <span class="acc-stat-label">Gross Revenue</span>
+                    <span class="acc-stat-sub">Completed online payments</span>
                 </div>
             </div>
             <div class="acc-stat-card acc-stat-blue">
-                <div class="acc-stat-icon">🧾</div>
+                <div class="acc-stat-icon">🏦</div>
                 <div class="acc-stat-info">
-                    <span class="acc-stat-num">{{ total_orders|default:"0" }}</span>
-                    <span class="acc-stat-label">Orders Completed</span>
-                    <span class="acc-stat-sub">Payments received</span>
+                    <span class="acc-stat-num">₹{{ vendor_net_revenue|floatformat:0|default:"0" }}</span>
+                    <span class="acc-stat-label">Net Revenue</span>
+                    <span class="acc-stat-sub">After 25% RAMYA commission</span>
                 </div>
             </div>
             <div class="acc-stat-card acc-stat-yellow">
-                <div class="acc-stat-icon">📦</div>
+                <div class="acc-stat-icon">🧾</div>
                 <div class="acc-stat-info">
-                    <span class="acc-stat-num">{{ total_stock|default:"0" }}</span>
-                    <span class="acc-stat-label">Stock Remaining</span>
-                    <span class="acc-stat-sub">Units in inventory</span>
+                    <span class="acc-stat-num">₹{{ ramya_commission|floatformat:0|default:"0" }}</span>
+                    <span class="acc-stat-label">RAMYA Commission</span>
+                    <span class="acc-stat-sub">25% platform share</span>
                 </div>
             </div>
             <div class="acc-stat-card acc-stat-red">
-                <div class="acc-stat-icon">⚠️</div>
+                <div class="acc-stat-icon">📦</div>
                 <div class="acc-stat-info">
-                    <span class="acc-stat-num">{{ out_of_stock|default:"0" }}</span>
-                    <span class="acc-stat-label">Out of Stock</span>
-                    <span class="acc-stat-sub">Products need restocking</span>
+                    <span class="acc-stat-num">{{ total_orders|default:"0" }}</span>
+                    <span class="acc-stat-label">Orders Tracked</span>
+                    <span class="acc-stat-sub">Cancelled orders excluded</span>
                 </div>
             </div>
         </div>
@@ -305,37 +305,42 @@
                 </div>
                 <div class="vendor-card-body" style="padding:0;">
                     {% if recent_transactions %}
-                    <table class="vendor-table" style="table-layout:fixed;">
-                        <thead>
-                            <tr>
-                                <th style="width:50px;">No.</th>
-                                <th>Order ID</th>
-                                <th>Amount</th>
-                                <th>Method</th>
-                                <th>Date</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                    </table>
-                    <div class="table-scroll-body">
-                        <table class="vendor-table" style="table-layout:fixed;">
-                            <tbody>
-                                {% for payment in recent_transactions %}
+                    <div class="table-scroll-body recent-transactions-scroll">
+                        <table class="vendor-table vendor-transactions-table vendor-transactions-full">
+                            <thead>
                                 <tr>
-                                    <td class="table-num" style="width:50px;">{{ forloop.counter }}</td>
-                                    <td style="font-weight:700;">#{{ payment.order.id }}</td>
-                                    <td style="font-weight:900; color:#000;">₹{{ payment.order.totalAmount|floatformat:0 }}</td>
+                                    <th>No.</th>
+                                    <th>Order ID</th>
+                                    <th>Product</th>
+                                    <th>Amount</th>
+                                    <th>Method</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for order in recent_transactions %}
+                                <tr>
+                                    <td class="table-num">{{ forloop.counter }}</td>
+                                    <td style="font-weight:700;">#{{ order.id }}</td>
+                                    <td style="font-size:11px;font-weight:700;">{{ order.product.name|default:"—" }}</td>
+                                    <td style="font-weight:900; color:#000;">₹{{ order.totalAmount|floatformat:0 }}</td>
                                     <td>
+                                        {% with payment=order.payment_set.first %}
                                         <span class="pay-tag">
                                             {% if payment.paymentType == 'razorpay' %}💳 Razorpay
                                             {% elif payment.paymentType == 'upi' %}📱 UPI
                                             {% elif payment.paymentType == 'netbanking' %}🏦 Net Banking
-                                            {% else %}💰 {{ payment.paymentType|title }}{% endif %}
+                                            {% elif payment.paymentType %}💰 {{ payment.paymentType|title }}
+                                            {% else %}—{% endif %}
                                         </span>
+                                        {% endwith %}
                                     </td>
-                                    <td style="color:rgba(0,0,0,0.5); font-size:11px;">{{ payment.order.orderDate|date:"d M Y" }}</td>
+                                    <td style="color:rgba(0,0,0,0.5); font-size:11px;">{{ order.orderDate|date:"d M Y" }}</td>
                                     <td>
-                                        <span class="txn-status txn-{{ payment.paymentStatus|lower }}">{{ payment.paymentStatus }}</span>
+                                        {% with payment=order.payment_set.first %}
+                                        <span class="txn-status txn-{{ payment.paymentStatus|lower|default:order.status|lower }}">{{ payment.paymentStatus|default:order.status }}</span>
+                                        {% endwith %}
                                     </td>
                                 </tr>
                                 {% endfor %}
@@ -351,6 +356,51 @@
                 </div>
             </div>
 
+        </div>
+    </div>
+
+    <div class="section-container">
+        <h2 class="section-title">⭐ Product Reviews</h2>
+        <div class="acc-card acc-card-wide">
+            <div class="vendor-card-header">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                Reviews On Your Products
+            </div>
+            <div class="vendor-card-body" style="padding:0;">
+                {% if product_reviews %}
+                <table class="vendor-table vendor-review-table" style="table-layout:fixed;">
+                    <thead>
+                        <tr>
+                            <th style="width:52px;">No.</th>
+                            <th style="width:24%;">Product</th>
+                            <th style="width:26%;">Customer</th>
+                            <th style="width:100px;">Rating</th>
+                            <th style="width:40%;">Comment</th>
+                        </tr>
+                    </thead>
+                </table>
+                <div class="table-scroll-body review-scroll-body">
+                    <table class="vendor-table vendor-review-table" style="table-layout:fixed;">
+                        <tbody>
+                            {% for review in product_reviews %}
+                            <tr>
+                                <td class="table-num" style="width:50px;">{{ forloop.counter }}</td>
+                                <td style="font-weight:700;">{{ review.product.name }}</td>
+                                <td style="font-size:11px;">{{ review.customer.user.email }}</td>
+                                <td style="font-size:13px;color:#f4c430;">{{ review.rating }}/5</td>
+                                <td style="font-size:11px; white-space:normal; overflow:visible; text-overflow:unset;">{{ review.comment|default:"—" }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="vendor-empty-small" style="padding:36px;">
+                    <span>⭐</span>
+                    <p>No product reviews yet</p>
+                </div>
+                {% endif %}
+            </div>
         </div>
     </div>
 
@@ -451,10 +501,20 @@
 /* Sticky thead */
 .vendor-top-card > .vendor-card-body > .vendor-table { width: 100%; border-collapse: collapse; }
 
-/* Scrollable tbody — 5 rows visible */
+/* Scrollable tbody */
 .table-scroll-body {
-    max-height: 280px;   /* ~5 rows */
     overflow-y: auto;
+}
+.performance-scroll-body {
+    height: 306px; /* exactly 5 body rows with current cell padding/borders */
+}
+.review-scroll-body {
+    max-height: 360px;
+}
+.recent-transactions-scroll {
+    overflow-x: auto;
+    overflow-y: auto;
+    max-height: 320px;
 }
 .table-scroll-body::-webkit-scrollbar { width: 5px; }
 .table-scroll-body::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); }
@@ -468,11 +528,29 @@
     color: #000; border-bottom: 2px solid rgba(0,0,0,0.15);
 }
 /* Fixed column widths so header aligns exactly with data */
-.vendor-table th:nth-child(1), .vendor-table td:nth-child(1) { width: 48px; }
-.vendor-table th:nth-child(2), .vendor-table td:nth-child(2) { width: auto; }
-.vendor-table th:nth-child(3), .vendor-table td:nth-child(3) { width: 90px; }
-.vendor-table th:nth-child(4), .vendor-table td:nth-child(4) { width: 70px; }
-.vendor-table th:nth-child(5), .vendor-table td:nth-child(5) { width: 180px; }
+.vendor-performance-table th:nth-child(1), .vendor-performance-table td:nth-child(1) { width: 52px; }
+.vendor-performance-table th:nth-child(2), .vendor-performance-table td:nth-child(2) { width: 44%; }
+.vendor-performance-table th:nth-child(3), .vendor-performance-table td:nth-child(3) { width: 110px; }
+.vendor-performance-table th:nth-child(4), .vendor-performance-table td:nth-child(4) { width: 90px; }
+.vendor-performance-table th:nth-child(5), .vendor-performance-table td:nth-child(5) { width: 220px; }
+
+.vendor-review-table th:nth-child(1), .vendor-review-table td:nth-child(1) { width: 52px; }
+.vendor-review-table th:nth-child(2), .vendor-review-table td:nth-child(2) { width: 24%; }
+.vendor-review-table th:nth-child(3), .vendor-review-table td:nth-child(3) { width: 26%; }
+.vendor-review-table th:nth-child(4), .vendor-review-table td:nth-child(4) { width: 100px; }
+.vendor-review-table th:nth-child(5), .vendor-review-table td:nth-child(5) { width: 40%; }
+
+.vendor-transactions-table th:nth-child(1), .vendor-transactions-table td:nth-child(1) { width: 52px; }
+.vendor-transactions-table th:nth-child(2), .vendor-transactions-table td:nth-child(2) { width: 90px; }
+.vendor-transactions-table th:nth-child(3), .vendor-transactions-table td:nth-child(3) { width: 320px; }
+.vendor-transactions-table th:nth-child(4), .vendor-transactions-table td:nth-child(4) { width: 110px; }
+.vendor-transactions-table th:nth-child(5), .vendor-transactions-table td:nth-child(5) { width: 150px; }
+.vendor-transactions-table th:nth-child(6), .vendor-transactions-table td:nth-child(6) { width: 120px; }
+.vendor-transactions-table th:nth-child(7), .vendor-transactions-table td:nth-child(7) { width: 120px; }
+.vendor-transactions-full {
+    min-width: 962px;
+    width: 962px;
+}
 
 .vendor-table td {
     padding: 10px 14px; border-bottom: 1px solid rgba(0,0,0,0.08);
@@ -509,7 +587,7 @@
 
 /* ══ MY PRODUCTS — 2 rows then vertical scroll ══ */
 .vendor-products-scroll-wrap {
-    max-height: 560px;  /* exactly 2 rows of cards */
+    max-height: 360px;  /* exactly 2 rows of cards */
     overflow-y: auto;
     padding-right: 6px;
 }
@@ -630,6 +708,7 @@
     display: grid;
     grid-template-columns: 1fr 1fr 2fr;
     gap: 18px;
+    align-items: start;
 }
 
 .acc-card {
@@ -638,6 +717,7 @@
     border-radius: 20px;
     overflow: hidden;
     box-shadow: inset 0 0 0 2px #000;
+    align-self: start;
 }
 .acc-card-wide { grid-column: span 1; }
 
@@ -765,7 +845,7 @@ if (labels.length > 0 && document.getElementById('viewsPieChart')) {
 
 // Toggle product active/inactive
 function toggleProduct(productId) {
-    fetch('/vendor/toggle/' + productId + '/', {
+    fetch('/vendor/toggle-product/' + productId + '/', {
         method: 'POST',
         headers: {
             'X-CSRFToken': '{{ csrf_token }}',
