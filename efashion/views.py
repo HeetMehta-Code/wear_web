@@ -682,30 +682,37 @@ def vendor_upload_product(request):
         color_names = request.POST.getlist('variant_color_name[]')
         color_codes = request.POST.getlist('variant_color_code[]')
         color_groups = request.POST.getlist('variant_color_group[]')
+        color_qtys = request.POST.getlist('variant_color_qty[]')
         size_groups = request.POST.getlist('variant_group[]')
         sizes = request.POST.getlist('variant_size[]')
         qtys = request.POST.getlist('variant_qty[]')
-        variant_photos = request.FILES.getlist('variant_image[]')
+        size_optional_categories = {'makeup', 'sunglasses', 'bags', 'purses'}
+        uses_color_only_variants = category in size_optional_categories
 
         # 3. Validation & Prep
-        # Calculate total stock by summing all quantities provided
         try:
-            total_stock = sum(int(q) for q in qtys if q)
+            total_stock = sum(int(q) for q in (color_qtys if uses_color_only_variants else qtys) if q)
         except ValueError:
             total_stock = 0
-            
-        # Use the very first image uploaded in the variants as the primary photo
-        main_product_photo = variant_photos[0] if variant_photos else None
 
         color_map = {}
         for index, group_id in enumerate(color_groups):
             if not group_id:
                 continue
+            images = request.FILES.getlist(f'variant_image_{group_id}[]')
             color_map[group_id] = {
                 'name': color_names[index].strip() if index < len(color_names) else '',
                 'code': color_codes[index].strip() if index < len(color_codes) else '',
-                'image': variant_photos[index] if index < len(variant_photos) else None,
+                'images': images,
+                'qty': int(color_qtys[index]) if index < len(color_qtys) and color_qtys[index] else 0,
             }
+
+        main_product_photo = None
+        for group_id in color_groups:
+            group_images = color_map.get(group_id, {}).get('images', [])
+            if group_images:
+                main_product_photo = group_images[0]
+                break
 
         # 4. Create Parent Product
         product = Product.objects.create(
@@ -721,45 +728,83 @@ def vendor_upload_product(request):
             is_active=True
         )
 
-        # 5. Create Variants (REPAIRED LOOP)
-        # We loop through 'sizes' because that represents the total number of rows.
-        for i in range(len(sizes)):
-            # Check if this row has at least a size or a quantity
-            if sizes[i] or (i < len(qtys) and qtys[i]):
-                current_group = size_groups[i] if i < len(size_groups) else None
-                current_color = color_map.get(current_group, {})
-                current_color_name = current_color.get('name')
-                current_color_code = current_color.get('code')
+        created_colors = {}
 
-                # Handle Foreign Keys (Get or Create)
-                c_obj = None
-                if current_color_name:
-                    c_obj, _ = Color.objects.get_or_create(
-                        name=current_color_name.strip().title(),
-                        defaults={'code': current_color_code or None}
-                    )
-                    if current_color_code and c_obj.code != current_color_code:
-                        c_obj.code = current_color_code
-                        c_obj.save(update_fields=['code'])
-                
-                s_obj = None
-                if sizes[i]:
-                    s_obj, _ = Size.objects.get_or_create(name=sizes[i].strip().upper())
-                
-                # Reuse the image uploaded for the current colour block
-                v_photo = current_color.get('image')
-                
-                # Get the quantity for this specific size
-                row_qty = int(qtys[i]) if (i < len(qtys) and qtys[i]) else 0
+        def get_or_create_color(color_name, color_code):
+            if not color_name:
+                return None
 
-                # Create the Variant entry in the database
+            cache_key = (color_name.strip().title(), color_code or '')
+            if cache_key in created_colors:
+                return created_colors[cache_key]
+
+            c_obj, _ = Color.objects.get_or_create(
+                name=color_name.strip().title(),
+                defaults={'code': color_code or None}
+            )
+            if color_code and c_obj.code != color_code:
+                c_obj.code = color_code
+                c_obj.save(update_fields=['code'])
+
+            created_colors[cache_key] = c_obj
+            return c_obj
+
+        if uses_color_only_variants:
+            for group_id in color_groups:
+                current_color = color_map.get(group_id, {})
+                c_obj = get_or_create_color(current_color.get('name'), current_color.get('code'))
+                images = current_color.get('images', [])
+                color_qty = current_color.get('qty', 0)
+
                 ProductVariant.objects.create(
                     product=product,
                     color=c_obj,
-                    size=s_obj,
-                    variant_stock=row_qty,
-                    image=v_photo
+                    size=None,
+                    variant_stock=color_qty,
+                    image=images[0] if images else None
                 )
+
+                for extra_image in images[1:]:
+                    ProductVariant.objects.create(
+                        product=product,
+                        color=c_obj,
+                        size=None,
+                        variant_stock=0,
+                        image=extra_image
+                    )
+        else:
+            for i in range(len(sizes)):
+                if sizes[i] or (i < len(qtys) and qtys[i]):
+                    current_group = size_groups[i] if i < len(size_groups) else None
+                    current_color = color_map.get(current_group, {})
+                    c_obj = get_or_create_color(current_color.get('name'), current_color.get('code'))
+
+                    s_obj = None
+                    if sizes[i]:
+                        s_obj, _ = Size.objects.get_or_create(name=sizes[i].strip().upper())
+
+                    images = current_color.get('images', [])
+                    row_qty = int(qtys[i]) if (i < len(qtys) and qtys[i]) else 0
+
+                    ProductVariant.objects.create(
+                        product=product,
+                        color=c_obj,
+                        size=s_obj,
+                        variant_stock=row_qty,
+                        image=images[0] if images else None
+                    )
+
+            for group_id in color_groups:
+                current_color = color_map.get(group_id, {})
+                c_obj = get_or_create_color(current_color.get('name'), current_color.get('code'))
+                for extra_image in current_color.get('images', [])[1:]:
+                    ProductVariant.objects.create(
+                        product=product,
+                        color=c_obj,
+                        size=None,
+                        variant_stock=0,
+                        image=extra_image
+                    )
 
         messages.success(request, f'Product "{name}" published with all variants!')
         return redirect('vendor_dashboard')

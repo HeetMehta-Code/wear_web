@@ -723,7 +723,7 @@ function resolveColor(name) {
 }
 
 // ══ BUILD colorMap — one entry per unique color ══
-// Stores: { name, cssColor, image_url, sizes: [{size, stock}] }
+// Stores: { name, cssColor, images: [], sizes: [{size, stock}] }
 const colorMap = {};
 variantData.forEach(function(v) {
     if (!v.color) return;
@@ -732,9 +732,12 @@ variantData.forEach(function(v) {
         colorMap[key] = {
             name:      v.color,
             cssColor:  resolveColor(v.color),
-            image_url: v.image_url || mainImageUrl,
+            images:    [],
             sizes:     []
         };
+    }
+    if (v.image_url && !colorMap[key].images.includes(v.image_url)) {
+        colorMap[key].images.push(v.image_url);
     }
     if (v.size) {
         colorMap[key].sizes.push({ size: v.size, stock: v.stock });
@@ -762,12 +765,12 @@ if (colorRow) {
             btn.textContent = c.name[0].toUpperCase();
         }
 
-        btn.onclick = function() { selectColor(this, c.name, c.image_url, c.sizes); };
+        btn.onclick = function() { selectColor(this, c.name, c.images, c.sizes); };
         if (i === 0) {
             btn.classList.add('selected');
             // Auto-render sizes for first color
             setTimeout(function() {
-                selectColor(btn, c.name, c.image_url, c.sizes);
+                selectColor(btn, c.name, c.images, c.sizes);
             }, 0);
         }
         colorRow.appendChild(btn);
@@ -776,23 +779,34 @@ if (colorRow) {
 
 // ══ RENDER THUMBNAILS ══
 const thumbWrap = document.getElementById('colorThumbnails');
-if (thumbWrap) {
+function renderThumbnails(colorName, images, activeUrl) {
+    if (!thumbWrap) return;
+    thumbWrap.innerHTML = '';
+
     if (mainImageUrl) {
         const t = document.createElement('div');
-        t.className = 'pd-thumb active';
+        t.className = 'pd-thumb';
         t.setAttribute('data-color', '__main__');
         t.onclick = function() { switchImage(mainImageUrl, t); };
         t.innerHTML = '<img src="' + mainImageUrl + '" alt="Main">';
         thumbWrap.appendChild(t);
     }
-    Object.values(colorMap).forEach(function(c) {
-        if (!c.image_url || c.image_url === mainImageUrl) return;
+
+    (images || []).forEach(function(imageUrl, index) {
+        if (!imageUrl || imageUrl === mainImageUrl) return;
         const t = document.createElement('div');
         t.className = 'pd-thumb';
-        t.setAttribute('data-color', c.name);
-        t.onclick = function() { switchImage(c.image_url, t); };
-        t.innerHTML = '<img src="' + c.image_url + '" alt="' + c.name + '">';
+        t.setAttribute('data-color', colorName);
+        t.setAttribute('data-image-url', imageUrl);
+        t.onclick = function() { switchImage(imageUrl, t); };
+        t.innerHTML = '<img src="' + imageUrl + '" alt="' + colorName + ' ' + (index + 1) + '">';
         thumbWrap.appendChild(t);
+    });
+
+    const selectedUrl = activeUrl || ((images && images.length) ? images[0] : mainImageUrl);
+    document.querySelectorAll('.pd-thumb').forEach(function(t) {
+        const img = t.querySelector('img');
+        t.classList.toggle('active', !!img && img.src === selectedUrl);
     });
 }
 
@@ -815,15 +829,13 @@ function switchImage(url, el) {
 }
 
 // ══ COLOR SELECTION — switches image AND renders correct sizes ══
-function selectColor(btn, colorName, imageUrl, sizes) {
+function selectColor(btn, colorName, images, sizes) {
     document.querySelectorAll('.pd-color-btn').forEach(b => b.classList.remove('selected'));
     btn.classList.add('selected');
     document.getElementById('selectedColorLabel').textContent = colorName;
-    if (imageUrl) switchImage(imageUrl, null);
-    // Highlight matching thumb
-    document.querySelectorAll('.pd-thumb').forEach(function(t) {
-        t.classList.toggle('active', t.getAttribute('data-color') === colorName);
-    });
+    const firstImage = (images && images.length) ? images[0] : mainImageUrl;
+    renderThumbnails(colorName, images, firstImage);
+    if (firstImage) switchImage(firstImage, null);
     // ── Render sizes for THIS color only ──
     renderSizes(sizes || []);
 }

@@ -154,6 +154,36 @@
         width: fit-content;
     }
     .add-size-btn:hover { border-color: #78b388; color: #cfffdc; }
+    .size-section-wrap {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    .color-stock-wrap {
+        display: none;
+        margin-top: 12px;
+    }
+    .color-stock-wrap.active {
+        display: block;
+    }
+    .multi-image-preview {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 6px;
+    }
+    .multi-image-preview img {
+        width: 50px;
+        height: 50px;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 2px solid #78b388;
+    }
+    .variant-mode-note {
+        margin-top: 8px;
+        font-size: 11px;
+        color: rgba(207,255,220,0.65);
+    }
     .color-picker-wrap {
         display: flex;
         align-items: center;
@@ -266,8 +296,8 @@
 
             <h3 style="color: #78b388;">Product Variants</h3>
             <p style="color: #666; font-size: 12px; margin-bottom: 20px;">
-                Add one colour at a time — upload <strong style="color:#cfffdc;">one image per colour</strong>. 
-                Then add all sizes for that colour below it. The first colour's image becomes the main product photo.
+                Add one colour at a time. You can upload <strong style="color:#cfffdc;">multiple optional images per colour</strong>.
+                Bags, purses, sunglasses and makeup use colour + stock only, without sizes.
             </p>
 
             <div id="color-container"></div>
@@ -280,13 +310,16 @@
 </div>
 
 <script>
-    // ── Subcategory data ──
     const subData = {
-    // Left side MUST match the first part of your model choices
-    'mens':   ['jackets', 'tshirts', 'shirts', 'hoodies', 'menpants', 'traditional'],
-    'womens': ['saree', 'kurti', 'womenpants', 'womentshirts', 'western', 'sweatshirts'],
-    'kids':   ['boys', 'girls'],
+        'mens': ['jackets', 'tshirts', 'shirts', 'hoodies', 'menpants', 'traditional'],
+        'womens': ['saree', 'kurti', 'womenpants', 'womentshirts', 'western', 'sweatshirts'],
+        'kids': ['boys', 'girls'],
     };
+    const noSizeCategories = new Set(['makeup', 'sunglasses', 'bags', 'purses']);
+
+    function isSizeOptionalCategory() {
+        return noSizeCategories.has(document.getElementById('id_category').value);
+    }
 
     function updateSubCategories() {
         const cat = document.getElementById('id_category').value;
@@ -299,9 +332,28 @@
             el.textContent = opt;
             subSelect.appendChild(el);
         });
+        syncVariantMode();
     }
 
-    // ── Add a colour block (one image per colour, multiple sizes under it) ──
+    function syncVariantMode() {
+        const sizeOptional = isSizeOptionalCategory();
+        document.querySelectorAll('.color-block').forEach(block => {
+            const sizeSection = block.querySelector('.size-section-wrap');
+            const addSizeBtn = block.querySelector('.add-size-btn');
+            const colorStockWrap = block.querySelector('.color-stock-wrap');
+            const sizeInputs = block.querySelectorAll('input[name="variant_size[]"]');
+
+            if (sizeSection) sizeSection.style.display = sizeOptional ? 'none' : 'flex';
+            if (addSizeBtn) addSizeBtn.style.display = sizeOptional ? 'none' : 'inline-flex';
+            if (colorStockWrap) colorStockWrap.classList.toggle('active', sizeOptional);
+
+            sizeInputs.forEach(input => {
+                input.required = !sizeOptional;
+                if (sizeOptional) input.value = '';
+            });
+        });
+    }
+
     function addColorBlock() {
         const container = document.getElementById('color-container');
         const colorId = Date.now();
@@ -321,31 +373,39 @@
                         <input type="color" name="variant_color_code[]" value="#333333" id="picker-${colorId}" class="color-picker-input" onchange="updateColorPreview(this)">
                     </div>
                     <div>
-                        <label style="color:#cfffdc;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;">Colour Image</label>
-                        <input type="file" name="variant_image[]" accept="image/*" onchange="previewColorImg(this)" required>
+                        <label style="color:#cfffdc;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;">Colour Images</label>
+                        <input type="file" name="variant_image_${colorId}[]" accept="image/*" multiple onchange="previewColorImages(this)">
+                        <div class="variant-mode-note">Optional. The first selected image becomes the main colour image.</div>
                     </div>
                     <div class="color-picker-wrap">
                         <label class="color-picker-btn" for="picker-${colorId}" id="dot-${colorId}" style="background:#333333;"></label>
                         <span class="color-code-label" id="code-${colorId}">#333333</span>
-                        <img id="imgPreview-${colorId}" src="" style="display:none;width:50px;height:50px;object-fit:cover;border-radius:8px;border:2px solid #78b388;">
+                        <div id="imgPreview-${colorId}" class="multi-image-preview"></div>
                     </div>
                 </div>
                 <button type="button" class="remove-btn" style="width:45px;height:45px;margin-top:20px;flex-shrink:0;" onclick="document.getElementById('color-${colorId}').remove()">×</button>
             </div>
 
-            <div class="size-rows-container" id="sizes-${colorId}">
-                <div class="size-row">
-                    <input type="hidden" name="variant_group[]" value="${colorId}">
-                    <input type="text" name="variant_size[]" placeholder="Size (e.g. S, M, XL, 42)">
-                    <input type="number" name="variant_qty[]" placeholder="Stock qty" min="0" required>
-                    <button type="button" class="remove-btn" style="width:45px;height:45px;" onclick="this.parentElement.remove()">×</button>
+            <div class="size-section-wrap">
+                <div class="size-rows-container" id="sizes-${colorId}">
+                    <div class="size-row">
+                        <input type="hidden" name="variant_group[]" value="${colorId}">
+                        <input type="text" name="variant_size[]" placeholder="Size (e.g. S, M, XL, 42)" required>
+                        <input type="number" name="variant_qty[]" placeholder="Stock qty" min="0" required>
+                        <button type="button" class="remove-btn" style="width:45px;height:45px;" onclick="this.parentElement.remove()">×</button>
+                    </div>
                 </div>
+                <button type="button" class="add-size-btn" onclick="addSizeRow('sizes-${colorId}', '${colorId}')">+ Add Size</button>
             </div>
 
-            <button type="button" class="add-size-btn" onclick="addSizeRow('sizes-${colorId}', '${colorId}')">+ Add Size</button>
+            <div class="color-stock-wrap">
+                <label style="color:#cfffdc;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;">Colour Stock</label>
+                <input type="number" name="variant_color_qty[]" placeholder="Stock qty for this colour" min="0" value="0">
+            </div>
         `;
         container.appendChild(block);
         updateColorPreview(block.querySelector('.color-picker-input'));
+        syncVariantMode();
     }
 
     function addSizeRow(containerId, colorId) {
@@ -354,11 +414,12 @@
         row.className = 'size-row';
         row.innerHTML = `
             <input type="hidden" name="variant_group[]" value="${colorId}">
-            <input type="text" name="variant_size[]" placeholder="Size (e.g. S, M, XL, 42)">
+            <input type="text" name="variant_size[]" placeholder="Size (e.g. S, M, XL, 42)" required>
             <input type="number" name="variant_qty[]" placeholder="Stock qty" min="0" required>
             <button type="button" class="remove-btn" style="width:45px;height:45px;" onclick="this.parentElement.remove()">×</button>
         `;
         container.appendChild(row);
+        syncVariantMode();
     }
 
     function updateColorPreview(input) {
@@ -378,18 +439,27 @@
         }
     }
 
-    function previewColorImg(input) {
+    function previewColorImages(input) {
         const block = input.closest('.color-block');
         const colorId = block.id.replace('color-', '');
         const preview = document.getElementById('imgPreview-' + colorId);
-        if (input.files && input.files[0] && preview) {
-            const reader = new FileReader();
-            reader.onload = e => { preview.src = e.target.result; preview.style.display = 'block'; };
-            reader.readAsDataURL(input.files[0]);
+        if (!preview) return;
+
+        preview.innerHTML = '';
+        if (input.files && input.files.length) {
+            Array.from(input.files).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = e => {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.alt = 'Preview';
+                    preview.appendChild(img);
+                };
+                reader.readAsDataURL(file);
+            });
         }
     }
 
-    // Add first color block on load
     addColorBlock();
     updateSubCategories();
 </script>
