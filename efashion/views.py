@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
@@ -216,12 +217,17 @@ def complete_profile(request):
     elif user.role == "customer":
         customer = Customer.objects.get(user=user)
         if request.method == "POST":
-            form = CustomerProfileForm(request.POST, request.FILES, instance=customer)
+            form = CustomerProfileForm(request.POST, request.FILES, instance=customer, user=user)
             if form.is_valid():
-                form.save()
+                customer = form.save()
+                new_password = form.cleaned_data.get('new_password')
+                if new_password:
+                    user.set_password(new_password)
+                    user.save(update_fields=['password'])
+                    update_session_auth_hash(request, user)
                 return redirect("customer_dashboard") 
         else:
-            form = CustomerProfileForm(instance=customer)
+            form = CustomerProfileForm(instance=customer, user=user)
         return render(request, "Customers/ccp.html", {"form": form})
 
 # ═══════════════════════════════════════════════════════════════════
@@ -945,10 +951,12 @@ def initiate_cart_payment(request):
         'is_cart_checkout': True,
         'checkout_title': f'Cart Checkout ({sum(item["quantity"] for item in cart_items)} items)',
         'amount_display': total_price,
-        'customer_name': getattr(customer_profile, 'name', 'Customer'),
+        'customer_name': getattr(customer_profile, 'name', '') or 'Customer',
         'customer_email': getattr(request.user, 'email', ''),
+        'customer_phone': getattr(customer_profile, 'phone', '') or '',
         'current_address': customer_profile.address or '',
         'delivery_address': customer_profile.address or '',
+        'order_date': timezone.localtime().strftime('%d %b %Y'),
     }
 
     if request.method == 'POST':
@@ -1026,10 +1034,12 @@ def initiate_payment(request, pk):
     context = {
         'product': product,
         'amount_display': product.price,
-        'customer_name': getattr(customer_profile, 'name', 'Customer'),
+        'customer_name': getattr(customer_profile, 'name', '') or 'Customer',
         'customer_email': getattr(request.user, 'email', ''),
+        'customer_phone': getattr(customer_profile, 'phone', '') or '',
         'current_address': customer_profile.address or '',
         'delivery_address': customer_profile.address or '',
+        'order_date': timezone.localtime().strftime('%d %b %Y'),
     }
 
     if request.method == 'POST':

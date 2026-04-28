@@ -97,6 +97,28 @@
                 </div>
             </div>
 
+            <div class="section-container pay-customer-card">
+                <h2 class="section-title">Customer Details</h2>
+                <div class="pay-customer-body">
+                    <div class="pay-detail-row">
+                        <span>Name</span>
+                        <strong>{{ customer_name|default:"Customer" }}</strong>
+                    </div>
+                    <div class="pay-detail-row">
+                        <span>Phone No</span>
+                        <strong>{{ customer_phone|default:"Not added" }}</strong>
+                    </div>
+                    <div class="pay-detail-row">
+                        <span>Email</span>
+                        <strong>{{ customer_email }}</strong>
+                    </div>
+                    <div class="pay-detail-row">
+                        <span>Order Date</span>
+                        <strong>{{ order_date }}</strong>
+                    </div>
+                </div>
+            </div>
+
             <!-- Order ID info -->
                 <div class="pay-order-info">
                 <span class="pay-order-label">{% if is_cart_checkout %}Checkout{% else %}Order ID{% endif %}</span>
@@ -182,6 +204,7 @@ var options = {
     prefill: {
         name:  "{{ customer_name }}",
         email: "{{ customer_email }}",
+        contact: "{{ customer_phone }}",
     },
     theme: {
         color: "#000000"
@@ -237,6 +260,41 @@ if (useCurrentAddress) {
 }
 .pay-message-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
 .pay-message-error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+
+.pay-customer-card {
+    margin-top: 18px;
+}
+
+.pay-customer-body {
+    padding: 18px 20px 8px;
+}
+
+.pay-detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 0 0 14px;
+    margin-bottom: 14px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    color: #1f1f1f;
+}
+
+.pay-detail-row span {
+    font-size: 13px;
+    color: #5a5a5a;
+}
+
+.pay-detail-row strong {
+    font-size: 14px;
+    text-align: right;
+    word-break: break-word;
+}
+
+.pay-detail-row:last-child {
+    margin-bottom: 0;
+    border-bottom: 0;
+}
 
 /* Breadcrumb */
 .pay-breadcrumb { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; }

@@ -4,40 +4,252 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Complete Your Profile | Chizi Fashion</title>
-    <link rel="stylesheet" href="{% static 'style.css' %}">
-     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700;800;900&display=swap" rel="stylesheet">   
+    <title>Edit Profile | RAMYA</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background: #142c1e;
+            min-height: 100vh;
+            color: #fff;
+        }
+        .edit-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: stretch;
+            justify-content: center;
+            padding: 28px;
+        }
+        .edit-card {
+            width: 100%;
+            max-width: 1180px;
+            background: #000;
+            border: 3px solid #78b388;
+            border-radius: 28px;
+            box-shadow: 0 0 40px rgba(207,255,220,0.18);
+            padding: 42px;
+        }
+        .edit-head {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 20px;
+            margin-bottom: 28px;
+            border-bottom: 1px solid rgba(120,179,136,0.25);
+            padding-bottom: 18px;
+        }
+        .edit-title {
+            margin: 0;
+            color: #cfffdc;
+            font-size: 2rem;
+            font-weight: 900;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        .edit-sub {
+            margin: 8px 0 0;
+            color: rgba(207,255,220,0.6);
+            font-size: 13px;
+        }
+        .edit-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .full-width { grid-column: 1 / -1; }
+        .field-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #cfffdc;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+        .field-group input,
+        .field-group textarea,
+        .field-group select {
+            width: 100%;
+            background: #111;
+            border: 1px solid #2a2a2a;
+            color: #fff;
+            border-radius: 14px;
+            padding: 14px 16px;
+            outline: none;
+            font-family: inherit;
+            font-size: 14px;
+        }
+        .field-group input[type="file"] {
+            padding: 10px 14px;
+            cursor: pointer;
+        }
+        .field-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        .field-group input:focus,
+        .field-group textarea:focus,
+        .field-group select:focus {
+            border-color: #78b388;
+            box-shadow: 0 0 0 3px rgba(120,179,136,0.15);
+        }
+        .field-help {
+            margin-top: 8px;
+            color: rgba(207,255,220,0.45);
+            font-size: 12px;
+        }
+        .errorlist {
+            margin: 8px 0 0;
+            padding: 0;
+            list-style: none;
+            color: #ff8c8c;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .profile-preview {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            background: #0d0d0d;
+            border: 1px solid #222;
+            border-radius: 16px;
+            padding: 14px;
+            margin-bottom: 12px;
+        }
+        .profile-preview img {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #78b388;
+        }
+        .profile-preview-fallback {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: #cfffdc;
+            color: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 24px;
+        }
+        .profile-preview-text {
+            color: rgba(207,255,220,0.7);
+            font-size: 13px;
+            font-weight: 600;
+        }
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 14px;
+            margin-top: 30px;
+        }
+        .btn-link,
+        .btn-save {
+            border-radius: 16px;
+            padding: 14px 24px;
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            text-decoration: none;
+            cursor: pointer;
+            transition: 0.2s ease;
+        }
+        .btn-link {
+            border: 1px solid rgba(207,255,220,0.25);
+            color: #cfffdc;
+            background: transparent;
+        }
+        .btn-link:hover { border-color: #cfffdc; }
+        .btn-save {
+            border: none;
+            background: #cfffdc;
+            color: #000;
+        }
+        .btn-save:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 20px rgba(207,255,220,0.18);
+        }
+        @media (max-width: 860px) {
+            .edit-page { padding: 14px; }
+            .edit-card { padding: 24px; }
+            .edit-grid { grid-template-columns: 1fr; }
+            .form-actions { flex-direction: column; }
+            .btn-link, .btn-save { width: 100%; text-align: center; }
+        }
+    </style>
 </head>
 <body>
-
-    <div class="main-wrapper">
-        <div class="logo-side">
-            <img src="{% static 'images/RAMYA5.jpeg' %}" alt="Logo" class="brand-img-logo">
-            
-            <div class="welcome-text">
-                <span class="line1">Complete Your</span>
-                <span class="line2">Profile</span>
+    <div class="edit-page">
+        <div class="edit-card">
+            <div class="edit-head">
+                <div>
+                    <h1 class="edit-title">Edit Profile</h1>
+                    <p class="edit-sub">Update your personal details, address, profile photo, and password.</p>
+                </div>
             </div>
-        </div>
 
-        <div class="form-container">
-            <h2>Final Steps</h2>
-            
             <form method="POST" enctype="multipart/form-data">
                 {% csrf_token %}
-                
-                <div class="form-fields">
-                    {{ form.as_p }}
+
+                <div class="edit-grid">
+                    <div class="field-group">
+                        <label for="{{ form.name.id_for_label }}">Name</label>
+                        {{ form.name }}
+                        {{ form.name.errors }}
+                    </div>
+
+                    <div class="field-group">
+                        <label for="{{ form.phone.id_for_label }}">Phone Number</label>
+                        {{ form.phone }}
+                        {{ form.phone.errors }}
+                    </div>
+
+                    <div class="field-group">
+                        <label for="{{ form.new_password.id_for_label }}">New Password</label>
+                        {{ form.new_password }}
+                        {{ form.new_password.errors }}
+                        <div class="field-help">Use 8 or 9 characters, one uppercase letter, and one special symbol.</div>
+                    </div>
+
+                    <div class="field-group">
+                        <label for="{{ form.confirm_password.id_for_label }}">Confirm Password</label>
+                        {{ form.confirm_password }}
+                        {{ form.confirm_password.errors }}
+                    </div>
+
+                    <div class="field-group full-width">
+                        <label for="{{ form.address.id_for_label }}">Address</label>
+                        {{ form.address }}
+                        {{ form.address.errors }}
+                    </div>
+
+                    <div class="field-group full-width">
+                        <label for="{{ form.profile_photo.id_for_label }}">Upload Profile Photo</label>
+                        <div class="profile-preview">
+                            {% if form.instance.profile_photo %}
+                                <img src="{{ form.instance.profile_photo.url }}" alt="Current Profile Photo">
+                            {% else %}
+                                <div class="profile-preview-fallback">{{ request.user.email|first|upper }}</div>
+                            {% endif %}
+                            <div class="profile-preview-text">Current profile photo</div>
+                        </div>
+                        {{ form.profile_photo }}
+                        {{ form.profile_photo.errors }}
+                    </div>
                 </div>
 
-                <button type="submit">SAVE & START</button>
+                <div class="form-actions">
+                    <a href="{% url 'customer_profile' %}" class="btn-link">Cancel</a>
+                    <button type="submit" class="btn-save">Edit Profile</button>
+                </div>
             </form>
-
-            <div class="form-footer">
-                <p>Ensuring your fashion vibe is ready.</p>
-            </div>
         </div>
     </div>
-
 </body>
 </html>

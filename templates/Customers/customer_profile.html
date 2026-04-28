@@ -25,8 +25,8 @@
         <!-- Name & Email -->
         <div class="profile-hero-info">
             <h1 class="profile-name">
-                {% if customer.user.first_name %}
-                    {{ customer.user.first_name }} {{ customer.user.last_name }}
+                {% if customer.name %}
+                    {{ customer.name }}
                 {% else %}
                     {{ customer.user.email|cut:"@"|cut:".com"|title }}
                 {% endif %}
@@ -68,6 +68,28 @@
                 <div class="profile-detail-row">
                     <span class="profile-detail-label">Email</span>
                     <span class="profile-detail-value">{{ customer.user.email }}</span>
+                </div>
+
+                <div class="profile-detail-row">
+                    <span class="profile-detail-label">Name</span>
+                    <span class="profile-detail-value">
+                        {% if customer.name %}
+                            {{ customer.name }}
+                        {% else %}
+                            <span class="profile-not-set">Not set</span>
+                        {% endif %}
+                    </span>
+                </div>
+
+                <div class="profile-detail-row">
+                    <span class="profile-detail-label">Phone</span>
+                    <span class="profile-detail-value">
+                        {% if customer.phone %}
+                            {{ customer.phone }}
+                        {% else %}
+                            <span class="profile-not-set">Not set</span>
+                        {% endif %}
+                    </span>
                 </div>
 
                 <div class="profile-detail-row">
